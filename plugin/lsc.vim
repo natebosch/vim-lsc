@@ -30,7 +30,7 @@ function! HighlightDiagnostics(diagnostics) abort
     let w:lsc_diagnostic_matches = []
   endif
   for current_match in w:lsc_diagnostic_matches
-    call matchdelete(current_match)
+    silent! call matchdelete(current_match)
   endfor
 let w:lsc_diagnostic_matches = []
 
