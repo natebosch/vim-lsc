@@ -3,13 +3,21 @@
 "endif
 "let g:loaded_lsc = 1
 
-" Diagnostics {{{
+" Diagnostics {{{1
 
 " Highlight groups {{{2
-hi link lscDiagnosticError Error
-hi link lscDiagnosticWarning Error
-hi link lscDiagnosticInfo Error
-hi link lscDiagnosticHint Error
+if !hlexists('lscDiagnosticError')
+  highlight link lscDiagnosticError Error
+endif
+if !hlexists('lscDiagnosticWarning')
+  highlight link lscDiagnosticWarning SpellBad
+endif
+if !hlexists('lscDiagnosticInfo')
+  highlight link lscDiagnosticInfo SpellBad
+endif
+if !hlexists('lscDiagnosticHint')
+  highlight link lscDiagnosticHint SpellBad
+endif
 
 " HighlightDiagnostics {{{2
 "
