@@ -12,20 +12,15 @@ let g:lsc_tracked_types = ['vim']
 
 augroup FileTracking
   autocmd!
-  autocmd BufWinEnter * call OnBufferDisplay()
+  autocmd BufWinEnter,TabEnter * call UpdateDisplayedHighlights()
 augroup END
 
-" OnBufferDisplay {{{2
+" UpdateDisplayedHighlights {{{2
 "
-" Update highlighting on the window to those for the newly opened file.
-function! OnBufferDisplay() abort
-  if index(g:lsc_tracked_types, &filetype) < 0
-    call ClearHighlights()
-    return
-  endif
-  let opened_file = expand('%:p')
-  let file_diagnostics = FileDiagnostics(opened_file)
-  call HighlightDiagnostics(file_diagnostics)
+" Update highlighting in all windows. A window may have opened, or changed to a
+" new buffer, or we may have changed tabs and the highlighting is stale.
+function! UpdateDisplayedHighlights() abort
+  call WinDo('call UpdateHighlighting()')
 endfunction
 
 " Diagnostics {{{1
@@ -100,16 +95,17 @@ function! SetFileDiagnostics(file_path, diagnostics) abort
     let g:lsc_file_diagnostics = {}
   endif
   let g:lsc_file_diagnostics[a:file_path] = a:diagnostics
-  call WinDo("call HighlightDiagnosticsIfCurrentFile('" . a:file_path . "')")
+  call WinDo("call UpdateHighlighting()")
 endfunction
 
-" HighlightDiagnosticsIfCurrentFile {{{2
+" UpdateHighlighting {{{2
 "
-" If `file_path` is the current file in this window, highlight diagnostics.
-function! HighlightDiagnosticsIfCurrentFile(file_path) abort
-  if expand('%:p') ==# a:file_path
-    let diagnostics = FileDiagnostics(a:file_path)
-    call HighlightDiagnostics(diagnostics)
+" Reset the highlighting for this window.
+function! UpdateHighlighting() abort
+  if index(g:lsc_tracked_types, &filetype) < 0
+    call ClearHighlights()
+  else
+    call HighlightDiagnostics(FileDiagnostics(expand('%:p')))
   endif
 endfunction!
 
