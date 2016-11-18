@@ -12,7 +12,7 @@ let g:lsc_tracked_types = ['vim']
 
 augroup FileTracking
   autocmd!
-  autocmd BufWinEnter,TabEnter * call UpdateDisplayedHighlights()
+  autocmd BufWinEnter,TabEnter,WinEnter * call UpdateDisplayedHighlights()
 augroup END
 
 " UpdateDisplayedHighlights {{{2
