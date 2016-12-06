@@ -29,7 +29,7 @@ endfunction
 
 " Server State {{{1
 
-if !exists('g:lsc_running_servers')
+if !exists('g:lsc_running_serverst')
   " Map from command -> channel
   let g:lsc_running_servers = {}
   " Map from job -> command
@@ -123,7 +123,7 @@ endfunction
 " auto commands {{{2
 augroup LscFileTracking
   autocmd!
-  autocmd BufWinEnter,TabEnter * call HandleFileVisible()
+  autocmd BufWinEnter,TabEnter,WinEnter * call HandleFileVisible()
 augroup END
 
 " HandleFileVisible {{{2
