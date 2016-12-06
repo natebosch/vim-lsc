@@ -174,17 +174,25 @@ endfunction
 function! HighlightDiagnostics(diagnostics) abort
   call ClearHighlights()
   for diagnostic in a:diagnostics
-    if diagnostic.severity == 1
-      let group = 'lscDiagnosticError'
-    elseif diagnostic.severity == 2
-      let group = 'lscDiagnosticWarning'
-    elseif diagnostic.severity == 3
-      let group = 'lscDiagnosticInfo'
-    elseif diagnostic.severity == 4
-      let group = 'lscDiagnosticHint'
-    endif
+    let group = SeverityGroup(diagnostic.severity)
+    echom 'Highlighting to '.group
     call add(w:lsc_diagnostic_matches, matchaddpos(group, [diagnostic.range]))
   endfor
+endfunction
+
+" SeverityGroup {{{2
+"
+" Finds the highlight group given a diagnostic severity level
+function! SeverityGroup(severity) abort
+    if a:severity == 1
+      return 'lscDiagnosticError'
+    elseif a:severity == 2
+      return 'lscDiagnosticWarning'
+    elseif a:severity == 3
+      return 'lscDiagnosticInfo'
+    elseif a:severity == 4
+      return 'lscDiagnosticHint'
+    endif
 endfunction
 
 " ClearHighlights {{{2
