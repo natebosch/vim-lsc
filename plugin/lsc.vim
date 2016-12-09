@@ -44,28 +44,15 @@ function! RunLanguageServer(command) abort
   endif
   let job_options = {'in_io': 'pipe', 'in_mode': 'raw',
       \ 'out_io': 'pipe', 'out_mode': 'raw',
-      \ 'out_cb': 'ChannelCallback',
-      \ 'close_cb': 'ChannelClose', 'exit_cb': 'JobExit'}
+      \ 'out_cb': 'ChannelCallback', 'exit_cb': 'JobExit'}
   let job = job_start(a:command, job_options)
   let g:lsc_running_servers[a:command] = job
 endfunction
 
 " KillServer {{{2
 function! KillServers(file_type) abort
-  if !has_key(g:lsc_server_commands, a:file_type)
-    echo 'No servers configured for '.a:file_type
-  endif
-  for command in g:lsc_server_commands[a:file_type]
-    if !has_key(g:lsc_running_servers, command)
-      echom 'Server is not running: '.command
-      continue
-    endif
-    let channel = job_getchannel(g:lsc_running_servers[command])
-    " TODO sending an EOF, should instead send Shutdown request and exit
-    " notification
-    call ch_sendraw(channel, '\xA')
-    call ch_close(channel)
-  endfor
+  call CallMethod(a:file_type, 'shutdown', '')
+  call CallMethod(a:file_type, 'exit', '')
 endfunction
 
 " CallMethod {{{2
@@ -110,7 +97,12 @@ endfunction
 function! ChannelCallback(channel, message) abort
   " Assumes the entire message was received at once. Very likely to fail.
   let payload = substitute(a:message, "^.*\r\n\r\n", '', 'v')
-  let content = json_decode(payload)
+  try
+    let content = json_decode(payload)
+  catch
+    echom 'Could not decode message: '.payload
+    let content = {}
+  endtry
   if has_key(content, 'method')
     echom 'Got notification: '.content['method'].
         \ ' params: '.string(content['params'])
@@ -121,17 +113,6 @@ function! ChannelCallback(channel, message) abort
   else
     echom 'Unknown message type: '.string(content)
   endif
-endfunction
-
-" ChannelClose {{{2
-"
-" Print out any remaining data in the channel and a message stating the channel
-" was closed.
-function! ChannelClose(arg) abort
-  while ch_status(a:arg) == 'buffered'
-    echom 'Channel Close Message: '.ch_read(a:arg)
-  endwhile
-  echom 'Channel Closed'
 endfunction
 
 " JobExit {{{2
