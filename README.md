@@ -20,13 +20,13 @@ a demo_server which fills this purpose.
   ../dart-language-server/bin/demo_server.dart')`
 - Anything which makes a buffer with this file type become visible will launch
   the server. `edit`, `split`, etc
-- `call CallMethod(&filetype, 'random_ints', {'count': 10})`
+- `:call CallMethod(&filetype, 'random_ints', {'count': 10})`
 - In another terminal, `cat /tmp/wirelog.txt`. You should also see a message in
   vim with the response
-- `call CallMethod(&filetype, 'start_notifications', '')`
+- `:call CallMethod(&filetype, 'start_notifications', '')`
 - You should see a notification message every 3 seconds
-- `call CallMethod(&filetype, 'stop_notifications', '')`
-- `call KillServers(&filetype)`
+- `:call CallMethod(&filetype, 'stop_notifications', '')`
+- `:call KillServers(&filetype)`
 - You should see more output in `/tmp/wirelog.txt` and the process should exit
 
 ## Testing diagnostic highlighting
@@ -37,7 +37,8 @@ displaying that file.
 - Open `plugin/lsc.vim`
 - `:source %`
 - Register the `&filetype` as above. Only registered filetypes get highlighting.
-- `:call RegisterLanguageServer(&filetype, 'arbitrary string')`
+- `:call RegisterLanguageServer(&filetype, 'dart
+  ../dart-language-server/bin/demo_server.dart')`
 - `:call SetFileDiagnostics(expand('%:p'), [{'severity': 1, 'range': [4, 1, 3]},
   {'severity': 2, 'range': [20, 1, 4]}])`
 - Change buffers/windows/tabs. Every time the file is visible it will have
