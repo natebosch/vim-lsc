@@ -115,7 +115,8 @@ endfunction
 " interesting functionality is implemented in my demo server, just echom to
 " show communication.
 function! ChannelCallback(channel, message) abort
-  " Assumes the entire message was received at once. Very likely to fail.
+  " TODO Assumes the entire message was received at once. Very likely to fail.
+  " TODO Only catches the last message if multiple arrive in a batch
   let payload = substitute(a:message, "^.*\r\n\r\n", '', 'v')
   try
     let content = json_decode(payload)
@@ -201,6 +202,8 @@ endfunction
 " diagnostics: A list of dictionaries. Only the 'severity' and 'range' keys are
 " used. See https://git.io/vXiUB
 function! HighlightDiagnostics(diagnostics) abort
+  " TODO perhaps a bit excessive to always readd matches? Maybe keep a version
+  " of the diagnostics?
   call ClearHighlights()
   for diagnostic in a:diagnostics
     let group = SeverityGroup(diagnostic.severity)
@@ -257,6 +260,7 @@ function! SetFileDiagnostics(file_path, diagnostics) abort
     let g:lsc_file_diagnostics = {}
   endif
   let g:lsc_file_diagnostics[a:file_path] = a:diagnostics
+  " TODO use setloclist() to add diagnostics
   call WinDo("call UpdateHighlighting()")
 endfunction
 
