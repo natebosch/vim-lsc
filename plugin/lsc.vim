@@ -36,6 +36,10 @@ if !exists('g:lsc_running_servers')
   let g:lsc_running_servers = {}
 endif
 
+if !exists('g:lsc_buffered_calls')
+  let g:lsc_buffered_calls = {}
+endif
+
 " RunLanguageServer {{{2
 function! RunLanguageServer(command) abort
   if has_key(g:lsc_running_servers, a:command)
@@ -47,6 +51,13 @@ function! RunLanguageServer(command) abort
       \ 'out_cb': 'ChannelCallback', 'exit_cb': 'JobExit'}
   let job = job_start(a:command, job_options)
   let g:lsc_running_servers[a:command] = job
+  let channel = job_getchannel(job)
+  if has_key(g:lsc_buffered_calls, a:command)
+    for buffered_call in g:lsc_buffered_calls[a:command]
+      call ch_sendraw(channel, buffered_call)
+    endfor
+    unlet g:lsc_buffered_calls[a:command]
+  endif
 endfunction
 
 " KillServer {{{2
@@ -63,14 +74,23 @@ function! CallMethod(file_type, method, params) abort
   if !has_key(g:lsc_server_commands, a:file_type)
     echo 'No servers configured for '.a:file_type
   endif
+  let call = FormatMessage(a:method, a:params)
   for command in g:lsc_server_commands[a:file_type]
     if !has_key(g:lsc_running_servers, command)
-      echom 'Server is not running: '.command
+      call BufferCall(command, call)
       continue
     endif
     let channel = job_getchannel(g:lsc_running_servers[command])
-    call ch_sendraw(channel, FormatMessage(a:method, a:params))
+    call ch_sendraw(channel, call)
   endfor
+endfunction
+
+" BufferCall {{{2
+function! BufferCall(command, call) abort
+  if !has_key(g:lsc_buffered_calls, a:command)
+    let g:lsc_buffered_calls[a:command] = []
+  endif
+  call add(g:lsc_buffered_calls[a:command], a:call)
 endfunction
 
 " FormatMessage {{{2
