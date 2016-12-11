@@ -125,8 +125,15 @@ function! ChannelCallback(channel, message) abort
     let content = {}
   endtry
   if has_key(content, 'method')
-    echom 'Got notification: '.content['method'].
-        \ ' params: '.string(content['params'])
+    if content['method'] ==? 'textDocument/publishDiagnostics'
+      let params = content['params']
+      " TODO parse `uri` isntead of assuming the active document
+      let file_path = expand('%:p')
+      call SetFileDiagnostics(file_path, params['diagnostics'])
+    else
+      echom 'Got notification: '.content['method'].
+          \ ' params: '.string(content['params'])
+    endif
   elseif has_key(content, 'error')
     echom 'Got error: '.string(content['error'])
   elseif has_key(content, 'result')
@@ -271,7 +278,11 @@ function! HighlightDiagnostics(diagnostics) abort
   call ClearHighlights()
   for diagnostic in a:diagnostics
     let group = SeverityGroup(diagnostic.severity)
-    call add(w:lsc_diagnostic_matches, matchaddpos(group, [diagnostic.range]))
+    let line = diagnostic.range.start.line + 1
+    let character = diagnostic.range.start.character + 1
+    let length = diagnostic.range.end.character + 1 - character
+    let range = [line, character, length]
+    call add(w:lsc_diagnostic_matches, matchaddpos(group, [range]))
   endfor
 endfunction
 
