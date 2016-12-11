@@ -130,7 +130,7 @@ function! ChannelCallback(channel, message) abort
   elseif has_key(content, 'error')
     echom 'Got error: '.string(content['error'])
   elseif has_key(content, 'result')
-    echom 'Got response: '.string(content['result'])
+    " Ignore responses?
   else
     echom 'Unknown message type: '.string(content)
   endif
