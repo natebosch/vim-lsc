@@ -150,10 +150,32 @@ endfunction
 
 " File Tracking {{{1
 
+" State {{{2
+
+" Map from file path -> file version
+if !exists('g:lsc_file_versions')
+  let g:lsc_file_versions = {}
+endif
+
+" FileVersion {{{3
+"
+" A monotonically increasing number for each open file.
+function! FileVersion(file_path)
+  if !has_key(g:lsc_file_versions, a:file_path)
+    let g:lsc_file_versions[a:file_path] = 0
+  endif
+  let file_version = g:lsc_file_versions[a:file_path] + 1
+  let g:lsc_file_versions[a:file_path] = file_version
+  return file_version
+endfunction
+
 " auto commands {{{2
 augroup LscFileTracking
   autocmd!
   autocmd BufWinEnter,TabEnter,WinEnter * call HandleFileVisible()
+  autocmd BufNewFile,BufReadPost * call HandleFileOpen()
+  autocmd TextChanged,TextChangedI * call HandleFileChanged()
+  autocmd VimLeave * call HandleVimQuit()
 augroup END
 
 " HandleFileVisible {{{2
@@ -170,6 +192,48 @@ function! HandleFileVisible() abort
   endif
 endfunction
 
+" HandleFileOpen {{{2
+function! HandleFileOpen() abort
+  if !has_key(g:lsc_server_commands, &filetype)
+    return
+  endif
+  let file_path = expand('%:p')
+  let buffer_content = join(getline(1, '$'), "\n")
+  let params = {'textDocument':
+      \   {'uri': 'file://'.file_path,
+      \    'languageId': &filetype,
+      \    'version': FileVersion(file_path),
+      \    'text': buffer_content
+      \   }
+      \ }
+  call CallMethod(&filetype, 'textDocument/didOpen', params)
+endfunction
+
+" HandleFileChanged {{{2
+function! HandleFileChanged() abort
+  if !has_key(g:lsc_server_commands, &filetype)
+    return
+  endif
+  let file_path = expand('%:p')
+  let buffer_content = join(getline(1, '$'), "\n")
+  let params = {'textDocument':
+      \   {'uri': 'file://'.file_path,
+      \    'version': FileVersion(file_path),
+      \   },
+      \ 'contentChanges': { 'text': buffer_content },
+      \ }
+  call CallMethod(&filetype, 'textDocument/didChange', params)
+endfunction
+
+" HandleVimQuit {{{2
+"
+" Exit all open language servers.
+function! HandleVimQuit() abort
+  for file_type in keys(g:lsc_server_commands)
+    echom 'Killing for '.file_type
+    call KillServers(file_type)
+  endfor
+endfunction
 
 " Diagnostics {{{1
 
