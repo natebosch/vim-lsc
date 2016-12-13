@@ -8,7 +8,7 @@ following the [language server protocol][]
 
 Don't expect this to do anything useful for a while.
 
-## Testing Server communication
+## Testing server communication and diagnostic highlighting
 
 The communication example is built with the assumption that it can call
 arbitrary methods with arbitrary parameters. The repo `dart-language-server` has
@@ -20,26 +20,8 @@ a demo_server which fills this purpose.
   ../dart-language-server/bin/demo_server.dart')`
 - Anything which makes a buffer with this file type become visible will launch
   the server. `edit`, `split`, etc
-- `:call CallMethod(&filetype, 'random_ints', {'count': 10})`
-- In another terminal, `cat /tmp/wirelog.txt`. You should also see a message in
-  vim with the response
-- `:call CallMethod(&filetype, 'start_notifications', '')`
-- You should see a notification message every 3 seconds
-- `:call CallMethod(&filetype, 'stop_notifications', '')`
-- `:call KillServers(&filetype)`
-- You should see more output in `/tmp/wirelog.txt` and the process should exit
-
-## Testing diagnostic highlighting
-
-File diagnostics can be set per file and will be highlighting in all windows
-displaying that file.
-
-- Open `plugin/lsc.vim`
-- `:source %`
-- Register the `&filetype` as above. Only registered filetypes get highlighting.
-- `:call RegisterLanguageServer(&filetype, 'dart
-  ../dart-language-server/bin/demo_server.dart')`
-- `:call SetFileDiagnostics(expand('%:p'), [{'severity': 1, 'range': [4, 1, 3]},
-  {'severity': 2, 'range': [20, 1, 4]}])`
-- Change buffers/windows/tabs. Every time the file is visible it will have
-  highlighting, including if it shows up in multiple windows simultaneously
+- The demo server will be notified of the contents of the file character by
+  character as you type. If any line contains the word `error` it should be
+  highlighted as a diagnostic.
+- Quit vim and the server will be signaled to exit.
+- Messages sent and received were logged in `/tmp/wirelog.txt`
