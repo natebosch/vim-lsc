@@ -127,8 +127,7 @@ function! ChannelCallback(channel, message) abort
   if has_key(content, 'method')
     if content['method'] ==? 'textDocument/publishDiagnostics'
       let params = content['params']
-      " TODO parse `uri` isntead of assuming the active document
-      let file_path = expand('%:p')
+      let file_path = substitute(params['uri'], '^file://', '', 'v')
       call SetFileDiagnostics(file_path, params['diagnostics'])
     else
       echom 'Got notification: '.content['method'].
