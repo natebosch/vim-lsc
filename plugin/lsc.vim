@@ -181,6 +181,7 @@ augroup LscFileTracking
   autocmd BufWinEnter,TabEnter,WinEnter * call HandleFileVisible()
   autocmd BufNewFile,BufReadPost * call HandleFileOpen()
   autocmd TextChanged,TextChangedI * call HandleFileChanged()
+  autocmd BufLeave * call FlushFileChanges()
   autocmd VimLeave * call HandleVimQuit()
 augroup END
 
@@ -215,12 +216,35 @@ function! HandleFileOpen() abort
   call CallMethod(&filetype, 'textDocument/didOpen', params)
 endfunction
 
+" From file path to a timer triggering a flush of changes to the language server
+if !exists('g:lsc_changed_files')
+  let g:lsc_changed_files = {}
+endif
+
 " HandleFileChanged {{{2
 function! HandleFileChanged() abort
   if !has_key(g:lsc_server_commands, &filetype)
     return
   endif
   let file_path = expand('%:p')
+  if has_key(g:lsc_changed_files, file_path)
+    call timer_stop(g:lsc_changed_files[file_path])
+  endif
+  let g:lsc_changed_files[file_path] =
+      \ timer_start(500, 'FlushFileChanges', {'repeat': 1})
+endfunction
+
+" FlushFileChanges {{{2
+"
+" Send file changes to the language server for any files which have changed
+" since the last time this function ran.
+function! FlushFileChanges(...) abort
+  let file_path = expand('%:p')
+  if !has_key(g:lsc_changed_files, file_path)
+    return
+  endif
+  call timer_stop(g:lsc_changed_files[file_path])
+  unlet g:lsc_changed_files[file_path]
   let buffer_content = join(getline(1, '$'), "\n")
   let params = {'textDocument':
       \   {'uri': 'file://'.file_path,
