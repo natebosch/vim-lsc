@@ -30,14 +30,18 @@ endfunction
 " Server State {{{1
 
 " Map from command -> job
-"
-" The job encapsulates the channel and process state.
 if !exists('g:lsc_running_servers')
   let g:lsc_running_servers = {}
 endif
 
+" Map from command -> [call]
 if !exists('g:lsc_buffered_calls')
   let g:lsc_buffered_calls = {}
+endif
+
+" Map from channel id -> received message
+if !exists('g:lsc_channel_buffers')
+  let g:lsc_channel_buffers = {}
 endif
 
 " RunLanguageServer {{{2
@@ -52,6 +56,8 @@ function! RunLanguageServer(command) abort
   let job = job_start(a:command, job_options)
   let g:lsc_running_servers[a:command] = job
   let channel = job_getchannel(job)
+  let ch_id = ch_info(channel)['id']
+  let g:lsc_channel_buffers[ch_id] = ''
   if has_key(g:lsc_buffered_calls, a:command)
     for buffered_call in g:lsc_buffered_calls[a:command]
       call ch_sendraw(channel, buffered_call)
@@ -111,34 +117,79 @@ endfunction
 
 " ChannelCallback {{{2
 "
-" Called when there is data available from a message server. Since no
-" interesting functionality is implemented in my demo server, just echom to
-" show communication.
+" Append to the buffer for the channel and try to consume a message.
 function! ChannelCallback(channel, message) abort
-  " TODO Assumes the entire message was received at once. Very likely to fail.
-  " TODO Only catches the last message if multiple arrive in a batch
-  let payload = substitute(a:message, "^.*\r\n\r\n", '', 'v')
+  let ch_id = ch_info(a:channel)['id']
+  let g:lsc_channel_buffers[ch_id] .= a:message
+  call ConsumeMessage(ch_id)
+endfunction
+
+" ContentLength {{{2
+"
+" Finds the header with 'Content-Length' and returns the integer value
+function! ContentLength(headers) abort
+  for header in a:headers
+    if header =~? '^Content-Length'
+      let parts = split(header, ':')
+      return parts[1] + 0
+    endif
+  endfor
+  return -1
+endfunction
+
+" ConsumeMessage {{{2
+"
+" Reads from the buffer for ch_id and processes the message. If multiple
+" messages are available consumes the first and then recurses. Does nothing if
+" a complete message is not available.
+function! ConsumeMessage(ch_id) abort
+  let message = g:lsc_channel_buffers[a:ch_id]
+  let end_of_header = stridx(message, "\r\n\r\n")
+  if end_of_header < 0
+    return
+  endif
+  let headers = split(message[:end_of_header], "\r\n")
+  let message_start = end_of_header + len("\r\n\r\n")
+  let message_end = message_start + ContentLength(headers)
+  if len(message) < message_end
+    " Wait for the rest of the message to get buffered
+    return
+  endif
+  let payload = message[message_start:message_end-1]
+  let g:lsc_channel_buffers[a:ch_id] = message[message_end:]
   try
     let content = json_decode(payload)
   catch
     echom 'Could not decode message: '.payload
     let content = {}
   endtry
-  if has_key(content, 'method')
-    if content['method'] ==? 'textDocument/publishDiagnostics'
-      let params = content['params']
+  call HandleMessage(content)
+  let remaining_message = message[message_end:]
+  let g:lsc_channel_buffers[a:ch_id] = remaining_message
+  if remaining_message != ''
+    call ConsumeMessage(a:ch_id)
+  endif
+endfunction
+
+" HandleMessage {{{2
+"
+" Take action based on a parsed message.
+function! HandleMessage(message) abort
+  if has_key(a:message, 'method')
+    if a:message['method'] ==? 'textDocument/publishDiagnostics'
+      let params = a:message['params']
       let file_path = substitute(params['uri'], '^file://', '', 'v')
       call SetFileDiagnostics(file_path, params['diagnostics'])
     else
-      echom 'Got notification: '.content['method'].
-          \ ' params: '.string(content['params'])
+      echom 'Got notification: '.a:message['method'].
+          \ ' params: '.string(a:message['params'])
     endif
-  elseif has_key(content, 'error')
-    echom 'Got error: '.string(content['error'])
-  elseif has_key(content, 'result')
+  elseif has_key(a:message, 'error')
+    echom 'Got error: '.string(a:message['error'])
+  elseif has_key(a:message, 'result')
     " Ignore responses?
   else
-    echom 'Unknown message type: '.string(content)
+    echom 'Unknown message type: '.string(a:message)
   endif
 endfunction
 
@@ -146,6 +197,9 @@ endfunction
 "
 " Clean up stored state about a running server.
 function! JobExit(job, status) abort
+  let channel = job_getchannel(job)
+  let ch_id = ch_info(channel)['id']
+  unlet g:lsc_channel_buffers[ch_id]
   for command in keys(g:lsc_running_servers)
     if g:lsc_running_servers[command] == a:job
       unlet g:lsc_running_servers[command]
