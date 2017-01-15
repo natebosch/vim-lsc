@@ -197,7 +197,7 @@ endfunction
 "
 " Clean up stored state about a running server.
 function! JobExit(job, status) abort
-  let channel = job_getchannel(job)
+  let channel = job_getchannel(a:job)
   let ch_id = ch_info(channel)['id']
   unlet g:lsc_channel_buffers[ch_id]
   for command in keys(g:lsc_running_servers)
