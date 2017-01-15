@@ -304,7 +304,7 @@ function! FlushFileChanges(...) abort
       \   {'uri': 'file://'.file_path,
       \    'version': FileVersion(file_path),
       \   },
-      \ 'contentChanges': { 'text': buffer_content },
+      \ 'contentChanges': [{'text': buffer_content}],
       \ }
   call CallMethod(&filetype, 'textDocument/didChange', params)
 endfunction
