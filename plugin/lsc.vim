@@ -86,7 +86,14 @@ function! CallMethod(file_type, method, params) abort
       call BufferCall(command, call)
       continue
     endif
-    let channel = job_getchannel(g:lsc_running_servers[command])
+    let job = g:lsc_running_servers[command]
+    if job_status(job) != 'run'
+      continue
+    endif
+    let channel = job_getchannel(job)
+    if ch_status(channel) != 'open'
+      continue
+    endif
     call ch_sendraw(channel, call)
   endfor
 endfunction
