@@ -1,27 +1,24 @@
 # Vim Language Server Client
 
 This is an experiment with building a partial replacement for plugins like
-YouCompleteMe. Eventually I hope to have it communicate with a language server
-following the [language server protocol][]
+YouCompleteMe communicating with a language server following the [language
+server protocol][]
 
 [language server protocol]: https://github.com/Microsoft/language-server-protocol
 
-Don't expect this to do anything useful for a while.
+In theory any language server should be compatible - but this is not being
+built against any reference implementation so there may be protocol bugs. The
+only implementation which supported for now is the [dart language server][]
+implemented alongside the plugin.
+
+[dart language server]: https://github.com/natebosch/dart_language_server
 
 ## Testing server communication and diagnostic highlighting
 
-The communication example is built with the assumption that it can call
-arbitrary methods with arbitrary parameters. The repo `dart-language-server` has
-a demo_server which fills this purpose.
-
+- Install the dart language server
 - Open any file in vim
 - `:source plugin/lsc.vim`
-- `:call RegisterLanguageServer(&filetype, 'dart
-  ../dart-language-server/bin/demo_server.dart')`
-- Anything which makes a buffer with this file type become visible will launch
-  the server. `edit`, `split`, etc
-- The demo server will be notified of the contents of the file character by
-  character as you type. If any line contains the word `error` it should be
-  highlighted as a diagnostic.
+- `:call RegisterLanguageServer('dart', 'dart_language_server')`
+- Open a buffer with the file type 'dart'.
+- Enter any invalid Dart code. You should see errors highlighted.
 - Quit vim and the server will be signaled to exit.
-- Messages sent and received were logged in `/tmp/wirelog.txt`
