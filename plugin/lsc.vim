@@ -248,16 +248,9 @@ augroup END
 
 " HandleFileVisible {{{2
 "
-" Called whenever a file becomes visible. Updates highlights in case they
-" changed while the file was in the background, and runs the language server in
-" case this is the first time we are seeing the file type.
+" Updates highlights in case they changed while the file was in the background.
 function! HandleFileVisible() abort
   call UpdateDisplayedHighlights()
-  if has_key(g:lsc_server_commands, &filetype)
-    for server_command in g:lsc_server_commands[&filetype]
-      call RunLanguageServer(server_command)
-    endfor
-  endif
 endfunction
 
 " HandleFileOpen {{{2
@@ -265,6 +258,9 @@ function! HandleFileOpen() abort
   if !has_key(g:lsc_server_commands, &filetype)
     return
   endif
+  for server_command in g:lsc_server_commands[&filetype]
+    call RunLanguageServer(server_command)
+  endfor
   let file_path = expand('%:p')
   let buffer_content = join(getline(1, '$'), "\n")
   let params = {'textDocument':
