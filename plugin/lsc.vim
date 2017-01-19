@@ -244,6 +244,7 @@ augroup LscFileTracking
   autocmd TextChanged,TextChangedI * call HandleFileChanged()
   autocmd BufLeave * call FlushFileChanges()
   autocmd VimLeave * call HandleVimQuit()
+  autocmd CursorMoved * call HandleCursorMoved()
 augroup END
 
 " HandleFileVisible {{{2
@@ -403,6 +404,46 @@ function! FileDiagnostics(file_path) abort
     return {}
   endif
   return g:lsc_file_diagnostics[a:file_path]
+endfunction
+
+function! HandleCursorMoved() abort
+  if !has_key(g:lsc_server_commands, &filetype)
+    return
+  endif
+  let diagnostic = DiagnosticUnderCursor()
+  if has_key(diagnostic, 'message')
+    echo diagnostic.message
+  else
+    echo ''
+  endif
+endfunction
+
+" DiagnosticUnderCursor {{{2
+"
+" Finds the first diagnostic which is under the cursor on the current line. If
+" no diagnostic is directly under the cursor returns the last seen diagnostic
+" on this line.
+function! DiagnosticUnderCursor() abort
+  let file_diagnostics = FileDiagnostics(expand('%:p'))
+  let line = line('.')
+  if !has_key(file_diagnostics, line)
+    return {}
+  endif
+  let diagnostics = file_diagnostics[line]
+  let col = col('.')
+  let closest_diagnostic = {}
+  let closest_distance = -1
+  for diagnostic in diagnostics
+    let range = diagnostic.range
+    let start = range[1]
+    let end = range[1] + range[2]
+    let distance = min([abs(start - col), abs(end - col)])
+    if closest_distance < 0 || distance < closest_distance
+      let closest_diagnostic = diagnostic
+      let closest_distance = distance
+    endif
+  endfor
+  return closest_diagnostic
 endfunction
 
 " SetFileDiagnostics {{{2
