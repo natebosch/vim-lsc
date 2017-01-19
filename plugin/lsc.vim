@@ -356,13 +356,11 @@ function! HighlightDiagnostics(diagnostics) abort
   " TODO perhaps a bit excessive to always readd matches? Maybe keep a version
   " of the diagnostics?
   call ClearHighlights()
-  for diagnostic in a:diagnostics
-    let group = SeverityGroup(diagnostic.severity)
-    let line = diagnostic.range.start.line + 1
-    let character = diagnostic.range.start.character + 1
-    let length = diagnostic.range.end.character + 1 - character
-    let range = [line, character, length]
-    call add(w:lsc_diagnostic_matches, matchaddpos(group, [range]))
+  for line in values(a:diagnostics)
+    for diagnostic in line
+      let match = matchaddpos(diagnostic.group, [diagnostic.range])
+      call add(w:lsc_diagnostic_matches, match)
+    endfor
   endfor
 endfunction
 
@@ -402,7 +400,7 @@ function! FileDiagnostics(file_path) abort
     let g:lsc_file_diagnostics = {}
   endif
   if !has_key(g:lsc_file_diagnostics, a:file_path)
-    let g:lsc_file_diagnostics[a:file_path] = []
+    return {}
   endif
   return g:lsc_file_diagnostics[a:file_path]
 endfunction
@@ -414,9 +412,27 @@ function! SetFileDiagnostics(file_path, diagnostics) abort
   if !exists('g:lsc_file_diagnostics')
     let g:lsc_file_diagnostics = {}
   endif
-  let g:lsc_file_diagnostics[a:file_path] = a:diagnostics
+  call map(a:diagnostics, 'ConvertDiagnostic(v:val)')
+  let diagnostics_by_line = {}
+  for diagnostic in a:diagnostics
+    if !has_key(diagnostics_by_line, diagnostic.range[0])
+      let diagnostics_by_line[diagnostic.range[0]] = []
+    endif
+    call add(diagnostics_by_line[diagnostic.range[0]], diagnostic)
+  endfor
+  let g:lsc_file_diagnostics[a:file_path] = diagnostics_by_line
   " TODO use setloclist() to add diagnostics
   call WinDo("call UpdateHighlighting()")
+endfunction
+
+function! ConvertDiagnostic(diagnostic) abort
+  let line = a:diagnostic.range.start.line + 1
+  let character = a:diagnostic.range.start.character + 1
+  " TODO won't work for multiline error
+  let length = a:diagnostic.range.end.character + 1 - character
+  let range = [line, character, length]
+  let group = SeverityGroup(a:diagnostic.severity)
+  return {'group': group, 'range': range, 'message': a:diagnostic.message}
 endfunction
 
 " UpdateHighlighting {{{2
