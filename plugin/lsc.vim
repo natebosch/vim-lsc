@@ -46,7 +46,7 @@ endfunction
 " Exit all open language servers.
 function! s:OnVimQuit() abort
   for file_type in keys(g:lsc_server_commands)
-    call KillServers(file_type)
+    call lsc#server#kill(file_type)
   endfor
 endfunction
 
