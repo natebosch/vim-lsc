@@ -5,7 +5,7 @@ endfunction
 
 " Refresh highlight matches in the current window.
 function! lsc#highlights#update() abort
-  call <SID>ClearHighlights()
+  call lsc#highlights#clear()
   if !has_key(g:lsc_server_commands, &filetype)
     return
   endif
@@ -18,7 +18,7 @@ function! lsc#highlights#update() abort
 endfunction!
 
 " Remove all highlighted matches in the current window.
-function! s:ClearHighlights() abort
+function! lsc#highlights#clear() abort
   if exists('w:lsc_diagnostic_matches')
     for current_match in w:lsc_diagnostic_matches
       silent! call matchdelete(current_match)

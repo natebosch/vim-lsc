@@ -31,7 +31,7 @@ augroup LscFileTracking
       \ call <SID>IfEnabled('lsc#highlights#updateDisplayed')
   autocmd BufNewFile,BufReadPost * call <SID>IfEnabled('lsc#file#onOpen')
   autocmd TextChanged,TextChangedI * call <SID>IfEnabled('lsc#file#onChange')
-  autocmd BufLeave * call <SID>IfEnabled('lsc#file#flushChanges')
+  autocmd BufLeave * call <SID>IfEnabled('lsc#file#onLeave')
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
   autocmd VimLeave * call <SID>OnVimQuit()
 augroup END

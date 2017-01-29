@@ -22,6 +22,11 @@ function! lsc#file#onChange() abort
       \ timer_start(500, 'lsc#file#flushChanges', {'repeat': 1})
 endfunction
 
+function! lsc#file#onLeave() abort
+  call lsc#file#flushChanges()
+  call lsc#highlights#clear()
+endfunction
+
 " Changes are flushed after 500ms of inactivity or before leaving the buffer.
 function! lsc#file#flushChanges(...) abort
   if !exists('b:lsc_flush_timer')
