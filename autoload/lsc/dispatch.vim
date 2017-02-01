@@ -12,8 +12,20 @@ function! lsc#dispatch#message(message) abort
   elseif has_key(a:message, 'error')
     echom 'Got error: '.string(a:message['error'])
   elseif has_key(a:message, 'result')
-    " Ignore responses?
+    let call_id = a:message['id']
+    if has_key(s:callbacks, call_id)
+      call s:callbacks[call_id](a:message['result'])
+      unlet s:callbacks[call_id]
+    endif
   else
     echom 'Unknown message type: '.string(a:message)
   endif
+endfunction
+
+if !exists('s:callbacks')
+  let s:callbacks = {}
+endif
+
+function! lsc#dispatch#registerCallback(id, callback) abort
+  let s:callbacks[a:id] = a:callback
 endfunction

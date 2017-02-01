@@ -16,11 +16,19 @@ function! lsc#server#kill(file_type) abort
   call lsc#server#call(a:file_type, 'exit', '')
 endfunction
 
-function! lsc#server#call(file_type, method, params) abort
-  let call = lsc#protocol#format(a:method, a:params)
+" Call a method on the language server for `file_type`.
+"
+" Formats a message calling `method` with parameters `params`. If called with 4
+" arguments the fourth should be a funcref which will be called when the server
+" returns a result for this call.
+function! lsc#server#call(file_type, method, params, ...) abort
+  let [call_id, message] = lsc#protocol#format(a:method, a:params)
+  if a:0 >= 1
+    call lsc#dispatch#registerCallback(call_id, a:1)
+  endif
   for command in g:lsc_server_commands[a:file_type]
     if !has_key(s:running_servers, command)
-      call <SID>BufferCall(command, call)
+      call s:BufferCall(command, message)
       continue
     endif
     let job = s:running_servers[command]
@@ -31,7 +39,7 @@ function! lsc#server#call(file_type, method, params) abort
     if ch_status(channel) != 'open'
       continue
     endif
-    call ch_sendraw(channel, call)
+    call ch_sendraw(channel, message)
   endfor
 endfunction
 

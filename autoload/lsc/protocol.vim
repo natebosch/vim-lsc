@@ -7,6 +7,8 @@ endif
 " Format a json rpc string calling `method` with serialized `params` and prepend
 " the headers for the language server protocol std io pipe format. Uses a
 " monotonically increasing message id.
+"
+" Returns [Id, formatted message]
 function! lsc#protocol#format(method, params) abort
   let s:lsc_last_id += 1
   let message = {'jsonrpc': '2.0', 'id': s:lsc_last_id, 'method': a:method}
@@ -15,7 +17,7 @@ function! lsc#protocol#format(method, params) abort
   endif
   let encoded = json_encode(message)
   let length = len(encoded)
-  return "Content-Length:".length."\r\n\r\n".encoded
+  return [s:lsc_last_id, "Content-Length:".length."\r\n\r\n".encoded]
 endfunction
 
 " Reads from the buffer for ch_id and processes the message. If multiple
