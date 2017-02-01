@@ -25,7 +25,7 @@ function! RegisterLanguageServer(file_type, command) abort
   call add(type_commands, a:command)
 endfunction
 
-augroup LscFileTracking
+augroup LSC
   autocmd!
   autocmd BufWinEnter,TabEnter,WinEnter *
       \ call <SID>IfEnabled('lsc#highlights#updateDisplayed')
@@ -33,6 +33,8 @@ augroup LscFileTracking
   autocmd TextChanged,TextChangedI * call <SID>IfEnabled('lsc#file#onChange')
   autocmd BufLeave * call <SID>IfEnabled('lsc#file#onLeave')
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
+  autocmd TextChangedI * call <SID>IfEnabled('lsc#complete#textChanged')
+  autocmd InsertCharPre * call <SID>IfEnabled('lsc#complete#insertCharPre')
   autocmd VimLeave * call <SID>OnVimQuit()
 augroup END
 
