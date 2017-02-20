@@ -85,21 +85,6 @@ function! s:SuggestCompletions(completions) abort
   echom 'Would suggestion completions: '.string(a:completions)
 endfunction
 
-" Returns a funcref which takes 0 or more ignored arguments, and calls `func`
-" with a the arguments `args`.
-function! s:apply(func, args) abort
-  " Its important that a:func is *not* a direct value in the map. If it was then
-  " `self` inside that function would be `data` when it is called, instead of
-  " whatever it would be otherwise.
-  let data = {'data': [a:func, a:args]}
-  function data.trigger(...) abort
-    let Func = self.data[0]
-    let args = self.data[1]
-    call call(Func, args)
-  endfunction
-  return data.trigger
-endfunction
-
 " Flush file contents and call the server to request completions for the current
 " cursor position.
 function! s:SearchCompletions(onFound) abort
