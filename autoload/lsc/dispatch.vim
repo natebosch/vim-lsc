@@ -14,7 +14,7 @@ function! lsc#dispatch#message(message) abort
   elseif has_key(a:message, 'result')
     let call_id = a:message['id']
     if has_key(s:callbacks, call_id)
-      call s:callbacks[call_id](a:message['result'])
+      call s:callbacks[call_id][0](a:message['result'])
       unlet s:callbacks[call_id]
     endif
   else
@@ -27,5 +27,5 @@ if !exists('s:callbacks')
 endif
 
 function! lsc#dispatch#registerCallback(id, callback) abort
-  let s:callbacks[a:id] = a:callback
+  let s:callbacks[a:id] = [a:callback]
 endfunction
