@@ -100,8 +100,23 @@ function! s:apply(func, args) abort
   return data.trigger
 endfunction
 
-" TODO: Actually call the server
+" Flush file contents and call the server to request completions for the current
+" cursor position.
 function! s:SearchCompletions(onFound) abort
-  let suggestions = ['foo', 'bar', 'baz']
-  call timer_start(500, s:apply(a:onFound, [suggestions]))
+  call lsc#file#flushChanges()
+  let params = { 'textDocument': {'uri': lsc#util#documentUri()},
+      \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
+      \ }
+  call lsc#server#call(&filetype, 'textDocument/completion', params,
+      \ lsc#util#compose(a:onFound, function('<SID>labelsOnly')))
+endfunction
+
+function! s:labelsOnly(completion_result) abort
+  if type(a:completion_result) == type([])
+    let completion_items = a:completion_result
+  else
+    let completion_items = a:completion_result.items
+  endif
+  call map(completion_items, 'v:val.label')
+  return completion_items
 endfunction
