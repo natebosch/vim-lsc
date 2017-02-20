@@ -70,6 +70,9 @@ function! s:startCompletion() abort
   let s:completion_id += 1
   let s:completion_canceled = v:false
   let s:completion_waiting = v:true
+  if exists('b:lsc_completion')
+    unlet b:lsc_completion
+  endif
   let data = {'old_pos': getcurpos(), 'completion_id': s:completion_id}
   function data.trigger(completions)
     if s:isCompletionValid(self.old_pos, self.completion_id)
@@ -80,9 +83,54 @@ function! s:startCompletion() abort
   call s:SearchCompletions(data.trigger)
 endfunction
 
-function! s:SuggestCompletions(completions) abort
-  " TODO: Popup the completion menu
-  echom 'Would suggestion completions: '.string(a:completions)
+function! s:SuggestCompletions(completion) abort
+  let &completefunc = 'lsc#complete#complete'
+  if len(a:completion.items) == 0
+    return
+  endif
+  let b:lsc_completion = a:completion
+  call feedkeys("\<c-x>\<c-u>\<c-p>", 'n')
+endfunction
+
+function! lsc#complete#complete(findstart, base) abort
+  if !exists('b:lsc_completion')
+    return -1
+  endif
+  if a:findstart
+    let start = s:FindStart(b:lsc_completion)
+    return start
+  else
+    return s:FindSuggestions(a:base, b:lsc_completion)
+  endif
+endfunction
+
+function! s:FindStart(completion) abort
+  if len(a:completion.items) == 0
+    return -3
+  endif
+  if has_key(a:completion, 'start_col')
+    return a:completion.start_col
+  endif
+  return s:GuessCompletionStart()
+endfunction
+
+" Finds the last whitespace or . before the cursor position
+function! s:GuessCompletionStart()
+  let search = col('.')
+  let line = getline('.')
+  while search > 0
+    let char = line[search]
+    if char == '.' || char =~ '\s'
+      return search + 1
+    endif
+    let search -= 1
+  endwhile
+  " TODO: ??? completion at the beginning of the line?
+  return 0
+endfunction
+
+function! s:FindSuggestions(base, completion)
+  return a:completion.items
 endfunction
 
 " Flush file contents and call the server to request completions for the current
@@ -103,5 +151,5 @@ function! s:labelsOnly(completion_result) abort
     let completion_items = a:completion_result.items
   endif
   call map(completion_items, 'v:val.label')
-  return completion_items
+  return {'items' : completion_items}
 endfunction
