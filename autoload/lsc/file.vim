@@ -5,7 +5,7 @@ function! lsc#file#onOpen() abort
   let file_path = expand('%:p')
   let buffer_content = join(getline(1, '$'), "\n")
   let params = {'textDocument':
-      \   {'uri': 'file://'.file_path,
+      \   {'uri': lsc#util#documentUri(),
       \    'languageId': &filetype,
       \    'version': <SID>FileVersion(file_path),
       \    'text': buffer_content
@@ -37,7 +37,7 @@ function! lsc#file#flushChanges(...) abort
   let file_path = expand('%:p')
   let buffer_content = join(getline(1, '$'), "\n")
   let params = {'textDocument':
-      \   {'uri': 'file://'.file_path,
+      \   {'uri': lsc#util#documentUri(),
       \    'version': <SID>FileVersion(file_path),
       \   },
       \ 'contentChanges': [{'text': buffer_content}],

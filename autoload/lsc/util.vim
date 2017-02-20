@@ -4,3 +4,7 @@ function! lsc#util#winDo(command) abort
   execute 'keepjumps noautocmd windo '.a:command
   execute 'keepjumps noautocmd '.current_window.'wincmd w'
 endfunction
+
+function! lsc#util#documentUri() abort
+  return 'file://'.expand('%:p')
+endfunction
