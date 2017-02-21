@@ -1,3 +1,7 @@
+# 0.1.1-dev
+
+- Use a relative path where possible when jumping to definition
+
 # 0.1.0
 
 Experimental first release - there are protocol bugs, for instance this does not

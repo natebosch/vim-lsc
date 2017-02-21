@@ -34,6 +34,7 @@ function! s:isGoToValid(old_pos, goto_definition_id) abort
 endfunction
 
 function! s:goTo(file, line, character) abort
-  exec 'edit '.a:file
+  let relative_path = fnamemodify(a:file, ":~:.")
+  exec 'edit '.relative_path
   call cursor(a:line, a:character)
 endfunction
