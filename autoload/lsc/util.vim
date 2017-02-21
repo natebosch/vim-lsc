@@ -9,6 +9,10 @@ function! lsc#util#documentUri() abort
   return 'file://'.expand('%:p')
 endfunction
 
+function! lsc#util#documentPath(uri) abort
+  return substitute(a:uri, '^file://', '', 'v')
+endfunction
+
 " Returns a funcref which is the result of first calling `inner` and then using
 " the result as the argument to `outer`. `inner` may take any number of
 " arguments, but `outer` must  take a single argument.

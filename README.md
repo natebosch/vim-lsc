@@ -13,12 +13,28 @@ implemented alongside the plugin.
 
 [dart language server]: https://github.com/natebosch/dart_language_server
 
-## Testing server communication and diagnostic highlighting
+## Installation
 
-- Install the dart language server
-- Open any file in vim
-- `:source plugin/lsc.vim`
-- `:call RegisterLanguageServer('dart', 'dart_language_server')`
-- Open a buffer with the file type 'dart'.
-- Enter any invalid Dart code. You should see errors highlighted.
-- Quit vim and the server will be signaled to exit.
+Install with your method of choice. If you don't have a preference check out
+[vim-plug][]. Install a language server and ensure it is executable from your
+`$PATH`.
+
+[vim-plug]:https://github.com/junegunn/vim-plug
+
+## Configuration
+
+Map a filetype to the command that starts the language server for that filetype
+in your `vimrc`. I also recommend a mapping to the function call to jump to
+definition.
+
+```vimscript
+let g:lsc_server_commands = {'dart': ['dart_language_server']}
+
+nnoremap gd :call lsc#reference#goToDefinition()<CR>
+```
+
+## Usage
+
+Edit any file for a configured filetype. Errors and suggestions will show up as
+you type. Call the `lsc#reference#goToDefinition()` function to jump to the
+definition of the token under the cursor.
