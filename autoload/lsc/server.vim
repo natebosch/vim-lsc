@@ -1,9 +1,13 @@
-" channel id -> received message
-let s:channel_buffers = {}
-" command -> [call]
-let s:buffered_calls = {}
-" command -> job
-let s:running_servers = {}
+if !exists('s:initialized')
+  " channel id -> received message
+  let s:channel_buffers = {}
+  " command -> [call]
+  let s:buffered_calls = {}
+  " command -> job
+  let s:running_servers = {}
+  let s:initialized_servers = []
+  let s:initialized = v:true
+endif
 
 function! lsc#server#start(filetype) abort
   for server_command in g:lsc_server_commands[a:filetype]
@@ -26,8 +30,14 @@ function! lsc#server#call(file_type, method, params, ...) abort
   if a:0 >= 1
     call lsc#dispatch#registerCallback(call_id, a:1)
   endif
+  if a:0 >= 2
+    let override_initialize = a:2
+  else
+    let override_initialize = v:false
+  endif
   for command in g:lsc_server_commands[a:file_type]
-    if !has_key(s:running_servers, command)
+    if !has_key(s:running_servers, command) ||
+        \ (index(s:initialized_servers, command) > 0 && !override_initiaze)
       call s:BufferCall(command, message)
       continue
     endif
@@ -64,12 +74,24 @@ function! s:RunCommand(command) abort
   let channel = job_getchannel(job)
   let ch_id = ch_info(channel)['id']
   let s:channel_buffers[ch_id] = ''
-  if has_key(s:buffered_calls, a:command)
-    for buffered_call in s:buffered_calls[a:command]
-      call ch_sendraw(channel, buffered_call)
-    endfor
-    unlet s:buffered_calls[a:command]
-  endif
+  let data = {'command': a:command, 'channel': channel}
+  function data.onInitialize(params) abort
+    " TODO: Check capabilities?
+    call add(s:initialized_servers, self.command)
+    if has_key(s:buffered_calls, self.command)
+      for buffered_call in s:buffered_calls[self.command]
+        call ch_sendraw(self.channel, buffered_call)
+      endfor
+      unlet s:buffered_calls[self.command]
+    endif
+  endfunction
+  let params = {'processId': getpid(),
+      \ 'rootUri': 'file://'.getcwd(),
+      \ 'capabilities': s:client_capabilities,
+      \ 'trace': 'messages'
+      \}
+  call lsc#server#call(&filetype, 'initialize',
+      \ params, data.onInitialize, v:true)
 endfunction
 
 " Clean up stored state about a running server.
@@ -80,6 +102,10 @@ function! lsc#server#onExit(job, status) abort
   for command in keys(s:running_servers)
     if s:running_servers[command] == a:job
       unlet s:running_servers[command]
+      let initialize = index(s:initialized_servers, command)
+      if initialize > 0
+        call remove(s:initialized_servers, initialize)
+      endif
       return
     endif
   endfor
@@ -98,3 +124,19 @@ function! s:BufferCall(command, call) abort
   endif
   call add(s:buffered_calls[a:command], a:call)
 endfunction
+
+" Supports no workspace capabilities - missing value means no support
+let s:client_capabilities = {
+    \ 'workspace': {},
+    \ 'textDocument': {
+    \   'synchronization': {
+    \     'willSave': v:false,
+    \     'willSaveWaitUntil': v:false,
+    \     'didSave': v:false,
+    \   },
+    \   'completion': {
+    \     'snippetSupport': v:false,
+    \   },
+    \   'definition': {'dynamicRegistration': v:false},
+    \ }
+    \}

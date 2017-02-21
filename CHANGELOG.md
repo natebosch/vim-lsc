@@ -1,5 +1,6 @@
 # 0.1.1-dev
 
+- Call initialize first for better protocol compliance
 - Use a relative path where possible when jumping to definition
 
 # 0.1.0
