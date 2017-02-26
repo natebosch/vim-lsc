@@ -6,7 +6,7 @@ endfunction
 " Refresh highlight matches in the current window.
 function! lsc#highlights#update() abort
   call lsc#highlights#clear()
-  if !has_key(g:lsc_server_commands, &filetype)
+  if !has_key(g:lsc_server_commands, &filetype) || &diff
     return
   endif
   for line in values(lsc#diagnostics#forFile(expand('%:p')))
