@@ -27,7 +27,7 @@ endfunction
 
 augroup LSC
   autocmd!
-  autocmd BufWinEnter,TabEnter,WinEnter *
+  autocmd BufWinEnter,TabEnter,WinEnter,WinLeave *
       \ call <SID>IfEnabled('lsc#highlights#updateDisplayed')
   autocmd BufNewFile,BufReadPost * call <SID>IfEnabled('lsc#file#onOpen')
   autocmd TextChanged,TextChangedI * call <SID>IfEnabled('lsc#file#onChange')
