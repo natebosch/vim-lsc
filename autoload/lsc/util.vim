@@ -28,3 +28,9 @@ function! lsc#util#compose(outer, inner) abort
   endfunction
   return data.composed
 endfunction
+
+function! lsc#util#error(message) abort
+  echohl Error
+  echom '[lsc] '.a:message
+  echohl None
+endfunction

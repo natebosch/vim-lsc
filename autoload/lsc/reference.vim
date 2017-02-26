@@ -5,6 +5,11 @@ function! lsc#reference#goToDefinition() abort
       \ 'goto_definition_id': s:goto_definition_id}
   function data.trigger(result) abort
     if !s:isGoToValid(self.old_pos, self.goto_definition_id)
+      echom 'GoTODefinition skipped'
+      return
+    endif
+    if type(a:result) == type(v:null)
+      call lsc#util#error('No definition found')
       return
     endif
     if type(a:result) == type([])
