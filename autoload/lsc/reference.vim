@@ -1,4 +1,5 @@
 function! lsc#reference#goToDefinition() abort
+  call lsc#file#flushChanges()
   let s:goto_definition_id += 1
   let data = {'old_pos': getcurpos(),
       \ 'goto_definition_id': s:goto_definition_id}
