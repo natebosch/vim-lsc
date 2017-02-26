@@ -34,3 +34,27 @@ function! lsc#util#error(message) abort
   echom '[lsc] '.a:message
   echohl None
 endfunction
+
+if !exists('s:initialized')
+  let s:au_group_id = 0
+  let s:callbacks = {}
+  let s:initialized = v:true
+endif
+
+" Schedule [function] to be called once for [event]. The function will only be
+" called if [event] fires for the current buffer. Callbacks cannot be canceled.
+function! lsc#util#once(event, function) abort
+  let s:au_group_id += 1
+  let au_group = 'LSC_'.string(s:au_group_id)
+  let s:callbacks[au_group] = [a:function]
+  exec 'augroup '.au_group
+  exec 'autocmd '.a:event.' <buffer> call <SID>Callback("'.au_group.'")'
+  exec 'augroup END'
+endfunction
+
+function! s:Callback(group)
+  exec 'autocmd! '.a:group
+  exec 'augroup! '.a:group
+  call s:callbacks[a:group][0]()
+  unlet s:callbacks[a:group]
+endfunction

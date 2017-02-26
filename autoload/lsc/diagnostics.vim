@@ -42,7 +42,7 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   endfor
   let s:file_diagnostics[a:file_path] = diagnostics_by_line
   " TODO use setloclist() to add diagnostics
-  call lsc#util#winDo("call lsc#highlights#update()")
+  call lsc#highlights#updateDisplayed()
 endfunction
 
 " Finds the first diagnostic which is under the cursor on the current line. If
