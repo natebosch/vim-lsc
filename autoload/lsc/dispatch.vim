@@ -10,7 +10,7 @@ function! lsc#dispatch#message(message) abort
           \ ' params: '.string(a:message['params'])
     endif
   elseif has_key(a:message, 'error')
-    echom 'Got error: '.string(a:message['error'])
+    call s:handleError(a:message['error'])
   elseif has_key(a:message, 'result')
     let call_id = a:message['id']
     if has_key(s:callbacks, call_id)
@@ -25,6 +25,15 @@ endfunction
 if !exists('s:callbacks')
   let s:callbacks = {}
 endif
+
+function! s:handleError(error) abort
+  if has_key(a:error, 'message')
+    let message = a:error['message']
+  else
+    let message = string(a:error)
+  endif
+  echom 'LSC Error!: '.message
+endfunction
 
 function! lsc#dispatch#registerCallback(id, callback) abort
   let s:callbacks[a:id] = [a:callback]

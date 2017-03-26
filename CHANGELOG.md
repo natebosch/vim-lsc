@@ -2,6 +2,7 @@
 
 - Call initialize first for better protocol compliance
 - Use a relative path where possible when jumping to definition
+- Only display 'message' field for errors
 
 # 0.1.0
 
