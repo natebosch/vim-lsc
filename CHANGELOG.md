@@ -4,6 +4,7 @@
 - Use a relative path where possible when jumping to definition
 - Only display 'message' field for errors
 - Bug Fix: Less likely to delete inserted text when trying to complete
+- Bug Fix: More likely to try to complete when not following a '.'
 
 # 0.1.0
 

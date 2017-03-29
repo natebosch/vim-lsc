@@ -72,8 +72,8 @@ function! s:startCompletion() abort
   let s:completion_waiting = v:true
   let data = {'old_pos': getcurpos(), 'completion_id': s:completion_id}
   function data.trigger(completions)
+    let s:completion_waiting = v:false
     if s:isCompletionValid(self.old_pos, self.completion_id)
-      let s:completion_waiting = v:false
       call s:SuggestCompletions(a:completions)
     endif
   endfunction
