@@ -3,6 +3,7 @@
 - Call initialize first for better protocol compliance
 - Use a relative path where possible when jumping to definition
 - Only display 'message' field for errors
+- Bug Fix: Less likely to delete inserted text when trying to complete
 
 # 0.1.0
 
