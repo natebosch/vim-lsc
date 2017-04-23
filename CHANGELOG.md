@@ -5,6 +5,7 @@
 - Only display 'message' field for errors
 - Bug Fix: Less likely to delete inserted text when trying to complete
 - Bug Fix: More likely to try to complete when not following a '.'
+- Populate location list with diagnostics
 
 # 0.1.0
 

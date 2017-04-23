@@ -1,6 +1,14 @@
 " file path -> line number -> [diagnostic]
+"
+" Diagnostics are dictionaries with:
+" 'group': The highlight group, like 'lscDiagnosticError'
+" 'range': 1-based [start line, start column, length]
+" 'message': The message to display
+" 'type': Single letter representation of severity for location list
 let s:file_diagnostics = {}
 
+" Converts between an LSP diagnostic and the internal representation used for
+" highlighting.
 function! lsc#diagnostics#convert(diagnostic) abort
   let line = a:diagnostic.range.start.line + 1
   let character = a:diagnostic.range.start.character + 1
@@ -8,7 +16,16 @@ function! lsc#diagnostics#convert(diagnostic) abort
   let length = a:diagnostic.range.end.character + 1 - character
   let range = [line, character, length]
   let group = <SID>SeverityGroup(a:diagnostic.severity)
-  return {'group': group, 'range': range, 'message': a:diagnostic.message}
+  let type = <SID>SeverityType(a:diagnostic.severity)
+  return {'group': group, 'range': range,
+      \ 'message': a:diagnostic.message, 'type': type}
+endfunction
+
+" Converts between an internal diagnostic and an item for the location list.
+function! s:locationListItem(bufnr, diagnostic) abort
+  return {'bufnr': a:bufnr,
+      \ 'lnum': a:diagnostic.range[0], 'col': a:diagnostic.range[1],
+      \ 'text': a:diagnostic.message, 'type': a:diagnostic.type}
 endfunction
 
 " Finds the highlight group given a diagnostic severity level
@@ -21,6 +38,19 @@ function! s:SeverityGroup(severity) abort
       return 'lscDiagnosticInfo'
     elseif a:severity == 4
       return 'lscDiagnosticHint'
+    endif
+endfunction
+
+" Finds the location list type given a diagnostic severity level
+function! s:SeverityType(severity) abort
+    if a:severity == 1
+      return 'E'
+    elseif a:severity == 2
+      return 'W'
+    elseif a:severity == 3
+      return 'I'
+    elseif a:severity == 4
+      return 'H'
     endif
 endfunction
 
@@ -41,8 +71,22 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
     call add(diagnostics_by_line[diagnostic.range[0]], diagnostic)
   endfor
   let s:file_diagnostics[a:file_path] = diagnostics_by_line
-  " TODO use setloclist() to add diagnostics
-  call lsc#highlights#updateDisplayed()
+  call lsc#util#winDo('call lsc#diagnostics#update("'.a:file_path.'")')
+endfunction
+
+" Updates highlighting and location list for the current window if it matches
+" [file_path]
+function! lsc#diagnostics#update(file_path) abort
+  if a:file_path != expand('%:p') | return | endif
+  call lsc#highlights#update()
+  let bufnr = bufnr('%')
+  let items = []
+  for line in values(lsc#diagnostics#forFile(a:file_path))
+    for diagnostic in line
+      call add(items, s:locationListItem(bufnr, diagnostic))
+    endfor
+  endfor
+  call setloclist(0, items)
 endfunction
 
 " Finds the first diagnostic which is under the cursor on the current line. If
