@@ -1,4 +1,4 @@
-# 0.1.1-dev
+# 0.1.1
 
 - Call initialize first for better protocol compliance
 - Use a relative path where possible when jumping to definition
@@ -6,6 +6,7 @@
 - Bug Fix: Less likely to delete inserted text when trying to complete
 - Bug Fix: More likely to try to complete when not following a '.'
 - Populate location list with diagnostics
+- Bug fix: Don't try to 'edit' the current file
 
 # 0.1.0
 
