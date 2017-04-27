@@ -5,7 +5,7 @@ function! lsc#reference#goToDefinition() abort
       \ 'goto_definition_id': s:goto_definition_id}
   function data.trigger(result) abort
     if !s:isGoToValid(self.old_pos, self.goto_definition_id)
-      echom 'GoTODefinition skipped'
+      echom 'GoToDefinition skipped'
       return
     endif
     if type(a:result) == type(v:null)
@@ -43,6 +43,10 @@ function! s:goTo(file, line, character) abort
   if a:file != expand('%:p')
     let relative_path = fnamemodify(a:file, ":~:.")
     exec 'edit '.relative_path
+    " 'edit' already left a jump
+    call cursor(a:line, a:character)
+  else
+    " Move with 'G' to ensure a jump is left
+    exec 'normal! '.a:line.'G'.a:character.'|'
   endif
-  call cursor(a:line, a:character)
 endfunction

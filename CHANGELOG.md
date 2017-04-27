@@ -1,3 +1,8 @@
+# 0.1.2-dev
+
+- Bug fix: Leave a jump in the jumplist when moving to a definition in the same
+  file
+
 # 0.1.1
 
 - Call initialize first for better protocol compliance
