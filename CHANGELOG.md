@@ -2,6 +2,7 @@
 
 - Bug fix: Leave a jump in the jumplist when moving to a definition in the same
   file
+- Overwrite `completeopt` before completion for a better experience.
 
 # 0.1.1
 

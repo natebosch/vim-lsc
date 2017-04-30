@@ -81,14 +81,12 @@ function! s:startCompletion() abort
 endfunction
 
 function! s:SuggestCompletions(completion) abort
-  if mode() != 'i' | return | endif
-  if len(a:completion.items) == 0
-    return
-  endif
+  if mode() != 'i' || len(a:completion.items) == 0 | return | endif
   let start = s:FindStart(a:completion)
   let suggestions = a:completion.items
+  setl completeopt-=longest
+  setl completeopt+=menu,menuone,noinsert,noselect
   call complete(start + 1, suggestions)
-  call feedkeys("\<c-p>", 'n')
 endfunction
 
 function! s:FindStart(completion) abort
