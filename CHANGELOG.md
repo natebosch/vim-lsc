@@ -2,9 +2,11 @@
 
 - Bug fix: Leave a jump in the jumplist when moving to a definition in the same
   file
-- Overwrite `completeopt` before completion for a better experience.
-- Avoid completion requests while already giving suggestions
-- Improve heuristics for start of completion range
+- Completion improvements:
+  - Overwrite `completeopt` before completion for a better experience.
+  - Avoid completion requests while already giving suggestions
+  - Improve heuristics for start of completion range
+  - Flush file changes after completion
 
 # 0.1.1
 

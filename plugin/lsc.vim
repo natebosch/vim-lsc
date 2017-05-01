@@ -30,7 +30,8 @@ augroup LSC
   autocmd BufWinEnter,TabEnter,WinEnter,WinLeave *
       \ call <SID>IfEnabled('lsc#highlights#updateDisplayed')
   autocmd BufNewFile,BufReadPost * call <SID>IfEnabled('lsc#file#onOpen')
-  autocmd TextChanged,TextChangedI * call <SID>IfEnabled('lsc#file#onChange')
+  autocmd TextChanged,TextChangedI,CompleteDone *
+      \ call <SID>IfEnabled('lsc#file#onChange')
   autocmd BufLeave * call <SID>IfEnabled('lsc#file#onLeave')
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
   autocmd TextChangedI * call <SID>IfEnabled('lsc#complete#textChanged')
