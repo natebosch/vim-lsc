@@ -21,6 +21,7 @@ endfunction
 
 function! s:typedCharacter() abort
   if s:isTrigger(s:next_char) || (s:isCompletable() && !s:completion_waiting)
+    let b:lsc_is_completing = v:true
     call s:startCompletion()
   else
     let s:completion_canceled = v:true
@@ -40,18 +41,23 @@ function! s:isTrigger(char) abort
   return a:char == '.'
 endfunction
 
+augroup LscCompletion
+  autocmd!
+  autocmd CompleteDone * let b:lsc_is_completing = v:false
+augroup END
+
 " TODO: Make this customizable
-" Whether the cursor follows at least 3 alphanumeric characters
+" Whether the cursor follows at least 3 word characters, and completion isn't
+" already in progress.
 function! s:isCompletable() abort
+  if exists('b:lsc_is_completing') && b:lsc_is_completing
+    return v:false
+  endif
   if s:next_char !~ '\w' | return v:false | endif
   let cur_col = col('.')
   if cur_col < 4 | return v:false | endif
   let word = getline('.')[cur_col - 4:cur_col - 2]
   return word =~ '^\w*$'
-endfunction
-
-function! s:cancelCompletion() abort
-  let s:canceled_completions[s:completion_id] = v:true
 endfunction
 
 " Whether the completion should still go through.
@@ -75,6 +81,8 @@ function! s:startCompletion() abort
     let s:completion_waiting = v:false
     if s:isCompletionValid(self.old_pos, self.completion_id)
       call s:SuggestCompletions(a:completions)
+    else
+      let b:lsc_is_completing = v:false
     endif
   endfunction
   call s:SearchCompletions(data.trigger)
