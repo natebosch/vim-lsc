@@ -4,6 +4,7 @@
   file
 - Overwrite `completeopt` before completion for a better experience.
 - Avoid completion requests while already giving suggestions
+- Improve heuristics for start of completion range
 
 # 0.1.1
 

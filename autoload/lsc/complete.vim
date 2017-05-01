@@ -104,13 +104,13 @@ function! s:FindStart(completion) abort
   return s:GuessCompletionStart()
 endfunction
 
-" Finds the last whitespace or . before the cursor position
+" Finds the last non word character
 function! s:GuessCompletionStart()
-  let search = col('.')
+  let search = col('.') - 2
   let line = getline('.')
   while search > 0
     let char = line[search]
-    if char == '.' || char =~ '\s'
+    if char !~ '\w'
       return search + 1
     endif
     let search -= 1
