@@ -2,6 +2,8 @@
 
 - Bug fix: Newlines in diagnostics are replace with '\n' to avoid multiline
   messages
+- Add support for `textDocument/references` request. References are shown in
+  quickfix list.
 
 # 0.1.2
 

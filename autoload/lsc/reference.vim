@@ -22,11 +22,48 @@ function! lsc#reference#goToDefinition() abort
     let character = location.range.start.character + 1
     call s:goTo(file, line, character)
   endfunction
-  let params = { 'textDocument': {'uri': lsc#util#documentUri()},
+  call lsc#server#call(&filetype, 'textDocument/definition',
+      \ s:TextDocumentPositionParams(), data.trigger)
+endfunction
+
+function! s:TextDocumentPositionParams() abort
+  return { 'textDocument': {'uri': lsc#util#documentUri()},
       \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
       \ }
-  call lsc#server#call(&filetype, 'textDocument/definition',
-      \ params, data.trigger)
+endfunction
+
+function! lsc#reference#findReferences() abort
+  call lsc#file#flushChanges()
+  let params = s:TextDocumentPositionParams()
+  let params.context = {'includeDeclaration': v:true}
+  call lsc#server#call(&filetype, 'textDocument/references',
+      \ params, function('<SID>setQuickFixReferences'))
+endfunction
+
+function! s:setQuickFixReferences(results) abort
+  call setqflist(map(a:results, 's:quickFixItem(v:val)'))
+  copen
+endfunction
+
+" Convert an LSP Location to a item suitable for the vim quickfix list.
+"
+" Both representations are dictionaries.
+"
+" Location:
+" 'uri': file:// URI
+" 'range': {'start': {'line', 'character'}, 'end': {'line', 'character'}}
+"
+" QuickFix Item: (as used)
+" 'filename': file path
+" 'lnum': line number
+" 'col': column number
+"
+" LSP line and column are zero-based, vim is one-based.
+function! s:quickFixItem(location) abort
+  return {'filename': lsc#util#documentPath(a:location.uri),
+      \ 'lnum': a:location.range.start.line + 1,
+      \ 'col': a:location.range.start.character + 1
+      \}
 endfunction
 
 if !exists('s:initialized')

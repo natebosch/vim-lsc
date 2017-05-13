@@ -60,3 +60,8 @@ moves again the options will be provided using vim's built in completion.
 While the cursor is on any identifier call `lsc#reference#goToDefinition()` (see
 above for recommended mapping) to jump to the location of the definition. If the
 cursor moves before the server responds the response will be ignored.
+
+## Find references
+
+While the cursor is on any identifier call `lsc#reference#findReferences()` to
+populate the quickfix list with usage locations.
