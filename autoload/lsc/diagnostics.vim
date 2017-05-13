@@ -71,22 +71,22 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
     call add(diagnostics_by_line[diagnostic.range[0]], diagnostic)
   endfor
   let s:file_diagnostics[a:file_path] = diagnostics_by_line
-  call lsc#util#winDo('call lsc#diagnostics#update("'.a:file_path.'")')
+  call lsc#highlights#updateDisplayed()
+  call lsc#diagnostics#updateLocationList(a:file_path)
 endfunction
 
-" Updates highlighting and location list for the current window if it matches
-" [file_path]
-function! lsc#diagnostics#update(file_path) abort
-  if a:file_path != expand('%:p') | return | endif
-  call lsc#highlights#update()
-  let bufnr = bufnr('%')
+" Updates location list for all windows showing [file_path].
+function! lsc#diagnostics#updateLocationList(file_path) abort
+  let bufnr = bufnr(a:file_path)
   let items = []
-  for line in values(lsc#diagnostics#forFile(a:file_path))
+  for line in values(lsc#diagnostics#forFile(expand('%:p')))
     for diagnostic in line
       call add(items, s:locationListItem(bufnr, diagnostic))
     endfor
   endfor
-  call setloclist(0, items)
+  for window in lsc#util#windowsForFile(a:file_path)
+    call setloclist(window, items)
+  endfor
 endfunction
 
 " Finds the first diagnostic which is under the cursor on the current line. If

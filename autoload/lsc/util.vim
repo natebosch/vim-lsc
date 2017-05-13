@@ -58,3 +58,10 @@ function! s:Callback(group)
   call s:callbacks[a:group][0]()
   unlet s:callbacks[a:group]
 endfunction
+
+" Returns the window IDs of the windows showing the buffer opened for
+" [file_path].
+function! lsc#util#windowsForFile(file_path) abort
+  let bufinfo = getbufinfo(a:file_path)[0]
+  return copy(bufinfo.windows)
+endfunction

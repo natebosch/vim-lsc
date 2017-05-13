@@ -7,6 +7,7 @@
   - Avoid completion requests while already giving suggestions
   - Improve heuristics for start of completion range
   - Flush file changes after completion
+- Bug fix: Don't change window highlights when in select mode
 
 # 0.1.1
 
