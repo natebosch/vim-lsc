@@ -54,16 +54,26 @@ endfunction
 " 'range': {'start': {'line', 'character'}, 'end': {'line', 'character'}}
 "
 " QuickFix Item: (as used)
-" 'filename': file path
+" 'filename': file path if file is not open
+" 'bufnr': buffer number if the file is open in a buffer
 " 'lnum': line number
 " 'col': column number
+" 'text': The content of the referenced line
 "
 " LSP line and column are zero-based, vim is one-based.
 function! s:quickFixItem(location) abort
-  return {'filename': lsc#util#documentPath(a:location.uri),
-      \ 'lnum': a:location.range.start.line + 1,
-      \ 'col': a:location.range.start.character + 1
-      \}
+  let item = {'lnum': a:location.range.start.line + 1,
+      \ 'col': a:location.range.start.character + 1}
+  let file_path = lsc#util#documentPath(a:location.uri)
+  let bufnr = bufnr(file_path)
+  if bufnr == -1
+    let item.filename = file_path
+    let item.text = readfile(file_path, '', item.lnum)[item.lnum - 1]
+  else
+    let item.bufnr = bufnr
+    let item.text = getbufline(bufnr, item.lnum)[0]
+  endif
+  return item
 endfunction
 
 if !exists('s:initialized')
