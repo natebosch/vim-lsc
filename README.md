@@ -6,12 +6,8 @@ server protocol][]
 
 [language server protocol]: https://github.com/Microsoft/language-server-protocol
 
-In theory any language server should be compatible - but this is not being
-built against any reference implementation so there may be protocol bugs. The
-only implementation which supported for now is the [dart language server][]
-implemented alongside the plugin.
-
-[dart language server]: https://github.com/natebosch/dart_language_server
+This client has not been tested against a wide range of servers so there may be
+protocol bugs.
 
 ## Installation
 
@@ -33,8 +29,34 @@ let g:lsc_server_commands = {'dart': ['dart_language_server']}
 nnoremap gd :call lsc#reference#goToDefinition()<CR>
 ```
 
-## Usage
+## Features
 
-Edit any file for a configured filetype. Errors and suggestions will show up as
-you type. Call the `lsc#reference#goToDefinition()` function to jump to the
-definition of the token under the cursor.
+The protocol does not require that every language server supports every feature
+so support may vary.
+
+All communication with the server is asynchronous and will not block the editor.
+For requests that trigger an action the response might be silently ignored if it
+can no longer be used - you can abort most operations that are too slow by
+moving the cursor.
+
+### Diagnostics
+
+Error, warnings, and hints reported by the server are highlighted in the buffer.
+When the cursor is on a line with a diagnostic the message will be displayed. If
+there are multiple diagnostics on a line the one closes to the cursor will be
+displayed.
+
+Diagnostics are also reported in the location list for each window which has the
+buffer open.
+
+### Autocomplete
+
+When more than 3 word characters or a '.' are typed a request for autocomplete
+suggestions is sent to the server. If the server responds before the cursor
+moves again the options will be provided using vim's built in completion.
+
+### Jump to definition
+
+While the cursor is on any identifier call `lsc#reference#goToDefinition()` (see
+above for recommended mapping) to jump to the location of the definition. If the
+cursor moves before the server responds the response will be ignored.
