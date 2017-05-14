@@ -41,7 +41,9 @@ function! lsc#reference#findReferences() abort
 endfunction
 
 function! s:setQuickFixReferences(results) abort
-  call setqflist(map(a:results, 's:quickFixItem(v:val)'))
+  call map(a:results, 's:QuickFixItem(v:val)')
+  call sort(a:results, 's:CompareQuickFixItems')
+  call setqflist(a:results)
   copen
 endfunction
 
@@ -61,19 +63,26 @@ endfunction
 " 'text': The content of the referenced line
 "
 " LSP line and column are zero-based, vim is one-based.
-function! s:quickFixItem(location) abort
+function! s:QuickFixItem(location) abort
   let item = {'lnum': a:location.range.start.line + 1,
       \ 'col': a:location.range.start.character + 1}
   let file_path = lsc#util#documentPath(a:location.uri)
+  let item.filename = file_path
   let bufnr = bufnr(file_path)
   if bufnr == -1
-    let item.filename = file_path
     let item.text = readfile(file_path, '', item.lnum)[item.lnum - 1]
   else
-    let item.bufnr = bufnr
     let item.text = getbufline(bufnr, item.lnum)[0]
   endif
   return item
+endfunction
+
+function! s:CompareQuickFixItems(i1, i2) abort
+  if a:i1.filename == a:i2.filename
+    return a:i1.lnum - a:i2.lnum
+  else
+    return  a:i1.filename > a:i2.filename ? 1 : -1
+  endif
 endfunction
 
 if !exists('s:initialized')
