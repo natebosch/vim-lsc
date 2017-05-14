@@ -1,3 +1,8 @@
+# 0.1.3-dev
+
+- Bug fix: Newlines in diagnostics are replace with '\n' to avoid multiline
+  messages
+
 # 0.1.2
 
 - Bug fix: Leave a jump in the jumplist when moving to a definition in the same
