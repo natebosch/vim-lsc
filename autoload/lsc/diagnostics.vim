@@ -1,11 +1,16 @@
-" file path -> line number -> [diagnostic]
-"
-" Diagnostics are dictionaries with:
-" 'group': The highlight group, like 'lscDiagnosticError'
-" 'range': 1-based [start line, start column, length]
-" 'message': The message to display
-" 'type': Single letter representation of severity for location list
-let s:file_diagnostics = {}
+if !exists('s:file_diagnostsics')
+  " file path -> line number -> [diagnostic]
+  "
+  " Diagnostics are dictionaries with:
+  " 'group': The highlight group, like 'lscDiagnosticError'
+  " 'range': 1-based [start line, start column, length]
+  " 'message': The message to display
+  " 'type': Single letter representation of severity for location list
+  let s:file_diagnostics = {}
+
+  " file path -> incrementing version number
+  let s:diagnostic_versions = {}
+endif
 
 " Converts between an LSP diagnostic and the internal representation used for
 " highlighting.
@@ -61,6 +66,13 @@ function! lsc#diagnostics#forFile(file_path) abort
   return s:file_diagnostics[a:file_path]
 endfunction
 
+function! s:DiagnosticsVersion(file_path) abort
+  if !has_key(s:diagnostic_versions, a:file_path)
+    return 0
+  endif
+  return s:diagnostic_versions[a:file_path]
+endfunction
+
 function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   call map(a:diagnostics, 'lsc#diagnostics#convert(v:val)')
   let diagnostics_by_line = {}
@@ -71,6 +83,11 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
     call add(diagnostics_by_line[diagnostic.range[0]], diagnostic)
   endfor
   let s:file_diagnostics[a:file_path] = diagnostics_by_line
+  if has_key(s:diagnostic_versions, a:file_path)
+    let s:diagnostic_versions[a:file_path] += 1
+  else
+    let s:diagnostic_versions[a:file_path] = 1
+  endif
   call lsc#highlights#updateDisplayed()
   call lsc#diagnostics#updateLocationList(a:file_path)
 endfunction
@@ -84,9 +101,43 @@ function! lsc#diagnostics#updateLocationList(file_path) abort
       call add(items, s:locationListItem(bufnr, diagnostic))
     endfor
   endfor
-  for window in lsc#util#windowsForFile(a:file_path)
-    call setloclist(window, items)
+  let diagnostics_version = s:DiagnosticsVersion(a:file_path)
+  for window_id in lsc#util#windowsForFile(a:file_path)
+    if !s:WindowIsCurrent(window_id, a:file_path, diagnostics_version)
+      call setloclist(window_id, items)
+      call s:MarkManagingLocList(window_id, a:file_path, diagnostics_version)
+    else
+    endif
   endfor
+endfunction
+
+function! s:MarkManagingLocList(window_id, file_path, version) abort
+  let window_info = getwininfo(a:window_id)[0]
+  let tabnr = window_info.tabnr
+  let winnr = window_info.winnr
+  call settabwinvar(tabnr, winnr, 'lsc_diagnostics_file', a:file_path)
+  call settabwinvar(tabnr, winnr, 'lsc_diagnostics_version', a:version)
+endfunction
+
+" Whether the location list has the most up to date diagnostics.
+"
+" Multiple events can cause the location list for a window to get updated. Track
+" the currently held file and version for diagnostics and block updates if they
+" are already current.
+function! s:WindowIsCurrent(window_id, file_path, version) abort
+  let window_info = getwininfo(a:window_id)[0]
+  let tabnr = window_info.tabnr
+  let winnr = window_info.winnr
+  return gettabwinvar(tabnr, winnr, 'lsc_diagnostics_version', -1) == a:version
+      \ && gettabwinvar(tabnr, winnr, 'lsc_diagnostics_file', '') == a:file_path
+endfunction
+
+
+" Remove the LSC controlled location list for the current window.
+function! lsc#diagnostics#clear() abort
+  call setloclist(0, [])
+  unlet w:lsc_diagnostics_version
+  unlet w:lsc_diagnostics_file
 endfunction
 
 " Finds the first diagnostic which is under the cursor on the current line. If

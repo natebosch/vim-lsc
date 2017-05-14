@@ -1,4 +1,4 @@
-# 0.1.2-dev
+# 0.1.2
 
 - Bug fix: Leave a jump in the jumplist when moving to a definition in the same
   file
@@ -8,6 +8,8 @@
   - Improve heuristics for start of completion range
   - Flush file changes after completion
 - Bug fix: Don't change window highlights when in select mode
+- Bug fix: Location list is cleared when switching to a non-tracked filetype,
+  and kept up to date across windows and tabs showing the same buffer
 
 # 0.1.1
 

@@ -27,17 +27,64 @@ endfunction
 
 augroup LSC
   autocmd!
-  autocmd BufWinEnter,TabEnter,WinEnter,WinLeave *
-      \ call <SID>IfEnabled('lsc#highlights#updateDisplayed')
+  " Some state which is logically owned by a buffer is attached to the window in
+  " practice and needs to be manage manually:
+  "
+  " 1. Diagnostic highlights
+  " 2. Diagnostic location list
+  "
+  " The `BufWinEnter` event indicates most times when the buffer <-> window
+  " relationship can change. There are some exceptions where this event is not
+  " fired such as `:split` and `:lopen` so `WinEnter` is used as a fallback with
+  " a block to ensure it only happens once.
+  autocmd BufWinEnter * call LSCEnsureCurrentWindowState()
+  autocmd WinEnter * call timer_start(1, 'LSCOnWinEnter')
+
+  " Window local state is only correctly maintained for the current tab.
+  autocmd TabEnter * call lsc#util#winDo('call LSCEnsureCurrentWindowState()')
+
   autocmd BufNewFile,BufReadPost * call <SID>IfEnabled('lsc#file#onOpen')
   autocmd TextChanged,TextChangedI,CompleteDone *
       \ call <SID>IfEnabled('lsc#file#onChange')
-  autocmd BufLeave * call <SID>IfEnabled('lsc#file#onLeave')
+  autocmd BufLeave * call <SID>IfEnabled('lsc#file#flushChanges')
+
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
+
   autocmd TextChangedI * call <SID>IfEnabled('lsc#complete#textChanged')
   autocmd InsertCharPre * call <SID>IfEnabled('lsc#complete#insertCharPre')
+
   autocmd VimLeave * call <SID>OnVimQuit()
 augroup END
+
+" Set window local state only if this is a brand new window which has not
+" already been initialized for LSC.
+"
+" This function must be called on a delay since critical values like
+" `expand('%')` and `&filetype` are not correctly set when the event fires. The
+" delay means that in the cases where `BufWinEnter` actually runs this will run
+" later and do nothing.
+function! LSCOnWinEnter(timer) abort
+  if exists('w:lsc_window_initialized')
+    return
+  endif
+  call LSCEnsureCurrentWindowState()
+endfunction
+
+" Update or clear state local to the current window.
+function! LSCEnsureCurrentWindowState() abort
+  let w:lsc_window_initialized = v:true
+  if !has_key(g:lsc_server_commands, &filetype)
+    if exists('w:lsc_diagnostic_matches')
+      call lsc#highlights#clear()
+    endif
+    if exists('w:lsc_diagnostics_version')
+      call lsc#diagnostics#clear()
+    endif
+    return
+  endif
+  call lsc#highlights#update()
+  call lsc#diagnostics#updateLocationList(expand('%:p'))
+endfunction
 
 " Run `function` if LSC is enabled for the current filetype.
 function! s:IfEnabled(function) abort
