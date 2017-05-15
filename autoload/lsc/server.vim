@@ -88,7 +88,7 @@ function! s:RunCommand(command) abort
   let params = {'processId': getpid(),
       \ 'rootUri': 'file://'.getcwd(),
       \ 'capabilities': s:client_capabilities,
-      \ 'trace': 'messages'
+      \ 'trace': 'off'
       \}
   call lsc#server#call(&filetype, 'initialize',
       \ params, data.onInitialize, v:true)
