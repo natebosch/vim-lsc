@@ -67,7 +67,7 @@ function! s:QuickFixItem(location) abort
   let item = {'lnum': a:location.range.start.line + 1,
       \ 'col': a:location.range.start.character + 1}
   let file_path = lsc#util#documentPath(a:location.uri)
-  let item.filename = file_path
+  let item.filename = fnamemodify(file_path, ':~:.')
   let bufnr = bufnr(file_path)
   if bufnr == -1
     let item.text = readfile(file_path, '', item.lnum)[item.lnum - 1]
@@ -97,7 +97,7 @@ endfunction
 
 function! s:goTo(file, line, character) abort
   if a:file != expand('%:p')
-    let relative_path = fnamemodify(a:file, ":~:.")
+    let relative_path = fnamemodify(a:file, ':~:.')
     exec 'edit '.relative_path
     " 'edit' already left a jump
     call cursor(a:line, a:character)
