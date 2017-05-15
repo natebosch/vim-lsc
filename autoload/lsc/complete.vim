@@ -104,7 +104,7 @@ function! s:FindStart(completion) abort
   return s:GuessCompletionStart()
 endfunction
 
-" Finds the last non word character
+" Finds the character after the last non word character behind the cursor.
 function! s:GuessCompletionStart()
   let search = col('.') - 2
   let line = getline('.')
@@ -127,15 +127,90 @@ function! s:SearchCompletions(onFound) abort
       \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
       \ }
   call lsc#server#call(&filetype, 'textDocument/completion', params,
-      \ lsc#util#compose(a:onFound, function('<SID>labelsOnly')))
+      \ lsc#util#compose(a:onFound, function('<SID>CompletionItems')))
 endfunction
 
-function! s:labelsOnly(completion_result) abort
+" Normalize LSP completion suggestions to the format used by vim.
+"
+" Returns a dict with:
+" `items`: The vim complete-item values
+" `start_col`: The start of the first range found, if any, in the suggestions
+"
+" Since different suggestions could, in theory, specify different ranges
+" autocomplete behavior could be incorrect since vim `complete` only allows a
+" single start columng for every suggestion.
+function! s:CompletionItems(completion_result) abort
   if type(a:completion_result) == type([])
     let completion_items = a:completion_result
   else
     let completion_items = a:completion_result.items
   endif
-  call map(completion_items, 'v:val.label')
-  return {'items' : completion_items}
+  call map(completion_items, 's:CompletionItem(v:val)')
+  let completion = {'items' : completion_items}
+  for item in completion_items
+    if has_key(item, 'start_col')
+      let completion.start_col = item.start_col
+      break
+    endif
+  endfor
+  return completion
+endfunction
+
+" Translate from the LSP representation to the Vim representation of a
+" completion item.
+"
+" `word` suggestions are taken from the highest priority field according to
+" order `textEdit` > `insertText` > `label`.
+" `label` is always expectes to be set and is used as the `abbr` shown in the
+" popupmenu. This may be different from the inserted text.
+function! s:CompletionItem(completion_item) abort
+  let item = {'abbr': a:completion_item.label}
+  if has_key(a:completion_item, 'textEdit')
+    let item.word = a:completion_item.textEdit.newText
+    let item.start_col = a:completion_item.textEdit.range.start.character + 1
+  elseif has_key(a:completion_item, 'insertText')
+    let item.word = a:completion_item.insertText
+  else
+    let item.word = a:completion_item.label
+  endif
+  if has_key(a:completion_item, 'kind')
+    let item.kind = s:CompletionItemKind(a:completion_item.kind)
+  endif
+  if has_key(a:completion_item, 'detail') && a:completion_item.detail != v:null
+    let item.menu = a:completion_item.detail
+  endif
+  if has_key(a:completion_item, 'documentation')
+      \ && a:completion_item.documentation != v:null
+    let item.info = a:completion_item.documentation
+  else
+    let item.info = ' '
+  endif
+  return item
+endfunction
+
+function! s:CompletionItemKind(completion_kind) abort
+  if a:completion_kind ==  2
+      \ || a:completion_kind == 3
+      \ || a:completion_kind == 4
+    " Method, Function, Constructor
+    return 'f'
+  elseif a:completion_kind == 5 " Field
+    return 'm'
+  elseif a:completion_kind == 6 " Variable
+    return 'v'
+  elseif a:completion_kind == 7
+      \ || a:completion_kind == 8
+      \ || a:completion_kind == 13
+    " Class, Interface, Enum
+    return 't'
+  elseif a:completion_kind == 14
+      \ a:completion_kind == 11
+      \ a:completion_kind == 12
+      \ a:completion_kind == 1
+      \ a:completion_kind == 16
+    " Keyword, Unit, Value, Text, Color
+    return 'd'
+  endif
+  " Many kinds are unmapped
+  return ''
 endfunction

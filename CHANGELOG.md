@@ -1,3 +1,7 @@
+# 0.1.4-dev
+
+- More detail in completion suggestions, doc comment in preview window.
+
 # 0.1.3
 
 - Bug fix: Newlines in diagnostics are replace with '\n' to avoid multiline

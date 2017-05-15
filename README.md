@@ -23,7 +23,7 @@ Map a filetype to the command that starts the language server for that filetype
 in your `vimrc`. I also recommend a mapping to the function call to jump to
 definition.
 
-```vimscript
+```viml
 let g:lsc_server_commands = {'dart': ['dart_language_server']}
 
 nnoremap gd :call lsc#reference#goToDefinition()<CR>
@@ -54,6 +54,10 @@ buffer open.
 When more than 3 word characters or a '.' are typed a request for autocomplete
 suggestions is sent to the server. If the server responds before the cursor
 moves again the options will be provided using vim's built in completion.
+
+Note: By default `completeopt` includes `preview` and completion items include
+documentation in the preview window. Close the window after completion with
+`<c-w><c-z>` or disable with `set completeopt-=preview`.
 
 ### Jump to definition
 
