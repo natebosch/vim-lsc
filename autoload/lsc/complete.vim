@@ -204,10 +204,10 @@ function! s:CompletionItemKind(completion_kind) abort
     " Class, Interface, Enum
     return 't'
   elseif a:completion_kind == 14
-      \ a:completion_kind == 11
-      \ a:completion_kind == 12
-      \ a:completion_kind == 1
-      \ a:completion_kind == 16
+      \ || a:completion_kind == 11
+      \ || a:completion_kind == 12
+      \ || a:completion_kind == 1
+      \ || a:completion_kind == 16
     " Keyword, Unit, Value, Text, Color
     return 'd'
   endif
