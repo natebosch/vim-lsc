@@ -1,9 +1,11 @@
-# 0.1.3-dev
+# 0.1.3
 
 - Bug fix: Newlines in diagnostics are replace with '\n' to avoid multiline
   messages
 - Add support for `textDocument/references` request. References are shown in
   quickfix list.
+- Bug fix: Support receiving diagnostics for files which are not opened in a
+  buffer
 
 # 0.1.2
 
