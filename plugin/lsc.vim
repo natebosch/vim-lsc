@@ -8,6 +8,9 @@ if !exists('g:lsc_server_commands')
   let g:lsc_server_commands = {}
 endif
 
+command! LSClientGoToDefinition call lsc#reference#goToDefinition()
+command! LSClientFindReferences call lsc#reference#findReferences()
+
 " RegisterLanguageServer
 "
 " Registers a command as the server to start the first time a file with type

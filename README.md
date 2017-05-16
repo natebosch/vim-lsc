@@ -20,13 +20,14 @@ Install with your method of choice. If you don't have a preference check out
 ## Configuration
 
 Map a filetype to the command that starts the language server for that filetype
-in your `vimrc`. I also recommend a mapping to the function call to jump to
-definition.
+in your `vimrc`. I also recommend mapping shortcuts to the go to definition and
+find references commands.
 
 ```viml
 let g:lsc_server_commands = {'dart': 'dart_language_server'}
 
-nnoremap gd :call lsc#reference#goToDefinition()<CR>
+nnoremap gd :LSClientGoToDefinition<CR>
+nnoremap gr :LSClientFindReferences<CR>
 ```
 
 ## Features
@@ -61,11 +62,11 @@ documentation in the preview window. Close the window after completion with
 
 ### Jump to definition
 
-While the cursor is on any identifier call `lsc#reference#goToDefinition()` (see
-above for recommended mapping) to jump to the location of the definition. If the
-cursor moves before the server responds the response will be ignored.
+While the cursor is on any identifier call `LSClientGoToDefinition` to jump to
+the location of the definition. If the cursor moves before the server responds
+the response will be ignored.
 
 ### Find references
 
-While the cursor is on any identifier call `lsc#reference#findReferences()` to
-populate the quickfix list with usage locations.
+While the cursor is on any identifier call `LSClientFindReferences` to populate
+the quickfix list with usage locations.

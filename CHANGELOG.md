@@ -3,6 +3,7 @@
 - More detail in completion suggestions, doc comment in preview window.
 - Sort diagnostics in location list.
 - Allow only 1 server command per filetype.
+- Add commands for GoToDefinition and FindReferences
 
 # 0.1.3
 
