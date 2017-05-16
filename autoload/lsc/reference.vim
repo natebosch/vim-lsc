@@ -42,7 +42,7 @@ endfunction
 
 function! s:setQuickFixReferences(results) abort
   call map(a:results, 's:QuickFixItem(v:val)')
-  call sort(a:results, 's:CompareQuickFixItems')
+  call sort(a:results, 'lsc#util#compareQuickFixItems')
   call setqflist(a:results)
   copen
 endfunction
@@ -75,14 +75,6 @@ function! s:QuickFixItem(location) abort
     let item.text = getbufline(bufnr, item.lnum)[0]
   endif
   return item
-endfunction
-
-function! s:CompareQuickFixItems(i1, i2) abort
-  if a:i1.filename == a:i2.filename
-    return a:i1.lnum - a:i2.lnum
-  else
-    return  a:i1.filename > a:i2.filename ? 1 : -1
-  endif
 endfunction
 
 if !exists('s:initialized')

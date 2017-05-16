@@ -1,6 +1,7 @@
 # 0.1.4-dev
 
 - More detail in completion suggestions, doc comment in preview window.
+- Sort diagnostics in location list.
 
 # 0.1.3
 

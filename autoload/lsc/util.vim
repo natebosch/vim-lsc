@@ -68,3 +68,22 @@ function! lsc#util#windowsForFile(file_path) abort
   endif
   return copy(bufinfo[0].windows)
 endfunction
+
+" Compare two quickfix or location list items.
+"
+" Items are compared with priority order:
+" filename > line > column
+function! lsc#util#compareQuickFixItems(i1, i2) abort
+  let file_1 = s:QuickFixFilename(a:i1)
+  let file_2 = s:QuickFixFilename(a:i2)
+  if file_1 != file_2 | return file_1 > file_2 ? 1 : -1 | endif
+  if a:i1.lnum != a:i2.lnum | return a:i1.lnum - a:i2.lnum | endif
+  return a:i1.col - a:i2.col
+endfunction
+
+function! s:QuickFixFilename(item) abort
+  if has_key(a:item, 'filename')
+    return a:item.filename
+  endif
+  return bufname(a:item.bufnr)
+endfunction

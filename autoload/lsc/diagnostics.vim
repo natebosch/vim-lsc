@@ -101,6 +101,7 @@ function! lsc#diagnostics#updateLocationList(file_path) abort
       call add(items, s:locationListItem(bufnr, diagnostic))
     endfor
   endfor
+  call sort(items, 'lsc#util#compareQuickFixItems')
   let diagnostics_version = s:DiagnosticsVersion(a:file_path)
   for window_id in lsc#util#windowsForFile(a:file_path)
     if !s:WindowIsCurrent(window_id, a:file_path, diagnostics_version)
