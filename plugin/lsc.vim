@@ -38,7 +38,7 @@ augroup LSC
   " fired such as `:split` and `:lopen` so `WinEnter` is used as a fallback with
   " a block to ensure it only happens once.
   autocmd BufWinEnter * call LSCEnsureCurrentWindowState()
-  autocmd WinEnter * call timer_start(1, 'LSCOnWinEnter')
+  autocmd WinEnter * call timer_start(1, function('<SID>OnWinEnter'))
 
   " Window local state is only correctly maintained for the current tab.
   autocmd TabEnter * call lsc#util#winDo('call LSCEnsureCurrentWindowState()')
@@ -63,7 +63,7 @@ augroup END
 " `expand('%')` and `&filetype` are not correctly set when the event fires. The
 " delay means that in the cases where `BufWinEnter` actually runs this will run
 " later and do nothing.
-function! LSCOnWinEnter(timer) abort
+function! s:OnWinEnter(timer) abort
   if exists('w:lsc_window_initialized')
     return
   endif
