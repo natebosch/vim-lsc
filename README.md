@@ -42,9 +42,9 @@ moving the cursor.
 
 ### Diagnostics
 
-Error, warnings, and hints reported by the server are highlighted in the buffer.
+Errors, warnings, and hints reported by the server are highlighted in the buffer.
 When the cursor is on a line with a diagnostic the message will be displayed. If
-there are multiple diagnostics on a line the one closes to the cursor will be
+there are multiple diagnostics on a line the one closest to the cursor will be
 displayed.
 
 Diagnostics are also reported in the location list for each window which has the
@@ -58,7 +58,12 @@ moves again the options will be provided using vim's built in completion.
 
 Note: By default `completeopt` includes `preview` and completion items include
 documentation in the preview window. Close the window after completion with
-`<c-w><c-z>` or disable with `set completeopt-=preview`.
+`<c-w><c-z>` or disable with `set completeopt-=preview`. To automatically close
+the documentation window use the following:
+
+```viml
+autocmd CompleteDone * silent! pclose
+```
 
 ### Jump to definition
 
