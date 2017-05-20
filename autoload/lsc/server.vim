@@ -37,7 +37,7 @@ function! lsc#server#call(file_type, method, params, ...) abort
   endif
   for command in g:lsc_server_commands[a:file_type]
     if !has_key(s:running_servers, command) ||
-        \ (index(s:initialized_servers, command) > 0 && !override_initiaze)
+        \ (index(s:initialized_servers, command) < 0 && !override_initialize)
       call s:BufferCall(command, message)
       continue
     endif
