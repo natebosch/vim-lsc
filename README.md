@@ -24,7 +24,7 @@ in your `vimrc`. I also recommend a mapping to the function call to jump to
 definition.
 
 ```viml
-let g:lsc_server_commands = {'dart': ['dart_language_server']}
+let g:lsc_server_commands = {'dart': 'dart_language_server'}
 
 nnoremap gd :call lsc#reference#goToDefinition()<CR>
 ```

@@ -1,7 +1,8 @@
-# 0.1.4-dev
+# 0.2.0-dev
 
 - More detail in completion suggestions, doc comment in preview window.
 - Sort diagnostics in location list.
+- Allow only 1 server command per filetype.
 
 # 0.1.3
 

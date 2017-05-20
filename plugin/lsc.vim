@@ -3,26 +3,23 @@
 "endif
 "let g:loaded_lsc = 1
 
-" file_type -> [command]
+" file_type -> command
 if !exists('g:lsc_server_commands')
   let g:lsc_server_commands = {}
 endif
 
-" RegisterLanguagServer {{{3
+" RegisterLanguageServer
 "
 " Registers a command as the server to start the first time a file with type
 " file_type is seen. As long as the server is running it won't be restarted on
 " subsequent appearances of this file type. If the server exits it will be
 " restarted the next time a window or tab is entered with this file type.
 function! RegisterLanguageServer(file_type, command) abort
-  if !has_key(g:lsc_server_commands, a:file_type)
-    let g:lsc_server_commands[a:file_type] = []
+  if has_key(g:lsc_server_commands, a:file_type)
+      \ && a:command != g:lsc_server_commands[a:file_type]
+    throw 'Already have a server command for '.a:file_type
   endif
-  let type_commands = g:lsc_server_commands[a:file_type]
-  if index(type_commands, a:command) >= 0
-    return
-  endif
-  call add(type_commands, a:command)
+  let g:lsc_server_commands[a:file_type] = a:command
 endfunction
 
 augroup LSC

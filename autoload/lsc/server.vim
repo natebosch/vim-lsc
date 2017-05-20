@@ -10,9 +10,7 @@ if !exists('s:initialized')
 endif
 
 function! lsc#server#start(filetype) abort
-  for server_command in g:lsc_server_commands[a:filetype]
-    call <SID>RunCommand(server_command)
-  endfor
+  call <SID>RunCommand(g:lsc_server_commands[a:filetype])
 endfunction
 
 function! lsc#server#kill(file_type) abort
@@ -35,22 +33,17 @@ function! lsc#server#call(file_type, method, params, ...) abort
   else
     let override_initialize = v:false
   endif
-  for command in g:lsc_server_commands[a:file_type]
-    if !has_key(s:running_servers, command) ||
-        \ (index(s:initialized_servers, command) < 0 && !override_initialize)
-      call s:BufferCall(command, message)
-      continue
-    endif
-    let job = s:running_servers[command]
-    if job_status(job) != 'run'
-      continue
-    endif
-    let channel = job_getchannel(job)
-    if ch_status(channel) != 'open'
-      continue
-    endif
-    call ch_sendraw(channel, message)
-  endfor
+  let command = g:lsc_server_commands[a:file_type]
+  if !has_key(s:running_servers, command) ||
+      \ (index(s:initialized_servers, command) < 0 && !override_initialize)
+    call s:BufferCall(command, message)
+    return
+  endif
+  let job = s:running_servers[command]
+  if job_status(job) != 'run' | return | endif
+  let channel = job_getchannel(job)
+  if ch_status(channel) != 'open' | return | endif
+  call ch_sendraw(channel, message)
 endfunction
 
 function! lsc#server#readBuffer(ch_id) abort
