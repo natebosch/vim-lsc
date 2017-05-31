@@ -1,8 +1,8 @@
-# 0.2.0-dev
+# 0.2.0
 
 - More detail in completion suggestions, doc comment in preview window.
 - Sort diagnostics in location list.
-- Allow only 1 server command per filetype.
+- **Breaking**: Allow only 1 server command per filetype.
 - Add commands for GoToDefinition and FindReferences
 - Bug fix: Don't try to read lines from unreadable buffer.
 
