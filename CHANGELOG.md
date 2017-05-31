@@ -4,6 +4,7 @@
 - Sort diagnostics in location list.
 - Allow only 1 server command per filetype.
 - Add commands for GoToDefinition and FindReferences
+- Bug fix: Don't try to read lines from unreadable buffer.
 
 # 0.1.3
 

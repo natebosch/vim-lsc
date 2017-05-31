@@ -69,10 +69,10 @@ function! s:QuickFixItem(location) abort
   let file_path = lsc#util#documentPath(a:location.uri)
   let item.filename = fnamemodify(file_path, ':~:.')
   let bufnr = bufnr(file_path)
-  if bufnr == -1
-    let item.text = readfile(file_path, '', item.lnum)[item.lnum - 1]
-  else
+  if bufnr != -1 && bufloaded(bufnr)
     let item.text = getbufline(bufnr, item.lnum)[0]
+  else
+    let item.text = readfile(file_path, '', item.lnum)[item.lnum - 1]
   endif
   return item
 endfunction
