@@ -20,7 +20,8 @@ function! lsc#complete#textChanged() abort
 endfunction
 
 function! s:typedCharacter() abort
-  if s:isTrigger(s:next_char) || (s:isCompletable() && !s:completion_waiting)
+  if s:isTrigger(s:next_char)
+      \ || (s:isCompletable() && !has_key(s:completion_waiting, &filetype))
     let b:lsc_is_completing = v:true
     call s:startCompletion()
   else
@@ -30,11 +31,27 @@ endfunction
 
 if !exists('s:initialized')
   let s:next_char = ''
-  let s:completion_waiting = v:false
+  " filetype -> ?, used as a Set
+  let s:completion_waiting = {}
   let s:completion_id = 1
   let s:completion_canceled = v:false
   let s:initialized = v:true
 endif
+
+" Clean state associated with a server.
+function! lsc#complete#clean(filetype) abort
+  call s:MarkNotCompleting(a:filetype)
+endfunction
+
+function s:MarkCompleting(filetype) abort
+  let s:completion_waiting[a:filetype] = v:true
+endfunction
+
+function s:MarkNotCompleting(filetype) abort
+  if has_key(s:completion_waiting, a:filetype)
+    unlet s:completion_waiting[a:filetype]
+  endif
+endfunction
 
 " TODO: Make this customizable
 function! s:isTrigger(char) abort
@@ -75,10 +92,12 @@ endfunction
 function! s:startCompletion() abort
   let s:completion_id += 1
   let s:completion_canceled = v:false
-  let s:completion_waiting = v:true
-  let data = {'old_pos': getcurpos(), 'completion_id': s:completion_id}
+  call s:MarkCompleting(&filetype)
+  let data = {'old_pos': getcurpos(),
+      \ 'completion_id': s:completion_id,
+      \ 'filetype': &filetype}
   function data.trigger(completions)
-    let s:completion_waiting = v:false
+    call s:MarkNotCompleting(self.filetype)
     if s:isCompletionValid(self.old_pos, self.completion_id)
       call s:SuggestCompletions(a:completions)
     else

@@ -26,6 +26,13 @@ function! lsc#diagnostics#convert(diagnostic) abort
       \ 'message': a:diagnostic.message, 'type': type}
 endfunction
 
+function! lsc#diagnostics#clean(filetype) abort
+  for buffer in getbufinfo({'loaded': v:true})
+    if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
+    call lsc#diagnostics#setForFile(buffer.name, [])
+  endfor
+endfunction
+
 " Converts between an internal diagnostic and an item for the location list.
 function! s:locationListItem(bufnr, diagnostic) abort
   return {'bufnr': a:bufnr,

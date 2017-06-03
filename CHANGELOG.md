@@ -1,3 +1,7 @@
+# 0.2.1-dev
+
+- Clean up local state when a language server exits.
+
 # 0.2.0
 
 - More detail in completion suggestions, doc comment in preview window.

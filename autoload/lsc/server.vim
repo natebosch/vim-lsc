@@ -87,20 +87,30 @@ function! s:RunCommand(command) abort
       \ params, data.onInitialize, v:true)
 endfunction
 
-" Clean up stored state about a running server.
+" Find the command for `job` and clean up it's state
 function! lsc#server#onExit(job, status) abort
   let channel = job_getchannel(a:job)
   let ch_id = ch_info(channel)['id']
   unlet s:channel_buffers[ch_id]
   for command in keys(s:running_servers)
     if s:running_servers[command] == a:job
-      unlet s:running_servers[command]
-      let initialize = index(s:initialized_servers, command)
-      if initialize > 0
-        call remove(s:initialized_servers, initialize)
-      endif
+      call s:OnCommandExit(command)
       return
     endif
+  endfor
+endfunction
+
+" Clean up stored state about a running server.
+function! s:OnCommandExit(command) abort
+  unlet s:running_servers[a:command]
+  let initialize = index(s:initialized_servers, a:command)
+  if initialize >= 0
+    call remove(s:initialized_servers, initialize)
+  endif
+  for filetype in keys(g:lsc_server_commands)
+    if g:lsc_server_commands[filetype] != a:command | continue | endif
+    call lsc#complete#clean(filetype)
+    call lsc#diagnostics#clean(filetype)
   endfor
 endfunction
 
