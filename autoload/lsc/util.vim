@@ -5,8 +5,13 @@ function! lsc#util#winDo(command) abort
   execute 'keepjumps noautocmd '.current_window.'wincmd w'
 endfunction
 
-function! lsc#util#documentUri() abort
-  return 'file://'.expand('%:p')
+function! lsc#util#documentUri(...) abort
+  if a:0 >= 1
+    let file_path = a:1
+  else
+    let file_path = expand('%:p')
+  endif
+  return 'file://'.file_path
 endfunction
 
 function! lsc#util#documentPath(uri) abort

@@ -1,6 +1,8 @@
 # 0.2.1-dev
 
-- Clean up local state when a language server exits.
+- Handle language server restarts:
+  - Clean up local state when a language server exits.
+  - Call `didOpen` for all open files when a language server (re)starts.
 
 # 0.2.0
 

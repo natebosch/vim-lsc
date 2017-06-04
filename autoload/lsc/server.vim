@@ -10,7 +10,9 @@ if !exists('s:initialized')
 endif
 
 function! lsc#server#start(filetype) abort
-  call <SID>RunCommand(g:lsc_server_commands[a:filetype])
+  if <SID>RunCommand(g:lsc_server_commands[a:filetype])
+    call lsc#file#trackAll(a:filetype)
+  endif
 endfunction
 
 function! lsc#server#kill(file_type) abort
@@ -54,11 +56,13 @@ function! lsc#server#setBuffer(ch_id, message) abort
   let s:channel_buffers[a:ch_id] = a:message
 endfunction
 
+" Start a language server using `command` if it isn't already running.
+"
+" Returns v:true if the server was started, or v:false if it was already
+" running.
 function! s:RunCommand(command) abort
-  if has_key(s:running_servers, a:command)
-    " Server is already running
-    return
-  endif
+  if has_key(s:running_servers, a:command) | return v:false | endif
+
   let job_options = {'in_io': 'pipe', 'in_mode': 'raw',
       \ 'out_io': 'pipe', 'out_mode': 'raw',
       \ 'out_cb': 'lsc#server#channelCallback', 'exit_cb': 'lsc#server#onExit'}
@@ -85,6 +89,7 @@ function! s:RunCommand(command) abort
       \}
   call lsc#server#call(&filetype, 'initialize',
       \ params, data.onInitialize, v:true)
+  return v:true
 endfunction
 
 " Find the command for `job` and clean up it's state
@@ -111,6 +116,7 @@ function! s:OnCommandExit(command) abort
     if g:lsc_server_commands[filetype] != a:command | continue | endif
     call lsc#complete#clean(filetype)
     call lsc#diagnostics#clean(filetype)
+    call lsc#file#clean(filetype)
   endfor
 endfunction
 
