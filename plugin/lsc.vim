@@ -10,6 +10,7 @@ endif
 
 command! LSClientGoToDefinition call lsc#reference#goToDefinition()
 command! LSClientFindReferences call lsc#reference#findReferences()
+command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
 
 " RegisterLanguageServer
 "

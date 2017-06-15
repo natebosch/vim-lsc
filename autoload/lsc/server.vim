@@ -7,17 +7,30 @@ if !exists('s:initialized')
   let s:running_servers = {}
   let s:initialized_servers = []
   let s:initialized = v:true
+  let s:restart_commands = []
 endif
 
 function! lsc#server#start(filetype) abort
-  if <SID>RunCommand(g:lsc_server_commands[a:filetype])
-    call lsc#file#trackAll(a:filetype)
+  call <SID>StartByCommand(g:lsc_server_commands[a:filetype])
+endfunction
+
+function! s:StartByCommand(command) abort
+  if <SID>RunCommand(a:command)
+    for filetype in keys(g:lsc_server_commands)
+      if g:lsc_server_commands[filetype] != a:command | continue | endif
+      call lsc#file#trackAll(filetype)
+    endfor
   endif
 endfunction
 
 function! lsc#server#kill(file_type) abort
   call lsc#server#call(a:file_type, 'shutdown', '')
   call lsc#server#call(a:file_type, 'exit', '')
+endfunction
+
+function! lsc#server#restart() abort
+  call add(s:restart_commands, g:lsc_server_commands[&filetype])
+  call lsc#server#kill(&filetype)
 endfunction
 
 " Call a method on the language server for `file_type`.
@@ -118,6 +131,11 @@ function! s:OnCommandExit(command) abort
     call lsc#diagnostics#clean(filetype)
     call lsc#file#clean(filetype)
   endfor
+  let restart = index(s:restart_commands, a:command)
+  if restart >= 0
+    call remove(s:restart_commands, restart)
+    call <SID>StartByCommand(a:command)
+  endif
 endfunction
 
 " Append to the buffer for the channel and try to consume a message.

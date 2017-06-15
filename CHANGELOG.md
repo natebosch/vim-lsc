@@ -1,8 +1,9 @@
-# 0.2.1-dev
+# 0.2.1
 
 - Handle language server restarts:
   - Clean up local state when a language server exits.
   - Call `didOpen` for all open files when a language server (re)starts.
+- Add LSClientRestart command to restart the server for the current filetype.
 
 # 0.2.0
 
