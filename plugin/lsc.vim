@@ -7,6 +7,9 @@
 if !exists('g:lsc_server_commands')
   let g:lsc_server_commands = {}
 endif
+if !exists('g:lsc_enable_autocomplete')
+  let g:lsc_enable_autocomplete = v:true
+endif
 
 command! LSClientGoToDefinition call lsc#reference#goToDefinition()
 command! LSClientFindReferences call lsc#reference#findReferences()

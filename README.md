@@ -30,6 +30,13 @@ nnoremap gd :LSClientGoToDefinition<CR>
 nnoremap gr :LSClientFindReferences<CR>
 ```
 
+To disable autocomplete in favor of manual completion also add
+
+```viml
+let g:lsc_enable_autocomplete = v:false
+set completefunc=lsc#complete#complete
+```
+
 ## Features
 
 The protocol does not require that every language server supports every feature
@@ -64,6 +71,10 @@ the documentation window use the following:
 ```viml
 autocmd CompleteDone * silent! pclose
 ```
+
+Disable autocomplete with `let g:lsc_enable_autocomplete = v:false`. When using
+manual completion the `completefunc` may have no results if completion is
+requested before the server responds with suggestions.
 
 ### Jump to definition
 

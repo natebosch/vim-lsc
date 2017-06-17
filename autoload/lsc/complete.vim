@@ -61,6 +61,7 @@ endfunction
 augroup LscCompletion
   autocmd!
   autocmd CompleteDone * let b:lsc_is_completing = v:false
+      \ | silent! unlet b:lsc_completion
 augroup END
 
 " TODO: Make this customizable
@@ -96,10 +97,14 @@ function! s:startCompletion() abort
   let data = {'old_pos': getcurpos(),
       \ 'completion_id': s:completion_id,
       \ 'filetype': &filetype}
-  function data.trigger(completions)
+  function data.trigger(completion)
     call s:MarkNotCompleting(self.filetype)
     if s:isCompletionValid(self.old_pos, self.completion_id)
-      call s:SuggestCompletions(a:completions)
+      if (g:lsc_enable_autocomplete)
+        call s:SuggestCompletions(a:completion)
+      else
+        let b:lsc_completion = a:completion
+      endif
     else
       let b:lsc_is_completing = v:false
     endif
@@ -118,6 +123,16 @@ function! s:SuggestCompletions(completion) abort
   setl completeopt-=longest
   setl completeopt+=menu,menuone,noinsert,noselect
   call complete(start, suggestions)
+endfunction
+
+function! lsc#complete#complete(findstart, base) abort
+  if !exists('b:lsc_completion') | return -1 | endif
+  if a:findstart
+    if len(b:lsc_completion.items) == 0 | return -3 | endif
+    return  s:FindStart(b:lsc_completion) - 1
+  else
+    return s:FindSuggestions(a:base, b:lsc_completion)
+  endif
 endfunction
 
 function! s:FindStart(completion) abort
