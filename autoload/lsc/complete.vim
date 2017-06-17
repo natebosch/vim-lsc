@@ -113,7 +113,7 @@ function! s:SuggestCompletions(completion) abort
   let suggestions = a:completion.items
   setl completeopt-=longest
   setl completeopt+=menu,menuone,noinsert,noselect
-  call complete(start + 1, suggestions)
+  call complete(start, suggestions)
 endfunction
 
 function! s:FindStart(completion) abort
@@ -130,7 +130,7 @@ function! s:GuessCompletionStart()
   while search > 0
     let char = line[search]
     if char !~ '\w'
-      return search + 1
+      return search + 2
     endif
     let search -= 1
   endwhile

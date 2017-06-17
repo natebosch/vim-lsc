@@ -1,3 +1,8 @@
+# 0.2.2-dev
+
+- Bug fix: Don't leave an extra character when completing after typing 3
+  characters.
+
 # 0.2.1
 
 - Handle language server restarts:
