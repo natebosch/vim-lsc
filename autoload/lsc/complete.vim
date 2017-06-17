@@ -111,6 +111,10 @@ function! s:SuggestCompletions(completion) abort
   if mode() != 'i' || len(a:completion.items) == 0 | return | endif
   let start = s:FindStart(a:completion)
   let suggestions = a:completion.items
+  if start != col('.')
+    let base = getline('.')[start - 1:col('.') - 2]
+    let suggestions = s:FindSuggestions(base, a:completion)
+  endif
   setl completeopt-=longest
   setl completeopt+=menu,menuone,noinsert,noselect
   call complete(start, suggestions)
@@ -136,6 +140,18 @@ function! s:GuessCompletionStart()
   endwhile
   " TODO: ??? completion at the beginning of the line?
   return 0
+endfunction
+
+function! s:FindSuggestions(base, completion) abort
+  let items = copy(a:completion.items)
+  if len(a:base) == 0 | return items | endif
+  return filter(items, '<SID>MatchSuggestion(a:base, v:val)')
+endfunction
+
+function! s:MatchSuggestion(base, suggestion) abort
+  let word = a:suggestion
+  if type(word) == v:t_dict | let word = word.word | endif
+  return word =~? a:base
 endfunction
 
 " Flush file contents and call the server to request completions for the current

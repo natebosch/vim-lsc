@@ -1,7 +1,9 @@
 # 0.2.2-dev
 
-- Bug fix: Don't leave an extra character when completing after typing 3
-  characters.
+- Completion Improvements:
+  - Bug fix: Don't leave an extra character when completing after typing 3
+    characters.
+  - Filter completions after typing 3 characters.
 
 # 0.2.1
 
