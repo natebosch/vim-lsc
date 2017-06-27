@@ -3,8 +3,8 @@
 " characters in `s:next_char` and use CursorMovedI to act on the change.
 "
 " Every typed character can potentially start a completion request:
-" - "Trigger" characters (.) always start a completion request when they are
-"   typed
+" - "Trigger" characters (as specified during initialization) always start a
+"   completion request when they are typed
 " - Characters that match '\w' start a completion in words of at least length 3
 
 function! lsc#complete#insertCharPre() abort
@@ -36,6 +36,8 @@ if !exists('s:initialized')
   let s:completion_id = 1
   let s:completion_canceled = v:false
   let s:initialized = v:true
+  " filetype -> [trigger characters]
+  let s:trigger_characters = {}
 endif
 
 " Clean state associated with a server.
@@ -53,9 +55,13 @@ function s:MarkNotCompleting(filetype) abort
   endif
 endfunction
 
-" TODO: Make this customizable
+function! lsc#complete#setTriggers(filetype, triggers) abort
+  let s:trigger_characters[a:filetype] = a:triggers
+endfunction
+
 function! s:isTrigger(char) abort
-  return a:char == '.'
+  if !has_key(s:trigger_characters, &filetype) | return v:false | endif
+  return index(s:trigger_characters[&filetype], a:char) >= 0
 endfunction
 
 augroup LscCompletion

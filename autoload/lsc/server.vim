@@ -87,6 +87,19 @@ function! s:RunCommand(command) abort
   let data = {'command': a:command, 'channel': channel}
   function data.onInitialize(params) abort
     " TODO: Check capabilities?
+    if has_key(a:params, 'capabilities')
+      let capabilities = a:params['capabilities']
+      if has_key(capabilities, 'completionProvider')
+        let completion_provider = capabilities['completionProvider']
+        if has_key(completion_provider, 'triggerCharacters')
+          let trigger_characters = completion_provider['triggerCharacters']
+          for filetype in keys(g:lsc_server_commands)
+            if g:lsc_server_commands[filetype] != self.command | continue | endif
+            call lsc#complete#setTriggers(filetype, trigger_characters)
+          endfor
+        endif
+      endif
+    endif
     call add(s:initialized_servers, self.command)
     if has_key(s:buffered_calls, self.command)
       for buffered_call in s:buffered_calls[self.command]
