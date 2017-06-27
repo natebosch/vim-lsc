@@ -5,6 +5,8 @@
     characters.
   - Filter completions after typing 3 characters.
   - Add configuration to disable autocomplete.
+  - Bug Fix: Don't block future completion attempts after an empty suggestion
+    list.
 - Bug Fix: Send and allow a space before header content.
 
 # 0.2.1

@@ -113,7 +113,10 @@ function! s:startCompletion() abort
 endfunction
 
 function! s:SuggestCompletions(completion) abort
-  if mode() != 'i' || len(a:completion.items) == 0 | return | endif
+  if mode() != 'i' || len(a:completion.items) == 0
+    let b:lsc_is_completing = v:false
+    return
+  endif
   let start = s:FindStart(a:completion)
   let suggestions = a:completion.items
   if start != col('.')
