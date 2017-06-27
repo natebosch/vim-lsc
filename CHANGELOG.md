@@ -5,6 +5,7 @@
     characters.
   - Filter completions after typing 3 characters.
   - Add configuration to disable autocomplete.
+- Bug Fix: Send and allow a space before header content.
 
 # 0.2.1
 

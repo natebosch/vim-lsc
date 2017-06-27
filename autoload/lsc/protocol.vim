@@ -17,7 +17,7 @@ function! lsc#protocol#format(method, params) abort
   endif
   let encoded = json_encode(message)
   let length = len(encoded)
-  return [s:lsc_last_id, "Content-Length:".length."\r\n\r\n".encoded]
+  return [s:lsc_last_id, "Content-Length: ".length."\r\n\r\n".encoded]
 endfunction
 
 " Reads from the buffer for ch_id and processes the message. If multiple
@@ -29,7 +29,7 @@ function! lsc#protocol#consumeMessage(ch_id) abort
   if end_of_header < 0
     return
   endif
-  let headers = split(message[:end_of_header], "\r\n")
+  let headers = split(message[:end_of_header - 1], "\r\n")
   let message_start = end_of_header + len("\r\n\r\n")
   let message_end = message_start + <SID>ContentLength(headers)
   if len(message) < message_end
@@ -39,11 +39,11 @@ function! lsc#protocol#consumeMessage(ch_id) abort
   let payload = message[message_start:message_end-1]
   try
     let content = json_decode(payload)
+    if type(content) != v:t_dict | throw 1 | endif
+    call lsc#dispatch#message(content)
   catch
-    echom 'Could not decode message: '.payload
-    let content = {}
+    call lsc#util#error('Could not decode message: '.payload)
   endtry
-  call lsc#dispatch#message(content)
   let remaining_message = message[message_end:]
   call lsc#server#setBuffer(a:ch_id, remaining_message)
   if remaining_message != ''
@@ -56,7 +56,9 @@ function! s:ContentLength(headers) abort
   for header in a:headers
     if header =~? '^Content-Length'
       let parts = split(header, ':')
-      return parts[1] + 0
+      let length = parts[1]
+      if length[0] == ' ' | let length = length[1:] | endif
+      return length + 0
     endif
   endfor
   return -1
