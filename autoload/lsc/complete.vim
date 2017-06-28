@@ -236,7 +236,7 @@ function! s:CompletionItem(completion_item) abort
     let item.kind = s:CompletionItemKind(a:completion_item.kind)
   endif
   if has_key(a:completion_item, 'detail') && a:completion_item.detail != v:null
-    let item.menu = a:completion_item.detail
+    let item.menu = split(a:completion_item.detail, "\n")[0]
   endif
   if has_key(a:completion_item, 'documentation')
       \ && a:completion_item.documentation != v:null

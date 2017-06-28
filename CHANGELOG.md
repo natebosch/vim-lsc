@@ -1,4 +1,4 @@
-# 0.2.2-dev
+# 0.2.2
 
 - Completion Improvements:
   - Bug fix: Don't leave an extra character when completing after typing 3
@@ -9,6 +9,7 @@
     list.
   - Use the `triggerCharacters` suggested by the server instead of `.`
     exclusively.
+  - Use only the first line of suggestion detail in completion menu
 - Bug Fix: Send and allow a space before header content.
 
 # 0.2.1
