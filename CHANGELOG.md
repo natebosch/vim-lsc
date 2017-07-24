@@ -1,3 +1,7 @@
+# 0.2.3-dev
+
+- `redraw` after jumping to definition in another file.
+
 # 0.2.2
 
 - Completion Improvements:

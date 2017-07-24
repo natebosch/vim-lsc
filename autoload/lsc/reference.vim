@@ -93,6 +93,7 @@ function! s:goTo(file, line, character) abort
     exec 'edit '.relative_path
     " 'edit' already left a jump
     call cursor(a:line, a:character)
+    redraw
   else
     " Move with 'G' to ensure a jump is left
     exec 'normal! '.a:line.'G'.a:character.'|'
