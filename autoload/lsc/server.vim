@@ -108,10 +108,16 @@ function! s:RunCommand(command) abort
       unlet s:buffered_calls[self.command]
     endif
   endfunction
+  if exists('g:lsc_trace_level') &&
+      \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
+    let trace_level = g:lsc_trace_level
+  else
+    let trace_level = 'off'
+  endif
   let params = {'processId': getpid(),
       \ 'rootUri': 'file://'.getcwd(),
       \ 'capabilities': s:client_capabilities,
-      \ 'trace': 'off'
+      \ 'trace': trace_level
       \}
   call lsc#server#call(&filetype, 'initialize',
       \ params, data.onInitialize, v:true)
