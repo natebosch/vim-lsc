@@ -69,6 +69,10 @@ function! lsc#server#setBuffer(ch_id, message) abort
   let s:channel_buffers[a:ch_id] = a:message
 endfunction
 
+function! lsc#server#getBuffers() abort
+  return s:channel_buffers
+endfunction
+
 " Start a language server using `command` if it isn't already running.
 "
 " Returns v:true if the server was started, or v:false if it was already
