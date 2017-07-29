@@ -20,9 +20,13 @@ function! lsc#protocol#format(method, params) abort
   return [s:lsc_last_id, "Content-Length: ".length."\r\n\r\n".encoded]
 endfunction
 
-" Reads from the buffer for ch_id and processes the message. If multiple
-" messages are available consumes the first and then recurses. Does nothing if
-" a complete message is not available.
+" Reads from the buffer for ch_id and processes the message. Continues to
+" process messages until the buffer is empty. Does nothing if a complete message
+" is not available.
+function! lsc#protocol#consumeMessage(ch_id) abort
+  while s:consumeMessage(a:ch_id) | endwhile
+endfunction
+
 function! lsc#protocol#consumeMessage(ch_id) abort
   let message = lsc#server#readBuffer(a:ch_id)
   let end_of_header = stridx(message, "\r\n\r\n")
@@ -46,9 +50,7 @@ function! lsc#protocol#consumeMessage(ch_id) abort
   if exists('l:content') | call lsc#dispatch#message(content) | endif
   let remaining_message = message[message_end:]
   call lsc#server#setBuffer(a:ch_id, remaining_message)
-  if remaining_message != ''
-    call lsc#protocol#consumeMessage(a:ch_id)
-  endif
+  return remaining_message != ''
 endfunction
 
 " Finds the header with 'Content-Length' and returns the integer value

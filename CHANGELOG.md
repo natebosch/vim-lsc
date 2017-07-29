@@ -3,6 +3,8 @@
 - `redraw` after jumping to definition in another file.
 - Allow configuring trace level with `g:lsc_trace_level`. May be one of 'off',
   'messages', or 'verbose'. Defaults to 'off'.
+- Bug fix: Avoid deep stack during large spikes of messages. Switch from
+  recursion to a while loop.
 
 # 0.2.2
 
