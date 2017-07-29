@@ -27,18 +27,18 @@ function! lsc#protocol#consumeMessage(ch_id) abort
   while s:consumeMessage(a:ch_id) | endwhile
 endfunction
 
-function! lsc#protocol#consumeMessage(ch_id) abort
+function! s:consumeMessage(ch_id) abort
   let message = lsc#server#readBuffer(a:ch_id)
   let end_of_header = stridx(message, "\r\n\r\n")
   if end_of_header < 0
-    return
+    return v:false
   endif
   let headers = split(message[:end_of_header - 1], "\r\n")
   let message_start = end_of_header + len("\r\n\r\n")
   let message_end = message_start + <SID>ContentLength(headers)
   if len(message) < message_end
     " Wait for the rest of the message to get buffered
-    return
+    return v:false
   endif
   let payload = message[message_start:message_end-1]
   try
