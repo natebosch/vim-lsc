@@ -5,6 +5,8 @@
   'messages', or 'verbose'. Defaults to 'off'.
 - Bug fix: Avoid deep stack during large spikes of messages. Switch from
   recursion to a while loop.
+- Add `LSClientDisable`, `LSClientEnable` to disable or re-enable the client
+  for the current filetype during a session.
 
 # 0.2.2
 

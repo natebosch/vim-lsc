@@ -10,10 +10,15 @@ endif
 if !exists('g:lsc_enable_autocomplete')
   let g:lsc_enable_autocomplete = v:true
 endif
+if !exists('s:disabled_filetypes')
+  let s:disabled_filetypes = {}
+endif
 
 command! LSClientGoToDefinition call lsc#reference#goToDefinition()
 command! LSClientFindReferences call lsc#reference#findReferences()
 command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
+command! LSClientDisable call <SID>Disable()
+command! LSClientEnable call <SID>Enable()
 
 " RegisterLanguageServer
 "
@@ -93,8 +98,19 @@ endfunction
 " Run `function` if LSC is enabled for the current filetype.
 function! s:IfEnabled(function) abort
   if has_key(g:lsc_server_commands, &filetype)
+      \ && !has_key(s:disabled_filetypes, &filetype)
     exec 'call '.a:function.'()'
   endif
+endfunction
+
+function! s:Disable() abort
+  let s:disabled_filetypes[&filetype] = v:true
+  call lsc#server#kill(&filetype)
+endfunction
+
+function! s:Enable() abort
+  silent! unlet s:disabled_filetypes[&filetype]
+  call lsc#server#start(&filetype)
 endfunction
 
 " Exit all open language servers.
