@@ -1,6 +1,8 @@
 # 0.2.3-dev
 
 - `redraw` after jumping to definition in another file.
+- Allow configuring trace level with `g:lsc_trace_level`. May be one of 'off',
+  'messages', or 'verbose'. Defaults to 'off'.
 
 # 0.2.2
 
