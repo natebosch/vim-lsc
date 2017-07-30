@@ -99,3 +99,19 @@ function! s:goTo(file, line, character) abort
     exec 'normal! '.a:line.'G'.a:character.'|'
   endif
 endfunction
+
+function! lsc#reference#hover() abort
+  call lsc#file#flushChanges()
+  let params = s:TextDocumentPositionParams()
+  call lsc#server#call(&filetype, 'textDocument/hover',
+      \ params, function('<SID>showHover'))
+endfunction
+
+function! s:showHover(result) abort
+  if empty(a:result) || empty(a:result.contents)
+    echom 'No hover information'
+    return
+  endif
+  let lines = split(a:result.contents, "\n")
+  call lsc#util#displayAsPreview(lines)
+endfunction

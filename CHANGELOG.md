@@ -7,6 +7,7 @@
   recursion to a while loop.
 - Add `LSClientDisable`, `LSClientEnable` to disable or re-enable the client
   for the current filetype during a session.
+- Add `LSClientShowHover` to display hover information in a preview window.
 
 # 0.2.2
 

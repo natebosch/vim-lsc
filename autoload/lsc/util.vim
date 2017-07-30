@@ -92,3 +92,22 @@ function! s:QuickFixFilename(item) abort
   endif
   return bufname(a:item.bufnr)
 endfunction
+
+" Populate a hidden buffer with [lines] and show it as a preview window.
+function! lsc#util#displayAsPreview(lines) abort
+  let view = winsaveview()
+  let alternate=@#
+  silent! pclose
+  sp __lsc_preview__
+  execute 'resize '.min([len(a:lines), &previewheight])
+  set previewwindow
+  setlocal bufhidden=hide
+  setlocal nobuflisted
+  setlocal buftype=nofile
+  setlocal noswapfile
+  %d
+  call setline(1, a:lines)
+  execute "normal \<c-w>p"
+  call winrestview(view)
+  let @#=alternate
+endfunction

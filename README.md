@@ -86,3 +86,8 @@ the response will be ignored.
 
 While the cursor is on any identifier call `LSClientFindReferences` to populate
 the quickfix list with usage locations.
+
+### Hover
+
+While the cursor is on any identifier call `LSClientShowHover` to request hover
+text and show it in a preview window.

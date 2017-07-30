@@ -16,6 +16,7 @@ endif
 
 command! LSClientGoToDefinition call lsc#reference#goToDefinition()
 command! LSClientFindReferences call lsc#reference#findReferences()
+command! LSClientShowHover call lsc#reference#hover()
 command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
 command! LSClientDisable call <SID>Disable()
 command! LSClientEnable call <SID>Enable()
