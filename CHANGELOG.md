@@ -1,3 +1,7 @@
+# 0.2.4-dev
+
+- Bug Fix: Handle completion items with empty detail.
+
 # 0.2.3
 
 - `redraw` after jumping to definition in another file.
