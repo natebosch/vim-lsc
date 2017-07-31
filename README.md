@@ -20,22 +20,39 @@ Install with your method of choice. If you don't have a preference check out
 ## Configuration
 
 Map a filetype to the command that starts the language server for that filetype
-in your `vimrc`. I also recommend mapping shortcuts to the go to definition and
-find references commands.
+in your `vimrc`.
 
 ```viml
 let g:lsc_server_commands = {'dart': 'dart_language_server'}
-
-nnoremap gd :LSClientGoToDefinition<CR>
-nnoremap gr :LSClientFindReferences<CR>
 ```
 
 To disable autocomplete in favor of manual completion also add
 
 ```viml
 let g:lsc_enable_autocomplete = v:false
-set completefunc=lsc#complete#complete
 ```
+
+Most interactive features are triggered by commands, you can map keys to these
+commands, or use `g:lsc_auto_map` to have them automatically mapped for the
+buffers which have a language server enabled. You can use the default mappings
+by setting it to `v:true`, or specify your own mappings in a dict. The
+`'Complete'` key will set a completion function only if
+`g:lsc_enable_autocomplete` is false.
+
+```viml
+let g:lsc_auto_map = v:true " Use defaults
+" ... or set only the keys you want mapped, defaults are:
+let g:lsc_auto_map = {
+    \ 'GoToDefinition': '<C-]>',
+    \ 'FindReferences': 'gr',
+    \ 'ShowHover': 'K',
+    \ 'Completion': 'completefunc',
+    \}
+```
+
+During the initialization call LSP supports a `trace` argument which configures
+logging on the server. Set this with `g:lsc_trace_level`. Valid values are
+`'off'`, `'messages'`, or `'verbose'`. Defaults to `'off'`.
 
 ## Features
 
@@ -46,6 +63,12 @@ All communication with the server is asynchronous and will not block the editor.
 For requests that trigger an action the response might be silently ignored if it
 can no longer be used - you can abort most operations that are too slow by
 moving the cursor.
+
+The client can be temporarily disabled for a session with `LSClientDisable` and
+re-enabled with `LSClientEnable`. At any time the server can be exited and
+restarted with `LSClientRestartServer` - this sends a request for the server to
+exit rather than kill it's process so a completely unresponsive server should be
+killed manually instead.
 
 ### Diagnostics
 
@@ -59,9 +82,10 @@ buffer open.
 
 ### Autocomplete
 
-When more than 3 word characters or a '.' are typed a request for autocomplete
-suggestions is sent to the server. If the server responds before the cursor
-moves again the options will be provided using vim's built in completion.
+When more than 3 word characters or a trigger character are typed a request for
+autocomplete suggestions is sent to the server. If the server responds before
+the cursor moves again the options will be provided using vim's built in
+completion.
 
 Note: By default `completeopt` includes `preview` and completion items include
 documentation in the preview window. Close the window after completion with
@@ -78,16 +102,16 @@ requested before the server responds with suggestions.
 
 ### Jump to definition
 
-While the cursor is on any identifier call `LSClientGoToDefinition` to jump to
-the location of the definition. If the cursor moves before the server responds
-the response will be ignored.
+While the cursor is on any identifier call `LSClientGoToDefinition` (`<C-]>` if
+using the default mappings) to jump to the location of the definition. If the
+cursor moves before the server responds the response will be ignored.
 
 ### Find references
 
-While the cursor is on any identifier call `LSClientFindReferences` to populate
-the quickfix list with usage locations.
+While the cursor is on any identifier call `LSClientFindReferences` (`gr` if
+using the default mappings) to populate the quickfix list with usage locations.
 
 ### Hover
 
-While the cursor is on any identifier call `LSClientShowHover` to request hover
-text and show it in a preview window.
+While the cursor is on any identifier call `LSClientShowHover` (`K` if using the
+default mappings) to request hover text and show it in a preview window.

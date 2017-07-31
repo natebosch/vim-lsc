@@ -1,4 +1,4 @@
-# 0.2.3-dev
+# 0.2.3
 
 - `redraw` after jumping to definition in another file.
 - Allow configuring trace level with `g:lsc_trace_level`. May be one of 'off',
@@ -8,6 +8,8 @@
 - Add `LSClientDisable`, `LSClientEnable` to disable or re-enable the client
   for the current filetype during a session.
 - Add `LSClientShowHover` to display hover information in a preview window.
+- Add support for automatically mapping keys only in buffers for tracked
+  filetypes.
 
 # 0.2.2
 

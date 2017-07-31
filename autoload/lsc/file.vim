@@ -16,6 +16,7 @@ endfunction
 " the 'didOpen' message.
 function! lsc#file#onOpen() abort
   call lsc#server#start(&filetype)
+  call lsc#config#mapKeys()
   call s:DidOpen(expand('%:p'))
 endfunction
 
