@@ -1,6 +1,8 @@
 # 0.2.4-dev
 
 - Bug Fix: Handle completion items with empty detail.
+- `LSClientShowHover` now reuses the window it already opened rather than
+  closing it and splitting again to allow for maintaining layout.
 
 # 0.2.3
 

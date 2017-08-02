@@ -93,21 +93,39 @@ function! s:QuickFixFilename(item) abort
   return bufname(a:item.bufnr)
 endfunction
 
-" Populate a hidden buffer with [lines] and show it as a preview window.
+" Populate a buffer with [lines] and show it as a preview window.
+"
+" If the __lsc_preview__ buffer was already showing, reuse it's window,
+" otherwise split a window with a max height of `&previewheight`.
 function! lsc#util#displayAsPreview(lines) abort
   let view = winsaveview()
   let alternate=@#
-  silent! pclose
-  sp __lsc_preview__
-  execute 'resize '.min([len(a:lines), &previewheight])
+  call s:createOrJumpToPreview(len(a:lines))
+  %d
+  call setline(1, a:lines)
+  wincmd p
+  call winrestview(view)
+  let @#=alternate
+endfunction
+
+function! s:createOrJumpToPreview(line_count) abort
+  let want_height = min([a:line_count, &previewheight])
+  let windows = range(1, winnr('$'))
+  call filter(windows, 'getwinvar(v:val, "&previewwindow") == 1')
+  if len(windows) > 0
+    execute string(windows[0]).' wincmd W'
+    edit __lsc_preview__
+    if winheight(windows[0]) < want_height
+      execute 'resize '.want_height
+    endif
+  else
+    sp __lsc_preview__
+    execute 'resize '.want_height
+  endif
   set previewwindow
+  set winfixheight
   setlocal bufhidden=hide
   setlocal nobuflisted
   setlocal buftype=nofile
   setlocal noswapfile
-  %d
-  call setline(1, a:lines)
-  execute "normal \<c-w>p"
-  call winrestview(view)
-  let @#=alternate
 endfunction
