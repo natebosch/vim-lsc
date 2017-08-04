@@ -13,6 +13,7 @@ server.
 https://github.com/natebosch/vim-lsc
 
 SETUP                                           *lsc-setup*
+                                                *g:lscc_server_commands*
 
 There is no install step for vim-lsc. Configure the filetypes that are tracked
 by installed language servers in the variable "g:lsc_server_commands". Each
@@ -58,7 +59,7 @@ The new hover information.
 
 If the preview window is not visible it will |split| the window and size it no
 bigger than |previewheight|. Override the direction of the split by setting
-"g:lsc_preview_split_direction" to either |above| or |below|.
+|g:lsc_preview_split_direction| to either |above| or |below|.
 
                                                 *:LSClientRestartServer*
 Sends requests to the server for the current filetype to "shutdown" and
@@ -76,11 +77,13 @@ tracking for the current filetype.
 CONFIGURATION                                   *lsc-configure*
 
                                                 *lsc-configure-trace*
+                                                *g:lsc_trace_level*
 Set the "trace" field sent to the server during initialization using the
 "g:lsc_trace_level". Valid values are "off", "messages", or "verbose".
 Defaults to "off". Generally this field configures logging in the server.
 
                                                 *lsc-configure-complete*
+                                                *g:lsc_enable_autocomplete*
 To disable the built-in autocompletion set "g:lsc_enable_autocomplete" to
 "v:false". Requests for completions will still be sent to the server, but the
 response will not open the popupmenu or complete words. Set |completefunc| or
@@ -101,6 +104,7 @@ automatically close the preview window after completion use the following:
 <
 
                                                 *lsc-configure-hover*
+                                                *g:lsc_preview_split_direction*
 By default the `:LSClientShowHover` command splits the window following
 the setting |splitbelow|. Override the direction that the hover preview splits
 with "g:lsc_preview_split_direction" set to either |above| or |below|. This
@@ -118,15 +122,16 @@ groups. For example:
     highlight link lscDiagnosticWarning SpellCap
 <
 
+                                                *lsc-configure-key-map*
                                                 *g:lsc_auto_map*
 If you want to overload keymaps to operate specifically when vim-lsc is
 enabled for a buffer set the variable "g:lsc_auto_map". Set the value to
-"v:true" to use the defaults |vim-lsc-default-map|, or set to a dict to use
+"v:true" to use the defaults |lsc-default-map|, or set to a dict to use
 other keys, or to only map a subset of the commands. The available keys
 correspond to command names - "GoToDefinition", "FindReferences", and
 "ShowHover". Additionally the key "Completion" can choose a completefunc to
 set to the vim-lsc completion function, this will only have effect if
-"g:lsc_enable_autocomplete" is "v:false".
+|g:lsc_enable_autocomplete| is "v:false".
 
                                                 *lsc-default-map*
 The default mapping for keys, if you've opted in to "g:lsc_auto_map" are:
@@ -144,7 +149,7 @@ If you are having difficulty with integration with a particular language
 server, you can spy into the communication with the server by wrapping it in a
 script to log stdin and stdout. For example if the server is normally started
 with "my_language_server", write a script like "my_languag_server_logged.sh"
-and point "g:lsc_server_commands" at this script.
+and point |g:lsc_server_commands| at this script.
 >
     #!/bin/bash
     tee in.log | my_language_server | tee out.log
