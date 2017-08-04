@@ -3,6 +3,8 @@
 - Bug Fix: Handle completion items with empty detail.
 - `LSClientShowHover` now reuses the window it already opened rather than
   closing it and splitting again to allow for maintaining layout.
+- Add optional configuration `g:lsc_preview_split_direction` to override
+  `splitbelow`.
 
 # 0.2.3
 

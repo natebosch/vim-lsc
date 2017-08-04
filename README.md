@@ -115,3 +115,5 @@ using the default mappings) to populate the quickfix list with usage locations.
 
 While the cursor is on any identifier call `LSClientShowHover` (`K` if using the
 default mappings) to request hover text and show it in a preview window.
+Override the direction of the split by setting `g:lsc_preview_split_direction`
+to either `'below'` or `'above'`.

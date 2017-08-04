@@ -119,8 +119,12 @@ function! s:createOrJumpToPreview(line_count) abort
       execute 'resize '.want_height
     endif
   else
-    sp __lsc_preview__
-    execute 'resize '.want_height
+    if exists('g:lsc_preview_split_direction')
+      let direction = g:lsc_preview_split_direction
+    else
+      let direction = ''
+    endif
+    execute direction.' '.string(want_height).'split __lsc_preview__'
   endif
   set previewwindow
   set winfixheight
