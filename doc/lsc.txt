@@ -146,7 +146,7 @@ AUTOCMDS                                        *lsc-autocmds*
 
                                                 *autocmd-LSCAutocomplete*
 Fires before triggering completion in auto-complete mode. Does not fire if
-|g:lsc_enable_auto_complete| is false. For example, if windows normally split
+|g:lsc_enable_autocomplete| is false. For example, if windows normally split
 above (set |nosplitbelow|) but the completion-menu preview window should split
 below:
 >
