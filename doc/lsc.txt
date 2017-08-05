@@ -21,15 +21,14 @@ value in this dict should be a string which corresponds to an executable in
 your "$PATH". If multiple filetypes are tracked by the same server they should
 be entered as separate keys with the same value. For example:
 >
-    let g:lsc_server_commands = {
-        \ 'dart': 'dart_language_server',
-        \ 'html': 'dart_language_server',
-        \}
+ let g:lsc_server_commands = {
+     \ 'dart': 'dart_language_server',
+     \ 'html': 'dart_language_server',
+     \}
 <
 
 lsc will communicate with each executable over stdin/stdout following the
 RPC protocol as specified.
->
 
 COMMANDS                                        *lsc-commands*
 
@@ -100,7 +99,7 @@ window to show more details for selected completion items. Close the window
 after completion with CTRL_W-z or disable with "set completeopt-=preview". To
 automatically close the preview window after completion use the following:
 >
-    autocmd CompleteDone * silent! pclose
+ autocmd CompleteDone * silent! pclose
 <
 
                                                 *lsc-configure-hover*
@@ -118,8 +117,8 @@ default "lscDiagnosticError" is linked to |hl-Error|, and the rest are linked
 to |hl-SpellBad|. Override this by setting or linking any of these highlight
 groups. For example:
 >
-    highlight lscDiagnosticError ctermbg=160
-    highlight link lscDiagnosticWarning SpellCap
+ highlight lscDiagnosticError ctermbg=160
+ highlight link lscDiagnosticWarning SpellCap
 <
 
                                                 *lsc-configure-key-map*
@@ -143,6 +142,27 @@ K                       `:LSClientShowHover`
 If "g:lsc_enable_autocomplete" is set to "v:false" then |completefunc| will be
 set to the vim-lsc completion function.
 
+AUTOCMDS                                        *lsc-autocmds*
+
+                                                *autocmd-LSCAutocomplete*
+Fires before triggering completion in auto-complete mode. Does not fire if
+|g:lsc_enable_auto_complete| is false. For example, if windows normally split
+above (set |nosplitbelow|) but the completion-menu preview window should split
+below:
+>
+ augroup completsplitbelow
+   autocmd User LSCAutocomplete setlocal splitbelow
+   autocmd CompleteDone * setlocal nosplitbelow
+ augroup END
+<
+                                                *autocmd-LSCShowPreview*
+Fires when LSC opens a new preview window during `:LSClientShowHover`. Does
+not fire if an exist preview window was reused. For example if the hover
+information should display full-height, 80 columns wide, at the left of the
+screen instead of as a horizontal split:
+>
+ autocmd User LSCShowPreview wincmd H | vertical resize 80
+<
 DEBUGGING TIPS                                  *lsc-debugging*
 
 If you are having difficulty with integration with a particular language
@@ -151,8 +171,8 @@ script to log stdin and stdout. For example if the server is normally started
 with "my_language_server", write a script like "my_languag_server_logged.sh"
 and point |g:lsc_server_commands| at this script.
 >
-    #!/bin/bash
-    tee in.log | my_language_server | tee out.log
+ #!/bin/bash
+ tee in.log | my_language_server | tee out.log
 <
 If a language server is following the protocol but does not work with vim-lsc,
 file an issue at https://github.com/natebosch/vim-lsc/issues

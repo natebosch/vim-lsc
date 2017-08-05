@@ -1,3 +1,8 @@
+# 0.2.5-dev
+
+- Add autocmds `LSCAutocomplete` before firing completion, and `LSCShowPreview`
+  after opening the preview window.
+
 # 0.2.4
 
 - Bug Fix: Handle completion items with empty detail.
