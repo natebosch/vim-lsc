@@ -129,8 +129,8 @@ if !hlexists('lscDiagnosticWarning')
   highlight link lscDiagnosticWarning SpellBad
 endif
 if !hlexists('lscDiagnosticInfo')
-  highlight link lscDiagnosticInfo SpellBad
+  highlight link lscDiagnosticInfo SpellCap
 endif
 if !hlexists('lscDiagnosticHint')
-  highlight link lscDiagnosticHint SpellBad
+  highlight link lscDiagnosticHint SpellCap
 endif

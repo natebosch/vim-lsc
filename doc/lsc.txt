@@ -111,11 +111,11 @@ configuration will not impact the preview window which may open during
 completion.
 
                                                 *lsc-configure-highlight*
-vim-lsc uses the highlight groups "lscDiagnosticError",
-"lscDiagnosticWarning", "lscDiagnosticInfo", and "lscDiagnosticHint". By
-default "lscDiagnosticError" is linked to |hl-Error|, and the rest are linked
-to |hl-SpellBad|. Override this by setting or linking any of these highlight
-groups. For example:
+vim-lsc uses highlight groups "lscDiagnosticError", "lscDiagnosticWarning",
+"lscDiagnosticInfo", and "lscDiagnosticHint". By default "Error" is linked to
+|hl-Error|, "Warning" is linked to |hl-SpllBad|, and "Info" and "Hint" are
+linked to |hl-SpellCap|. Override this by setting or linking any of these
+highlight groups. For example:
 >
  highlight lscDiagnosticError ctermbg=160
  highlight link lscDiagnosticWarning SpellCap
