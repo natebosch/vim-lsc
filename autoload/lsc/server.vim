@@ -88,8 +88,7 @@ function! s:RunCommand(command) abort
   let channel = job_getchannel(job)
   let ch_id = ch_info(channel)['id']
   let s:channel_buffers[ch_id] = ''
-  let data = {'command': a:command, 'channel': channel}
-  function data.onInitialize(params) abort
+  function! OnInitialize(params) closure abort
     " TODO: Check capabilities?
     if has_key(a:params, 'capabilities')
       let capabilities = a:params['capabilities']
@@ -98,18 +97,18 @@ function! s:RunCommand(command) abort
         if has_key(completion_provider, 'triggerCharacters')
           let trigger_characters = completion_provider['triggerCharacters']
           for filetype in keys(g:lsc_server_commands)
-            if g:lsc_server_commands[filetype] != self.command | continue | endif
+            if g:lsc_server_commands[filetype] != a:command | continue | endif
             call lsc#complete#setTriggers(filetype, trigger_characters)
           endfor
         endif
       endif
     endif
-    call add(s:initialized_servers, self.command)
-    if has_key(s:buffered_calls, self.command)
-      for buffered_call in s:buffered_calls[self.command]
-        call ch_sendraw(self.channel, buffered_call)
+    call add(s:initialized_servers, a:command)
+    if has_key(s:buffered_calls, a:command)
+      for buffered_call in s:buffered_calls[a:command]
+        call ch_sendraw(channel, buffered_call)
       endfor
-      unlet s:buffered_calls[self.command]
+      unlet s:buffered_calls[a:command]
     endif
   endfunction
   if exists('g:lsc_trace_level') &&
@@ -124,7 +123,7 @@ function! s:RunCommand(command) abort
       \ 'trace': trace_level
       \}
   call lsc#server#call(&filetype, 'initialize',
-      \ params, data.onInitialize, v:true)
+      \ params, function('OnInitialize'), v:true)
   return v:true
 endfunction
 

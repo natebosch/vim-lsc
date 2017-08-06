@@ -18,22 +18,6 @@ function! lsc#util#documentPath(uri) abort
   return substitute(a:uri, '^file://', '', 'v')
 endfunction
 
-" Returns a funcref which is the result of first calling `inner` and then using
-" the result as the argument to `outer`. `inner` may take any number of
-" arguments, but `outer` must  take a single argument.
-"
-" For examples lsc#util#compose(g, f) returns a function (args) => g(f(args)).
-function! lsc#util#compose(outer, inner) abort
-  let data = {'funcs': [a:outer, a:inner]}
-  function data.composed(...) abort
-    let Outer = self['funcs'][0]
-    let Inner = self['funcs'][1]
-    let result = call(Inner, a:000)
-    return call(Outer, [result])
-  endfunction
-  return data.composed
-endfunction
-
 function! lsc#util#error(message) abort
   echohl Error
   echom '[lsc] '.a:message
@@ -111,7 +95,7 @@ endfunction
 function! s:createOrJumpToPreview(line_count) abort
   let want_height = min([a:line_count, &previewheight])
   let windows = range(1, winnr('$'))
-  call filter(windows, 'getwinvar(v:val, "&previewwindow") == 1')
+  call filter(windows, {_, win -> getwinvar(win, "&previewwindow") == 1})
   if len(windows) > 0
     execute string(windows[0]).' wincmd W'
     edit __lsc_preview__

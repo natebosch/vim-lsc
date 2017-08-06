@@ -14,7 +14,7 @@ endif
 
 " Converts between an LSP diagnostic and the internal representation used for
 " highlighting.
-function! lsc#diagnostics#convert(diagnostic) abort
+function! s:Convert(diagnostic) abort
   let line = a:diagnostic.range.start.line + 1
   let character = a:diagnostic.range.start.character + 1
   " TODO won't work for multiline error
@@ -81,7 +81,7 @@ function! s:DiagnosticsVersion(file_path) abort
 endfunction
 
 function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
-  call map(a:diagnostics, 'lsc#diagnostics#convert(v:val)')
+  call map(a:diagnostics, {_, diagnostic -> s:Convert(diagnostic)})
   let diagnostics_by_line = {}
   for diagnostic in a:diagnostics
     if !has_key(diagnostics_by_line, diagnostic.range[0])

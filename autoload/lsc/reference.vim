@@ -1,10 +1,10 @@
 function! lsc#reference#goToDefinition() abort
   call lsc#file#flushChanges()
   let s:goto_definition_id += 1
-  let data = {'old_pos': getcurpos(),
-      \ 'goto_definition_id': s:goto_definition_id}
-  function data.trigger(result) abort
-    if !s:isGoToValid(self.old_pos, self.goto_definition_id)
+  let old_pos = getcurpos()
+  let goto_definition_id = s:goto_definition_id
+  function! Jump(result) closure abort
+    if !s:isGoToValid(old_pos, goto_definition_id)
       echom 'GoToDefinition skipped'
       return
     endif
@@ -23,7 +23,7 @@ function! lsc#reference#goToDefinition() abort
     call s:goTo(file, line, character)
   endfunction
   call lsc#server#call(&filetype, 'textDocument/definition',
-      \ s:TextDocumentPositionParams(), data.trigger)
+      \ s:TextDocumentPositionParams(), function('Jump'))
 endfunction
 
 function! s:TextDocumentPositionParams() abort
@@ -41,7 +41,7 @@ function! lsc#reference#findReferences() abort
 endfunction
 
 function! s:setQuickFixReferences(results) abort
-  call map(a:results, 's:QuickFixItem(v:val)')
+  call map(a:results, {_, ref -> s:QuickFixItem(ref)})
   call sort(a:results, 'lsc#util#compareQuickFixItems')
   call setqflist(a:results)
   copen

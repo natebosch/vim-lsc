@@ -100,22 +100,28 @@ function! s:startCompletion() abort
   let s:completion_id += 1
   let s:completion_canceled = v:false
   call s:MarkCompleting(&filetype)
-  let data = {'old_pos': getcurpos(),
-      \ 'completion_id': s:completion_id,
-      \ 'filetype': &filetype}
-  function data.trigger(completion)
-    call s:MarkNotCompleting(self.filetype)
-    if s:isCompletionValid(self.old_pos, self.completion_id)
+  let old_pos = getcurpos()
+  let completion_id = s:completion_id
+  let filetype = &filetype
+  function! OnComplete(completion) closure abort
+    let completions = s:CompletionItems(a:completion)
+    call s:MarkNotCompleting(filetype)
+    if s:isCompletionValid(old_pos, completion_id)
       if (g:lsc_enable_autocomplete)
-        call s:SuggestCompletions(a:completion)
+        call s:SuggestCompletions(completions)
       else
-        let b:lsc_completion = a:completion
+        let b:lsc_completion = completions
       endif
     else
       let b:lsc_is_completing = v:false
     endif
   endfunction
-  call s:SearchCompletions(data.trigger)
+  call lsc#file#flushChanges()
+  let params = { 'textDocument': {'uri': lsc#util#documentUri()},
+      \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
+      \ }
+  call lsc#server#call(&filetype, 'textDocument/completion', params,
+      \ funcref('OnComplete'))
 endfunction
 
 function! s:SuggestCompletions(completion) abort
@@ -170,24 +176,13 @@ endfunction
 function! s:FindSuggestions(base, completion) abort
   let items = copy(a:completion.items)
   if len(a:base) == 0 | return items | endif
-  return filter(items, '<SID>MatchSuggestion(a:base, v:val)')
+  return filter(items, {_, item -> s:MatchSuggestion(a:base, item)})
 endfunction
 
 function! s:MatchSuggestion(base, suggestion) abort
   let word = a:suggestion
   if type(word) == v:t_dict | let word = word.word | endif
   return word =~? a:base
-endfunction
-
-" Flush file contents and call the server to request completions for the current
-" cursor position.
-function! s:SearchCompletions(onFound) abort
-  call lsc#file#flushChanges()
-  let params = { 'textDocument': {'uri': lsc#util#documentUri()},
-      \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
-      \ }
-  call lsc#server#call(&filetype, 'textDocument/completion', params,
-      \ lsc#util#compose(a:onFound, function('<SID>CompletionItems')))
 endfunction
 
 " Normalize LSP completion suggestions to the format used by vim.
@@ -205,7 +200,7 @@ function! s:CompletionItems(completion_result) abort
   else
     let completion_items = a:completion_result.items
   endif
-  call map(completion_items, 's:CompletionItem(v:val)')
+  call map(completion_items, {_, item -> s:CompletionItem(item)})
   let completion = {'items' : completion_items}
   for item in completion_items
     if has_key(item, 'start_col')
