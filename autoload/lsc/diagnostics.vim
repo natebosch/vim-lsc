@@ -22,8 +22,11 @@ function! s:Convert(diagnostic) abort
   let range = [line, character, length]
   let group = <SID>SeverityGroup(a:diagnostic.severity)
   let type = <SID>SeverityType(a:diagnostic.severity)
-  return {'group': group, 'range': range,
-      \ 'message': a:diagnostic.message, 'type': type}
+  let message = a:diagnostic.message
+  if has_key(a:diagnostic, 'code')
+    let message = message.' ['.a:diagnostic.code.']'
+  endif
+  return {'group': group, 'range': range, 'message': message, 'type': type}
 endfunction
 
 function! lsc#diagnostics#clean(filetype) abort

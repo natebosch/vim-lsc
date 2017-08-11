@@ -1,8 +1,9 @@
-# 0.2.5-dev
+# 0.2.5
 
 - Add autocmds `LSCAutocomplete` before firing completion, and `LSCShowPreview`
   after opening the preview window.
 - Change Info and Hint diagnostic default highlight to `SpellCap`.
+- Append diagnostic code to the message.
 
 # 0.2.4
 
