@@ -1,3 +1,8 @@
+# 0.2.6-dev
+
+- Send file updates after re-reading already open file. Fixes some cases where
+  the server has a different idea of the file content than the editor.
+
 # 0.2.5
 
 - Add autocmds `LSCAutocomplete` before firing completion, and `LSCShowPreview`

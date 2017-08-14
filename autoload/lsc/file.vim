@@ -20,9 +20,13 @@ function! lsc#file#onOpen() abort
   call s:DidOpen(expand('%:p'))
 endfunction
 
-" Send the 'didOpen' message for a file if it isn't already tracked.
+" Send the 'didOpen' message for a file if it isn't already tracked, else
+" flushes changes to the server.
 function! s:DidOpen(file_path) abort
-  if has_key(s:file_versions, a:file_path) | return | endif
+  if has_key(s:file_versions, a:file_path)
+    call lsc#file#flushChanges()
+    return
+  endif
   let bufnr = bufnr(a:file_path)
   if !bufloaded(bufnr) | return | endif
   let s:file_versions[a:file_path] = 1
