@@ -6,6 +6,7 @@ endfunction
 
 " Refresh highlight matches in the current window.
 function! lsc#highlights#update() abort
+  if s:CurrentWindowIsFresh() | return | endif
   call lsc#highlights#clear()
   if !has_key(g:lsc_server_commands, &filetype) || &diff
     return
@@ -16,6 +17,7 @@ function! lsc#highlights#update() abort
       call add(w:lsc_diagnostic_matches, match)
     endfor
   endfor
+  call s:MarkCurrentWindowFresh()
 endfunction!
 
 " Remove all highlighted matches in the current window.
@@ -39,4 +41,17 @@ function! s:DeferForSelect() abort
     return v:true
   endif
   return v:false
+endfunction
+
+" Whether the diagnostic highlights for the current window are up to date.
+function! s:CurrentWindowIsFresh() abort
+  if !exists('w:lsc_diagnostics_version') | return v:true | endif
+  if !exists('w:lsc_highlights_version') | return v:false | endif
+  return w:lsc_highlights_version == w:lsc_diagnostics_version &&
+      \ w:lsc_highlights_file == w:lsc_diagnostics_file
+endfunction
+
+function! s:MarkCurrentWindowFresh() abort
+  let w:lsc_highlights_version = w:lsc_diagnostics_version
+  let w:lsc_highlights_file = w:lsc_diagnostics_file
 endfunction

@@ -2,6 +2,8 @@
 
 - Send file updates after re-reading already open file. Fixes some cases where
   the server has a different idea of the file content than the editor.
+- Avoid clearing and readding the same diagnostic matches each time diagnostics
+  change in some other file.
 
 # 0.2.5
 

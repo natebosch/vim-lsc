@@ -92,8 +92,8 @@ function! LSCEnsureCurrentWindowState() abort
     endif
     return
   endif
-  call lsc#highlights#update()
   call lsc#diagnostics#updateLocationList(expand('%:p'))
+  call lsc#highlights#update()
 endfunction
 
 " Run `function` if LSC is enabled for the current filetype.

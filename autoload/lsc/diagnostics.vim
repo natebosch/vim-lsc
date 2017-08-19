@@ -98,8 +98,8 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   else
     let s:diagnostic_versions[a:file_path] = 1
   endif
-  call lsc#highlights#updateDisplayed()
   call lsc#diagnostics#updateLocationList(a:file_path)
+  call lsc#highlights#updateDisplayed()
 endfunction
 
 " Updates location list for all windows showing [file_path].
