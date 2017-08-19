@@ -105,21 +105,29 @@ endfunction
 " Updates location list for all windows showing [file_path].
 function! lsc#diagnostics#updateLocationList(file_path) abort
   let bufnr = bufnr(a:file_path)
-  let items = []
-  for line in values(lsc#diagnostics#forFile(expand('%:p')))
-    for diagnostic in line
-      call add(items, s:locationListItem(bufnr, diagnostic))
-    endfor
-  endfor
-  call sort(items, 'lsc#util#compareQuickFixItems')
+  if bufnr == -1 | return | endif
   let diagnostics_version = s:DiagnosticsVersion(a:file_path)
   for window_id in lsc#util#windowsForFile(a:file_path)
     if !s:WindowIsCurrent(window_id, a:file_path, diagnostics_version)
+      if !exists('l:items')
+        let items = s:LocationListItems(bufnr, a:file_path)
+      endif
       call setloclist(window_id, items)
       call s:MarkManagingLocList(window_id, a:file_path, diagnostics_version)
     else
     endif
   endfor
+endfunction
+
+function! s:LocationListItems(bufnr, file_path) abort
+  let items = []
+  for line in values(lsc#diagnostics#forFile(a:file_path))
+    for diagnostic in line
+      call add(items, s:locationListItem(a:bufnr, diagnostic))
+    endfor
+  endfor
+  call sort(items, 'lsc#util#compareQuickFixItems')
+  return items
 endfunction
 
 function! s:MarkManagingLocList(window_id, file_path, version) abort

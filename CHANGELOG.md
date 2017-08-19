@@ -4,6 +4,9 @@
   the server has a different idea of the file content than the editor.
 - Avoid clearing and readding the same diagnostic matches each time diagnostics
   change in some other file.
+- Avoid doing work on diagnostics for unopened files.
+- Bug Fix: Use the correct diagnostics when updating the location list for
+  windows other than the current window.
 
 # 0.2.5
 
