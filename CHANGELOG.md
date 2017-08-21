@@ -11,6 +11,9 @@
   of the language server for the current filetype.
 - `:LSCRestartServer` can now restart servers that failed, rather than just
   those which are currently running.
+- Bug Fix: Always send `didOpen` calls with the content they have at the time of
+  initialization rather than what they had when the buffer was read. Fixes some
+  cases where an edit before the server is read would get lost.
 
 # 0.2.5
 

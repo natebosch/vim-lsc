@@ -29,17 +29,18 @@ function! s:DidOpen(file_path) abort
   endif
   let bufnr = bufnr(a:file_path)
   if !bufloaded(bufnr) | return | endif
-  let s:file_versions[a:file_path] = 1
   let buffer_content = join(getbufline(bufnr, 1, '$'), "\n")
   let filetype = getbufvar(bufnr, '&filetype')
   let params = {'textDocument':
       \   {'uri': lsc#util#documentUri(a:file_path),
       \    'languageId': filetype,
-      \    'version': s:file_versions[a:file_path],
+      \    'version': 1,
       \    'text': buffer_content
       \   }
       \ }
-  call lsc#server#call(filetype, 'textDocument/didOpen', params)
+  if lsc#server#call(filetype, 'textDocument/didOpen', params)
+    let s:file_versions[a:file_path] = 1
+  endif
 endfunction
 
 " Mark all files of type `filetype` as untracked.

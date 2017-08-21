@@ -1,8 +1,6 @@
 if !exists('s:initialized')
   " channel id -> received message
   let s:channel_buffers = {}
-  " command -> [call]
-  let s:buffered_calls = {}
   " command -> job
   let s:running_servers = {}
   " command -> status. Possible statuses are:
@@ -20,15 +18,6 @@ function! lsc#server#status(filetype) abort
   let command = g:lsc_server_commands[a:filetype]
   if !has_key(s:server_statuses, command) | return 'unknown' | endif
   return s:server_statuses[command]
-endfunction
-
-function! s:StartByCommand(command) abort
-  if <SID>RunCommand(a:command)
-    for filetype in keys(g:lsc_server_commands)
-      if g:lsc_server_commands[filetype] != a:command | continue | endif
-      call lsc#file#trackAll(filetype)
-    endfor
-  endif
 endfunction
 
 function! lsc#server#kill(file_type) abort
@@ -66,14 +55,14 @@ function! lsc#server#call(file_type, method, params, ...) abort
   let command = g:lsc_server_commands[a:file_type]
   if !has_key(s:running_servers, command) ||
       \ (s:server_statuses[command] != 'running' && !override_initialize)
-    call s:BufferCall(command, message)
-    return
+    return v:false
   endif
   let job = s:running_servers[command]
-  if job_status(job) != 'run' | return | endif
+  if job_status(job) != 'run' | return v:false | endif
   let channel = job_getchannel(job)
-  if ch_status(channel) != 'open' | return | endif
+  if ch_status(channel) != 'open' | return v:false | endif
   call ch_sendraw(channel, message)
+  return v:true
 endfunction
 
 function! lsc#server#readBuffer(ch_id) abort
@@ -89,11 +78,8 @@ function! lsc#server#getBuffers() abort
 endfunction
 
 " Start a language server using `command` if it isn't already running.
-"
-" Returns v:true if the server was started, or v:false if it was already
-" running.
-function! s:RunCommand(command) abort
-  if has_key(s:running_servers, a:command) | return v:false | endif
+function! s:StartByCommand(command) abort
+  if has_key(s:running_servers, a:command) | return | endif
 
   let job_options = {'in_io': 'pipe', 'in_mode': 'raw',
       \ 'out_io': 'pipe', 'out_mode': 'raw',
@@ -120,12 +106,10 @@ function! s:RunCommand(command) abort
       endif
     endif
     let s:server_statuses[a:command] = 'running'
-    if has_key(s:buffered_calls, a:command)
-      for buffered_call in s:buffered_calls[a:command]
-        call ch_sendraw(channel, buffered_call)
-      endfor
-      unlet s:buffered_calls[a:command]
-    endif
+    for filetype in keys(g:lsc_server_commands)
+      if g:lsc_server_commands[filetype] != a:command | continue | endif
+      call lsc#file#trackAll(filetype)
+    endfor
   endfunction
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
@@ -140,7 +124,6 @@ function! s:RunCommand(command) abort
       \}
   call lsc#server#call(&filetype, 'initialize',
       \ params, function('OnInitialize'), v:true)
-  return v:true
 endfunction
 
 " Find the command for `job` and clean up it's state
@@ -184,13 +167,6 @@ function! lsc#server#channelCallback(channel, message) abort
   let ch_id = ch_info(a:channel)['id']
   let s:channel_buffers[ch_id] .= a:message
   call lsc#protocol#consumeMessage(ch_id)
-endfunction
-
-function! s:BufferCall(command, call) abort
-  if !has_key(s:buffered_calls, a:command)
-    let s:buffered_calls[a:command] = []
-  endif
-  call add(s:buffered_calls[a:command], a:call)
 endfunction
 
 " Supports no workspace capabilities - missing value means no support
