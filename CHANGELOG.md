@@ -16,6 +16,7 @@
   cases where an edit before the server is read would get lost.
 - Bug Fix: Handle case where a `GoToDefinition` is an empty list rather than
   null.
+- Bug Fix: Handle case where initialization call gets a null response.
 
 # 0.2.5
 

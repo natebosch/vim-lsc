@@ -90,20 +90,9 @@ function! s:StartByCommand(command) abort
   let channel = job_getchannel(job)
   let ch_id = ch_info(channel)['id']
   let s:channel_buffers[ch_id] = ''
-  function! OnInitialize(params) closure abort
-    " TODO: Check capabilities?
-    if has_key(a:params, 'capabilities')
-      let capabilities = a:params['capabilities']
-      if has_key(capabilities, 'completionProvider')
-        let completion_provider = capabilities['completionProvider']
-        if has_key(completion_provider, 'triggerCharacters')
-          let trigger_characters = completion_provider['triggerCharacters']
-          for filetype in keys(g:lsc_server_commands)
-            if g:lsc_server_commands[filetype] != a:command | continue | endif
-            call lsc#complete#setTriggers(filetype, trigger_characters)
-          endfor
-        endif
-      endif
+  function! OnInitialize(init_results) closure abort
+    if type(a:init_results) == v:t_dict
+      call s:CheckCapabilities(a:init_results)
     endif
     let s:server_statuses[a:command] = 'running'
     for filetype in keys(g:lsc_server_commands)
@@ -124,6 +113,23 @@ function! s:StartByCommand(command) abort
       \}
   call lsc#server#call(&filetype, 'initialize',
       \ params, function('OnInitialize'), v:true)
+endfunction
+
+function! s:CheckCapabilities(init_results) abort
+  " TODO: Check with more depth IE whether go to definition works
+  if has_key(a:init_results, 'capabilities')
+    let capabilities = a:init_results['capabilities']
+    if has_key(capabilities, 'completionProvider')
+      let completion_provider = capabilities['completionProvider']
+      if has_key(completion_provider, 'triggerCharacters')
+        let trigger_characters = completion_provider['triggerCharacters']
+        for filetype in keys(g:lsc_server_commands)
+          if g:lsc_server_commands[filetype] != a:command | continue | endif
+          call lsc#complete#setTriggers(filetype, trigger_characters)
+        endfor
+      endif
+    endif
+  endif
 endfunction
 
 " Find the command for `job` and clean up it's state
