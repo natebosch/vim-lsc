@@ -146,6 +146,8 @@ function! s:OnCommandExit(command) abort
   let initialize = index(s:initialized_servers, a:command)
   if initialize >= 0
     call remove(s:initialized_servers, initialize)
+  else
+    call lsc#util#error('Failed to initialize server: '.a:command)
   endif
   for filetype in keys(g:lsc_server_commands)
     if g:lsc_server_commands[filetype] != a:command | continue | endif
