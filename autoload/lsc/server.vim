@@ -38,8 +38,14 @@ function! lsc#server#kill(file_type) abort
 endfunction
 
 function! lsc#server#restart() abort
-  call lsc#server#kill(&filetype)
-  let s:server_statuses[g:lsc_server_commands[&filetype]] = 'restarting'
+  let command = g:lsc_server_commands[&filetype]
+  let old_status = s:server_statuses[command]
+  if old_status == 'starting' || old_status == 'running'
+    call lsc#server#kill(&filetype)
+    let s:server_statuses[command] = 'restarting'
+  else
+    call s:StartByCommand(command)
+  endif
 endfunction
 
 " Call a method on the language server for `file_type`.

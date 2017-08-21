@@ -9,6 +9,8 @@
   windows other than the current window.
 - Add `LSCServerStatus()` function which returns a string representing the state
   of the language server for the current filetype.
+- `:LSCRestartServer` can now restart servers that failed, rather than just
+  those which are currently running.
 
 # 0.2.5
 
