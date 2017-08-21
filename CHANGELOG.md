@@ -14,6 +14,8 @@
 - Bug Fix: Always send `didOpen` calls with the content they have at the time of
   initialization rather than what they had when the buffer was read. Fixes some
   cases where an edit before the server is read would get lost.
+- Bug Fix: Handle case where a `GoToDefinition` is an empty list rather than
+  null.
 
 # 0.2.5
 

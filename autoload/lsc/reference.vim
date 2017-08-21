@@ -8,7 +8,8 @@ function! lsc#reference#goToDefinition() abort
       echom 'GoToDefinition skipped'
       return
     endif
-    if type(a:result) == type(v:null)
+    if type(a:result) == v:t_none ||
+        \ (type(a:result) == v:t_list && len(a:result) == 0)
       call lsc#util#error('No definition found')
       return
     endif
