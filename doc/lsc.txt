@@ -73,6 +73,25 @@ Sends requests to the server for the current filetype to "shutdown" and
 If the server was previously disabled, restart the server and re-enable change
 tracking for the current filetype.
 
+FUNCTIONS                                       *lsc-functions*
+
+                                                *LSCServerStatus()*
+Returns a string representing the status of the language server for the
+current filetype. If there is no configured command for this filetype returns
+an empty string. The possible statuses are:
+
+- "starting": The command has been started but the initialize call has not
+  compelted.
+- "running": The command has been started and initialized and is running
+  normally.
+- "exiting": Exit was requested but the process has not yet finished.
+- "restaring": Exit was requested and the server will be started again after
+  the process finishes.
+- "exited": Process has finished after a requested exit.
+- "unexpected exit": Process has finished but no exit was requested.
+- "failed": Process finished before initialization was complete. This could
+  inidcate that the command cannot be run at all.
+
 CONFIGURATION                                   *lsc-configure*
 
                                                 *lsc-configure-trace*

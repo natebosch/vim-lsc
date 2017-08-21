@@ -7,6 +7,8 @@
 - Avoid doing work on diagnostics for unopened files.
 - Bug Fix: Use the correct diagnostics when updating the location list for
   windows other than the current window.
+- Add `LSCServerStatus()` function which returns a string representing the state
+  of the language server for the current filetype.
 
 # 0.2.5
 

@@ -21,6 +21,12 @@ command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
 command! LSClientDisable call <SID>Disable()
 command! LSClientEnable call <SID>Enable()
 
+" Returns the status of the language server for the current filetype or empty
+" string if it is not configured.
+function! LSCServerStatus() abort
+  return lsc#server#status(&filetype)
+endfunction
+
 " RegisterLanguageServer
 "
 " Registers a command as the server to start the first time a file with type
