@@ -193,11 +193,12 @@ endfunction
 "
 " Since different suggestions could, in theory, specify different ranges
 " autocomplete behavior could be incorrect since vim `complete` only allows a
-" single start columng for every suggestion.
+" single start columns for every suggestion.
 function! s:CompletionItems(completion_result) abort
-  if type(a:completion_result) == type([])
+  let completion_items = []
+  if type(a:completion_result) == v:t_list
     let completion_items = a:completion_result
-  else
+  elseif type(a:completion_result) == v:t_dict
     let completion_items = a:completion_result.items
   endif
   call map(completion_items, {_, item -> s:CompletionItem(item)})
@@ -216,7 +217,7 @@ endfunction
 "
 " `word` suggestions are taken from the highest priority field according to
 " order `textEdit` > `insertText` > `label`.
-" `label` is always expectes to be set and is used as the `abbr` shown in the
+" `label` is always expected to be set and is used as the `abbr` shown in the
 " popupmenu. This may be different from the inserted text.
 function! s:CompletionItem(completion_item) abort
   let item = {'abbr': a:completion_item.label}

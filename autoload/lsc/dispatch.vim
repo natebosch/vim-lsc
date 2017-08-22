@@ -21,6 +21,7 @@ function! lsc#dispatch#message(message) abort
             \' while handling '.string(call_id))
         let g:lsc_last_error = v:exception
         let g:lsc_last_throwpoint = v:throwpoint
+        let g:lsc_last_error_message = a:message
       endtry
       unlet s:callbacks[call_id]
     endif

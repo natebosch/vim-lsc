@@ -22,6 +22,7 @@
   `textDocument/hover` calls.
 - Add experimental support for communicating over a TCP channel. Configure the
   command as a "host:port" pair.
+- Bug Fix: Handle null completions response.
 
 # 0.2.5
 
