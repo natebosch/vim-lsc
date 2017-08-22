@@ -23,7 +23,7 @@ endfunction
 function! lsc#server#kill(file_type) abort
   call lsc#server#call(a:file_type, 'shutdown', '')
   call lsc#server#call(a:file_type, 'exit', '')
-  let s:server_statuses[g:lsc_server_commands[&filetype]] = 'exiting'
+  let s:server_statuses[g:lsc_server_commands[a:file_type]] = 'exiting'
 endfunction
 
 function! lsc#server#restart() abort
