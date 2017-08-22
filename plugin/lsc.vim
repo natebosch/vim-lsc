@@ -39,6 +39,12 @@ function! RegisterLanguageServer(file_type, command) abort
     throw 'Already have a server command for '.a:file_type
   endif
   let g:lsc_server_commands[a:file_type] = a:command
+  for buffer in getbufinfo({'loaded': v:true})
+    if getbufvar(buffer.bufnr, '&filetype') == a:file_type
+      call lsc#server#start(a:file_type)
+      return
+    endif
+  endfor
 endfunction
 
 augroup LSC
