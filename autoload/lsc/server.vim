@@ -74,14 +74,6 @@ function! lsc#server#call(file_type, method, params, ...) abort
   return v:true
 endfunction
 
-function! lsc#server#readBuffer(server_name) abort
-  return s:servers[a:server_name].buffer
-endfunction
-
-function! lsc#server#setBuffer(server_name, message) abort
-  let s:servers[a:server_name].buffer = a:message
-endfunction
-
 " Start a language server using `command` if it isn't already running.
 function! s:Start(command) abort
   if has_key(s:servers, a:command) && has_key(s:servers[a:command], 'channel')
@@ -190,8 +182,9 @@ endfunction
 function! lsc#server#callback(channel, message) abort
   let ch_id = ch_info(a:channel)['id']
   let server_name = s:server_names[ch_id]
-  let s:servers[server_name].buffer .= a:message
-  call lsc#protocol#consumeMessage(server_name)
+  let server_info = s:servers[server_name]
+  let server_info.buffer .= a:message
+  call lsc#protocol#consumeMessage(server_info)
 endfunction
 
 " Supports no workspace capabilities - missing value means no support
