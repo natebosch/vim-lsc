@@ -20,6 +20,8 @@
 - Bug Fix: Avoid breaking further callbacks when a message handler throws.
 - Bug Fix: Handle `MarkedString` and `List<MarkedString>` results to
   `textDocument/hover` calls.
+- Add experimental support for communicating over a TCP channel. Configure the
+  command as a "host:port" pair.
 
 # 0.2.5
 

@@ -1,7 +1,7 @@
 if !exists('s:initialized')
   " channel id -> received message
   let s:channel_buffers = {}
-  " command -> job
+  " command -> channel
   let s:running_servers = {}
   " command -> status. Possible statuses are:
   " [starting, running, exiting, restarting, exited, unexpected exit, failed]
@@ -57,9 +57,7 @@ function! lsc#server#call(file_type, method, params, ...) abort
       \ (s:server_statuses[command] != 'running' && !override_initialize)
     return v:false
   endif
-  let job = s:running_servers[command]
-  if job_status(job) != 'run' | return v:false | endif
-  let channel = job_getchannel(job)
+  let channel = s:running_servers[command]
   if ch_status(channel) != 'open' | return v:false | endif
   call ch_sendraw(channel, message)
   return v:true
@@ -81,13 +79,18 @@ endfunction
 function! s:StartByCommand(command) abort
   if has_key(s:running_servers, a:command) | return | endif
 
-  let job_options = {'in_io': 'pipe', 'in_mode': 'raw',
-      \ 'out_io': 'pipe', 'out_mode': 'raw',
-      \ 'out_cb': 'lsc#server#channelCallback', 'exit_cb': 'lsc#server#onExit'}
-  let job = job_start(a:command, job_options)
-  let s:running_servers[a:command] = job
+  if a:command =~? ':'
+    let channel_options = {'mode': 'raw', 'callback': 'lsc#server#callback'}
+    let channel = ch_open(a:command, channel_options)
+  else
+    let job_options = {'in_io': 'pipe', 'in_mode': 'raw',
+        \ 'out_io': 'pipe', 'out_mode': 'raw', 'out_cb': 'lsc#server#callback',
+        \ 'exit_cb': 'lsc#server#onExit'}
+    let job = job_start(a:command, job_options)
+    let channel = job_getchannel(job)
+  endif
+  let s:running_servers[a:command] = channel
   let s:server_statuses[a:command] = 'starting'
-  let channel = job_getchannel(job)
   let ch_id = ch_info(channel)['id']
   let s:channel_buffers[ch_id] = ''
   function! OnInitialize(init_results) closure abort
@@ -135,10 +138,15 @@ endfunction
 " Find the command for `job` and clean up it's state
 function! lsc#server#onExit(job, status) abort
   let channel = job_getchannel(a:job)
-  let ch_id = ch_info(channel)['id']
+  call lsc#server#onClose(channel)
+endfunction
+
+" Find the command for `channel` and clean up it's state
+function! lsc#server#onClose(channel) abort
+  let ch_id = ch_info(a:channel)['id']
   unlet s:channel_buffers[ch_id]
   for command in keys(s:running_servers)
-    if s:running_servers[command] == a:job
+    if s:running_servers[command] == a:channel
       call s:OnCommandExit(command)
       return
     endif
@@ -169,7 +177,7 @@ function! s:OnCommandExit(command) abort
 endfunction
 
 " Append to the buffer for the channel and try to consume a message.
-function! lsc#server#channelCallback(channel, message) abort
+function! lsc#server#callback(channel, message) abort
   let ch_id = ch_info(a:channel)['id']
   let s:channel_buffers[ch_id] .= a:message
   call lsc#protocol#consumeMessage(ch_id)

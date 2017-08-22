@@ -13,22 +13,26 @@ server.
 https://github.com/natebosch/vim-lsc
 
 SETUP                                           *lsc-setup*
-                                                *g:lscc_server_commands*
+                                                *g:lsc_server_commands*
 
 There is no install step for vim-lsc. Configure the filetypes that are tracked
 by installed language servers in the variable "g:lsc_server_commands". Each
-value in this dict should be a string which corresponds to an executable in
-your "$PATH". If multiple filetypes are tracked by the same server they should
-be entered as separate keys with the same value. For example:
+value in this dict should be a string which corresponds to either an
+executable in your "$PATH", or a "host:port" pair. If multiple filetypes are
+tracked by the same server they should be entered as separate keys with the
+same value. For example:
+
 >
  let g:lsc_server_commands = {
      \ 'dart': 'dart_language_server',
      \ 'html': 'dart_language_server',
+     \ 'typescript': 'localhost:8000',
      \}
 <
 
-lsc will communicate with each executable over stdin/stdout following the
-RPC protocol as specified.
+lsc will communicate with each server following the LSP protocol. If the
+command was an executable communication happens over stdin/stdout. If the
+command was a "host:port" parit communicaiton happens over a TCP channel.
 
 COMMANDS                                        *lsc-commands*
 
