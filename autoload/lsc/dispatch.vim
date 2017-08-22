@@ -19,6 +19,8 @@ function! lsc#dispatch#message(message) abort
       catch
         call lsc#util#error('Caught '.string(v:exception).
             \' while handling '.string(call_id))
+        let g:lsc_last_error = v:exception
+        let g:lsc_last_throwpoint = v:throwpoint
       endtry
       unlet s:callbacks[call_id]
     endif
