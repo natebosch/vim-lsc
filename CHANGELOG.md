@@ -18,6 +18,8 @@
   null.
 - Bug Fix: Handle case where initialization call gets a null response.
 - Bug Fix: Avoid breaking further callbacks when a message handler throws.
+- Bug Fix: Handle `MarkedString` and `List<MarkedString>` results to
+  `textDocument/hover` calls.
 
 # 0.2.5
 

@@ -113,6 +113,13 @@ function! s:showHover(result) abort
     echom 'No hover information'
     return
   endif
-  let lines = split(a:result.contents, "\n")
+  let contents = a:result.contents
+  if type(contents) == v:t_list
+    let contents = contents[0]
+  endif
+  if type(contents) == v:t_dict
+    let contents = contents.value
+  endif
+  let lines = split(contents, "\n")
   call lsc#util#displayAsPreview(lines)
 endfunction
