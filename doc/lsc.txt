@@ -6,7 +6,7 @@ vim-lsc communicates with a server following the Language Server Protocol and
 adds autocomplete, diagnostic highlighting, and reference searching.
 
 vim-lsc does not have any built-in support for any language, all features are
-enabled through languag specific servers and should work with any server
+enabled through language specific servers and should work with any server
 following the protocol. Each feature is dependent on support in the configured
 server.
 
@@ -32,7 +32,8 @@ same value. For example:
 
 lsc will communicate with each server following the LSP protocol. If the
 command was an executable communication happens over stdin/stdout. If the
-command was a "host:port" parit communicaiton happens over a TCP channel.
+command was a "host:port" part communication happens over a TCP channel. When
+using TCP the server should already be running before starting vim.
 
 COMMANDS                                        *lsc-commands*
 
@@ -85,16 +86,16 @@ current filetype. If there is no configured command for this filetype returns
 an empty string. The possible statuses are:
 
 - "starting": The command has been started but the initialize call has not
-  compelted.
+  completed.
 - "running": The command has been started and initialized and is running
   normally.
 - "exiting": Exit was requested but the process has not yet finished.
-- "restaring": Exit was requested and the server will be started again after
+- "restoring": Exit was requested and the server will be started again after
   the process finishes.
 - "exited": Process has finished after a requested exit.
 - "unexpected exit": Process has finished but no exit was requested.
 - "failed": Process finished before initialization was complete. This could
-  inidcate that the command cannot be run at all.
+  indicate that the command cannot be run at all.
 
 CONFIGURATION                                   *lsc-configure*
 
@@ -115,7 +116,7 @@ autocomplete would have shown suggestions, or if the server has not responded
 with results before completion is started.
 
 The completefunc can be automatically set for buffers with files tracked by a
-langage server by setting the "Complete" key in |g:lsc_auto_map|.
+language server by setting the "Complete" key in |g:lsc_auto_map|.
 
 Note: By default |completeopt| includes "preview" which will open the preview
 window to show more details for selected completion items. Close the window
@@ -191,7 +192,7 @@ DEBUGGING TIPS                                  *lsc-debugging*
 If you are having difficulty with integration with a particular language
 server, you can spy into the communication with the server by wrapping it in a
 script to log stdin and stdout. For example if the server is normally started
-with "my_language_server", write a script like "my_languag_server_logged.sh"
+with "my_language_server", write a script like "my_language_server_logged.sh"
 and point |g:lsc_server_commands| at this script.
 >
  #!/bin/bash

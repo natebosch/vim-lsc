@@ -1,19 +1,20 @@
 # Vim Language Server Client
 
-This is an experiment with building a partial replacement for plugins like
-YouCompleteMe communicating with a language server following the [language
-server protocol][]
+Adds language-aware tooling to vim by communicating with a language server
+following the [language server protocol][]. For more information see
+[langserver.org][].
 
 [language server protocol]: https://github.com/Microsoft/language-server-protocol
+[langserver.org]: http://langserver.org/
 
 This client has not been tested against a wide range of servers so there may be
 protocol bugs.
 
 ## Installation
 
-Install with your method of choice. If you don't have a preference check out
-[vim-plug][]. Install a language server and ensure it is executable from your
-`$PATH`.
+Install with your plugin management method of choice. If you don't have a
+preference check out [vim-plug][]. Install a language server and ensure it is
+executable from your `$PATH`.
 
 [vim-plug]:https://github.com/junegunn/vim-plug
 
