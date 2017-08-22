@@ -17,6 +17,7 @@
 - Bug Fix: Handle case where a `GoToDefinition` is an empty list rather than
   null.
 - Bug Fix: Handle case where initialization call gets a null response.
+- Bug Fix: Avoid breaking further callbacks when a message handler throws.
 
 # 0.2.5
 
