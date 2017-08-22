@@ -20,15 +20,15 @@ function! lsc#protocol#format(method, params) abort
   return [s:lsc_last_id, "Content-Length: ".length."\r\n\r\n".encoded]
 endfunction
 
-" Reads from the buffer for ch_id and processes the message. Continues to
+" Reads from the buffer for server_name and processes the message. Continues to
 " process messages until the buffer is empty. Does nothing if a complete message
 " is not available.
-function! lsc#protocol#consumeMessage(ch_id) abort
-  while s:consumeMessage(a:ch_id) | endwhile
+function! lsc#protocol#consumeMessage(server_name) abort
+  while s:consumeMessage(a:server_name) | endwhile
 endfunction
 
-function! s:consumeMessage(ch_id) abort
-  let message = lsc#server#readBuffer(a:ch_id)
+function! s:consumeMessage(server_name) abort
+  let message = lsc#server#readBuffer(a:server_name)
   let end_of_header = stridx(message, "\r\n\r\n")
   if end_of_header < 0
     return v:false
@@ -49,7 +49,7 @@ function! s:consumeMessage(ch_id) abort
   endtry
   if exists('l:content') | call lsc#dispatch#message(content) | endif
   let remaining_message = message[message_end:]
-  call lsc#server#setBuffer(a:ch_id, remaining_message)
+  call lsc#server#setBuffer(a:server_name, remaining_message)
   return remaining_message != ''
 endfunction
 

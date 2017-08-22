@@ -1,39 +1,49 @@
 if !exists('s:initialized')
-  " channel id -> received message
-  let s:channel_buffers = {}
-  " command -> channel
-  let s:running_servers = {}
-  " command -> status. Possible statuses are:
-  " [starting, running, exiting, restarting, exited, unexpected exit, failed]
-  let s:server_statuses = {}
+  " channel id -> server name
+  let s:server_names = {}
+  " server name -> server info.
+  "
+  " Server name defaults to the command string.
+  "
+  " Info contains:
+  " - status. Possible statuses are:
+  "   [starting, running, exiting, restarting, exited, unexpected exit, failed]
+  " - buffer. String received from the server but not processed yet.
+  " - channel. The communication channel
+  let s:servers = {}
   let s:initialized = v:true
 endif
 
 function! lsc#server#start(filetype) abort
-  call <SID>StartByCommand(g:lsc_server_commands[a:filetype])
+  call s:Start(g:lsc_server_commands[a:filetype])
 endfunction
 
 function! lsc#server#status(filetype) abort
   if !has_key(g:lsc_server_commands, a:filetype) | return '' | endif
   let command = g:lsc_server_commands[a:filetype]
-  if !has_key(s:server_statuses, command) | return 'unknown' | endif
-  return s:server_statuses[command]
+  if !has_key(s:servers, command) | return 'unknown' | endif
+  return s:servers[command]['status']
+endfunction
+
+function! lsc#server#servers() abort
+  return s:servers
 endfunction
 
 function! lsc#server#kill(file_type) abort
   call lsc#server#call(a:file_type, 'shutdown', '')
   call lsc#server#call(a:file_type, 'exit', '')
-  let s:server_statuses[g:lsc_server_commands[a:file_type]] = 'exiting'
+  let s:servers[g:lsc_server_commands[a:file_type]]['satus'] = 'exiting'
 endfunction
 
 function! lsc#server#restart() abort
   let command = g:lsc_server_commands[&filetype]
-  let old_status = s:server_statuses[command]
+  let server_info = s:servers[command]
+  let old_status = server_info.status
   if old_status == 'starting' || old_status == 'running'
     call lsc#server#kill(&filetype)
-    let s:server_statuses[command] = 'restarting'
+    let server_info.status = 'restarting'
   else
-    call s:StartByCommand(command)
+    call s:Start(command)
   endif
 endfunction
 
@@ -53,31 +63,30 @@ function! lsc#server#call(file_type, method, params, ...) abort
     let override_initialize = v:false
   endif
   let command = g:lsc_server_commands[a:file_type]
-  if !has_key(s:running_servers, command) ||
-      \ (s:server_statuses[command] != 'running' && !override_initialize)
+  if !has_key(s:servers, command) | return v:false | endif
+  let server_info = s:servers[command]
+  if server_info.status != 'running' && !override_initialize
     return v:false
   endif
-  let channel = s:running_servers[command]
+  let channel = server_info.channel
   if ch_status(channel) != 'open' | return v:false | endif
   call ch_sendraw(channel, message)
   return v:true
 endfunction
 
-function! lsc#server#readBuffer(ch_id) abort
-  return s:channel_buffers[a:ch_id]
+function! lsc#server#readBuffer(server_name) abort
+  return s:servers[a:server_name].buffer
 endfunction
 
-function! lsc#server#setBuffer(ch_id, message) abort
-  let s:channel_buffers[a:ch_id] = a:message
-endfunction
-
-function! lsc#server#getBuffers() abort
-  return s:channel_buffers
+function! lsc#server#setBuffer(server_name, message) abort
+  let s:servers[a:server_name].buffer = a:message
 endfunction
 
 " Start a language server using `command` if it isn't already running.
-function! s:StartByCommand(command) abort
-  if has_key(s:running_servers, a:command) | return | endif
+function! s:Start(command) abort
+  if has_key(s:servers, a:command) && has_key(s:servers[a:command], 'channel')
+    return
+  endif
 
   if a:command =~? ':'
     let channel_options = {'mode': 'raw', 'callback': 'lsc#server#callback'}
@@ -89,15 +98,18 @@ function! s:StartByCommand(command) abort
     let job = job_start(a:command, job_options)
     let channel = job_getchannel(job)
   endif
-  let s:running_servers[a:command] = channel
-  let s:server_statuses[a:command] = 'starting'
+  let s:servers[a:command] = {
+      \ 'status': 'starting',
+      \ 'buffer': '',
+      \ 'channel': channel,
+      \}
   let ch_id = ch_info(channel)['id']
-  let s:channel_buffers[ch_id] = ''
+  let s:server_names[ch_id] = a:command
   function! OnInitialize(init_results) closure abort
     if type(a:init_results) == v:t_dict
       call s:CheckCapabilities(a:init_results, a:command)
     endif
-    let s:server_statuses[a:command] = 'running'
+    let s:servers[a:command]['status'] = 'running'
     for filetype in keys(g:lsc_server_commands)
       if g:lsc_server_commands[filetype] != a:command | continue | endif
       call lsc#file#trackAll(filetype)
@@ -144,43 +156,42 @@ endfunction
 " Find the command for `channel` and clean up it's state
 function! lsc#server#onClose(channel) abort
   let ch_id = ch_info(a:channel)['id']
-  unlet s:channel_buffers[ch_id]
-  for command in keys(s:running_servers)
-    if s:running_servers[command] == a:channel
-      call s:OnCommandExit(command)
-      return
-    endif
-  endfor
+  let server_name = s:server_names[ch_id]
+  unlet s:server_names[ch_id]
+  call s:OnExit(server_name)
 endfunction
 
 " Clean up stored state about a running server.
-function! s:OnCommandExit(command) abort
-  unlet s:running_servers[a:command]
-  let old_status = s:server_statuses[a:command]
+function! s:OnExit(server_name) abort
+  let server_info = s:servers[a:server_name]
+  unlet server_info.buffer
+  unlet server_info.channel
+  let old_status = server_info.status
   if old_status == 'starting'
-    let s:server_statuses[a:command] = 'failed'
-    call lsc#util#error('Failed to initialize server: '.a:command)
+    let server_info.status= 'failed'
+    call lsc#util#error('Failed to initialize server: '.a:server_name)
   elseif old_status == 'exiting'
-    let s:server_statuses[a:command] = 'exited'
+    let server_info.status= 'exited'
   elseif old_status == 'running'
-    let s:server_statuses[a:command] = 'unexpected exit'
+    let server_info.status= 'unexpected exit'
   endif
   for filetype in keys(g:lsc_server_commands)
-    if g:lsc_server_commands[filetype] != a:command | continue | endif
+    if g:lsc_server_commands[filetype] != a:server_name | continue | endif
     call lsc#complete#clean(filetype)
     call lsc#diagnostics#clean(filetype)
     call lsc#file#clean(filetype)
   endfor
   if old_status == 'restarting'
-    call <SID>StartByCommand(a:command)
+    call s:Start(a:server_name)
   endif
 endfunction
 
 " Append to the buffer for the channel and try to consume a message.
 function! lsc#server#callback(channel, message) abort
   let ch_id = ch_info(a:channel)['id']
-  let s:channel_buffers[ch_id] .= a:message
-  call lsc#protocol#consumeMessage(ch_id)
+  let server_name = s:server_names[ch_id]
+  let s:servers[server_name].buffer .= a:message
+  call lsc#protocol#consumeMessage(server_name)
 endfunction
 
 " Supports no workspace capabilities - missing value means no support
