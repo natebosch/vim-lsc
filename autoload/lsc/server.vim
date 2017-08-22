@@ -10,6 +10,9 @@ if !exists('s:initialized')
   "   [starting, running, exiting, restarting, exited, unexpected exit, failed]
   " - buffer. String received from the server but not processed yet.
   " - channel. The communication channel
+  " - calls. The last 10 calls made to the server
+  " - messages. The last 10 messages from the server
+  " - init_result. The response to the initialization call
   let s:servers = {}
   let s:initialized = v:true
 endif
@@ -71,6 +74,8 @@ function! lsc#server#call(file_type, method, params, ...) abort
   let channel = server_info.channel
   if ch_status(channel) != 'open' | return v:false | endif
   call ch_sendraw(channel, message)
+  call lsc#util#shift(server_info.calls, 10,
+      \ {'method': a:method, 'params': a:params, 'id': call_id})
   return v:true
 endfunction
 
@@ -94,12 +99,15 @@ function! s:Start(command) abort
       \ 'status': 'starting',
       \ 'buffer': '',
       \ 'channel': channel,
+      \ 'calls': [],
+      \ 'messages': [],
       \}
   let ch_id = ch_info(channel)['id']
   let s:server_names[ch_id] = a:command
-  function! OnInitialize(init_results) closure abort
-    if type(a:init_results) == v:t_dict
-      call s:CheckCapabilities(a:init_results, a:command)
+  function! OnInitialize(init_result) closure abort
+    let s:servers[a:command].init_result = a:init_result
+    if type(a:init_result) == v:t_dict
+      call s:CheckCapabilities(a:init_result, a:command)
     endif
     let s:servers[a:command]['status'] = 'running'
     for filetype in keys(g:lsc_server_commands)

@@ -47,7 +47,10 @@ function! s:consumeMessage(server) abort
   catch
     call lsc#util#error('Could not decode message: '.payload)
   endtry
-  if exists('l:content') | call lsc#dispatch#message(content) | endif
+  if exists('l:content')
+    call lsc#util#shift(a:server.messages, 10, content)
+    call lsc#dispatch#message(content)
+  endif
   let remaining_message = message[message_end:]
   let a:server.buffer = remaining_message
   return remaining_message != ''

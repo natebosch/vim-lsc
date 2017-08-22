@@ -118,3 +118,10 @@ function! s:createOrJumpToPreview(line_count) abort
   setlocal buftype=nofile
   setlocal noswapfile
 endfunction
+
+" Adds [value] to the [list] and removes the earliest entry if it would make the
+" list longer than [max_length]
+function! lsc#util#shift(list, max_length, value) abort
+  call add(a:list, a:value)
+  if len(a:list) > a:max_length | call remove(a:list, 0) | endif
+endfunction
