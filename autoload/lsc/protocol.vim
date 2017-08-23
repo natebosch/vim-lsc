@@ -9,15 +9,30 @@ endif
 " monotonically increasing message id.
 "
 " Returns [Id, formatted message]
-function! lsc#protocol#format(method, params) abort
+function! lsc#protocol#formatRequest(method, params) abort
   let s:lsc_last_id += 1
-  let message = {'jsonrpc': '2.0', 'id': s:lsc_last_id, 'method': a:method}
-  if type(a:params) != 1 || a:params != ''
+  return [s:lsc_last_id, s:Format(a:method, a:params, s:lsc_last_id)]
+endfunction
+
+" Format a json rpc string notifying with `method`.
+"
+" Like `formatRequest` but without the 'id' field. Returns the formatted
+" message.
+function! lsc#protocol#formatNotification(method, params) abort
+  return s:Format(a:method, a:params)
+endfunction
+
+function! s:Format(method, params, ...) abort
+  let message = {'jsonrpc': '2.0', 'method': a:method}
+  if type(a:params) != v:t_string || a:params != ''
     let message['params'] = a:params
+  endif
+  if a:0 >= 1
+    let message['id'] = a:1
   endif
   let encoded = json_encode(message)
   let length = len(encoded)
-  return [s:lsc_last_id, "Content-Length: ".length."\r\n\r\n".encoded]
+  return "Content-Length: ".length."\r\n\r\n".encoded
 endfunction
 
 " Reads from the buffer for server_name and processes the message. Continues to

@@ -58,9 +58,11 @@ endfunction
 " arguments the fourth should be a funcref which will be called when the server
 " returns a result for this call.
 function! lsc#server#call(file_type, method, params, ...) abort
-  let [call_id, message] = lsc#protocol#format(a:method, a:params)
   if a:0 >= 1
+    let [call_id, message] = lsc#protocol#formatRequest(a:method, a:params)
     call lsc#dispatch#registerCallback(call_id, a:1)
+  else
+    let message = lsc#protocol#formatNotification(a:method, a:params)
   endif
   if a:0 >= 2
     let override_initialize = a:2
@@ -76,8 +78,9 @@ function! lsc#server#call(file_type, method, params, ...) abort
   let channel = server_info.channel
   if ch_status(channel) != 'open' | return v:false | endif
   call ch_sendraw(channel, message)
-  call lsc#util#shift(server_info.calls, 10,
-      \ {'method': a:method, 'params': a:params, 'id': call_id})
+  let stored_call = {'method': a:method, 'params': a:params}
+  if exists('l:call_id') | let stored_call.call_id = call_id | endif
+  call lsc#util#shift(server_info.calls, 10, stored_call)
   return v:true
 endfunction
 

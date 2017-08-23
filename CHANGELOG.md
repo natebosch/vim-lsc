@@ -23,6 +23,7 @@
 - Add experimental support for communicating over a TCP channel. Configure the
   command as a "host:port" pair.
 - Bug Fix: Handle null completions response.
+- Bug Fix: Don't include an 'id' field for messages which are notifications.
 
 # 0.2.5
 
