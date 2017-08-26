@@ -24,6 +24,7 @@
   command as a "host:port" pair.
 - Bug Fix: Handle null completions response.
 - Bug Fix: Don't include an 'id' field for messages which are notifications.
+- Add support for `window/showMessage` and `window/logMessage`.
 
 # 0.2.5
 
