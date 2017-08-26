@@ -60,7 +60,7 @@ function! s:consumeMessage(server) abort
     let content = json_decode(payload)
     if type(content) != v:t_dict | throw 1 | endif
   catch
-    call lsc#util#error('Could not decode message: '.payload)
+    call lsc#message#error('Could not decode message: '.payload)
   endtry
   if exists('l:content')
     call lsc#util#shift(a:server.messages, 10, content)

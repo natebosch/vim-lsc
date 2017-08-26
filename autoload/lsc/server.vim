@@ -174,7 +174,7 @@ function! s:OnExit(server_name) abort
   let old_status = server_info.status
   if old_status == 'starting'
     let server_info.status= 'failed'
-    call lsc#util#error('Failed to initialize server: '.a:server_name)
+    call lsc#message#error('Failed to initialize server: '.a:server_name)
   elseif old_status == 'exiting'
     let server_info.status= 'exited'
   elseif old_status == 'running'

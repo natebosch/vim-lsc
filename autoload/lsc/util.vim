@@ -18,12 +18,6 @@ function! lsc#util#documentPath(uri) abort
   return substitute(a:uri, '^file://', '', 'v')
 endfunction
 
-function! lsc#util#error(message) abort
-  echohl Error
-  echom '[lsc] '.a:message
-  echohl None
-endfunction
-
 if !exists('s:initialized')
   let s:au_group_id = 0
   let s:callbacks = {}

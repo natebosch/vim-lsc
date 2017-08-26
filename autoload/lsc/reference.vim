@@ -10,7 +10,7 @@ function! lsc#reference#goToDefinition() abort
     endif
     if type(a:result) == v:t_none ||
         \ (type(a:result) == v:t_list && len(a:result) == 0)
-      call lsc#util#error('No definition found')
+      call lsc#message#error('No definition found')
       return
     endif
     if type(a:result) == type([])

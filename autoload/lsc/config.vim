@@ -16,7 +16,7 @@ function! lsc#config#mapKeys() abort
     let maps = s:default_maps
   endif
   if type(maps) != v:t_dict
-    call lsc#util#error('g:lsc_auto_map must be a bool or dict')
+    call lsc#message#error('g:lsc_auto_map must be a bool or dict')
     return
   endif
 

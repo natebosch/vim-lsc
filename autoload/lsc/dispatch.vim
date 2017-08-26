@@ -5,6 +5,12 @@ function! lsc#dispatch#message(message) abort
       let params = a:message['params']
       let file_path = lsc#util#documentPath(params['uri'])
       call lsc#diagnostics#setForFile(file_path, params['diagnostics'])
+    elseif a:message['method'] ==? 'window/showMessage'
+      let params = a:message['params']
+      call lsc#message#show(params['message'], params['type'])
+    elseif a:message['method'] ==? 'window/logMessage'
+      let params = a:message['params']
+      call lsc#message#log(params['message'], params['type'])
     else
       echom 'Got notification: '.a:message['method'].
           \ ' params: '.string(a:message['params'])
@@ -17,7 +23,7 @@ function! lsc#dispatch#message(message) abort
       try
         call s:callbacks[call_id][0](a:message['result'])
       catch
-        call lsc#util#error('Caught '.string(v:exception).
+        call lsc#message#error('Caught '.string(v:exception).
             \' while handling '.string(call_id))
         let g:lsc_last_error = v:exception
         let g:lsc_last_throwpoint = v:throwpoint
