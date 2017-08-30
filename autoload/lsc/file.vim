@@ -8,25 +8,25 @@ endif
 function! lsc#file#trackAll(filetype) abort
   for buffer in getbufinfo({'loaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    call s:DidOpen(buffer.name)
+    call s:FlushChanges(buffer.name)
   endfor
 endfunction
 
-" Run language servers for this filetype if they aren't already running and send
-" the 'didOpen' message.
+" Run language servers for this filetype if they aren't already running and
+" flush file changes.
 function! lsc#file#onOpen() abort
   call lsc#server#start(&filetype)
   call lsc#config#mapKeys()
-  call s:DidOpen(expand('%:p'))
+  call s:FlushChanges(expand('%:p'))
 endfunction
 
-" Send the 'didOpen' message for a file if it isn't already tracked, else
-" flushes changes to the server.
+" Flushes changes for the current buffer.
+function! lsc#file#flushChanges() abort
+  call s:FlushChanges(expand('%:p'))
+endfunction
+
+" Send the 'didOpen' message for a file.
 function! s:DidOpen(file_path) abort
-  if has_key(s:file_versions, a:file_path)
-    call lsc#file#flushChanges()
-    return
-  endif
   let bufnr = bufnr(a:file_path)
   if !bufloaded(bufnr) | return | endif
   let buffer_content = join(getbufline(bufnr, 1, '$'), "\n")
@@ -58,23 +58,26 @@ function! lsc#file#onChange() abort
     call timer_stop(b:lsc_flush_timer)
   endif
   let b:lsc_flush_timer =
-      \ timer_start(500, 'lsc#file#flushChanges', {'repeat': 1})
+      \ timer_start(500, {_->s:FlushChanges(expand('%:p'))}, {'repeat': 1})
 endfunction
 
 " Changes are flushed after 500ms of inactivity or before leaving the buffer.
-function! lsc#file#flushChanges(...) abort
+function! s:FlushChanges(file_path) abort
+  echom 'Flushing changes to '.a:file_path
   if !exists('b:lsc_flush_timer')
     return
   endif
-  let file_path = expand('%:p')
-  if !has_key(s:file_versions, file_path) | return | endif
-  let s:file_versions[file_path] += 1
+  if !has_key(s:file_versions, a:file_path)
+    call s:DidOpen(a:file_path)
+    return
+  endif
+  let s:file_versions[a:file_path] += 1
   call timer_stop(b:lsc_flush_timer)
   unlet b:lsc_flush_timer
   let buffer_content = join(getline(1, '$'), "\n")
   let params = {'textDocument':
       \   {'uri': lsc#util#documentUri(),
-      \    'version': s:file_versions[file_path],
+      \    'version': s:file_versions[a:file_path],
       \   },
       \ 'contentChanges': [{'text': buffer_content}],
       \ }
