@@ -63,7 +63,6 @@ endfunction
 
 " Changes are flushed after 500ms of inactivity or before leaving the buffer.
 function! s:FlushChanges(file_path) abort
-  echom 'Flushing changes to '.a:file_path
   if !exists('b:lsc_flush_timer')
     return
   endif
