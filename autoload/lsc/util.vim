@@ -103,7 +103,9 @@ function! s:createOrJumpToPreview(line_count) abort
       let direction = ''
     endif
     execute direction.' '.string(want_height).'split __lsc_preview__'
-    if exists('#User#LSCShowPreview') | doautocmd User LSCShowPreview | endif
+    if exists('#User#LSCShowPreview')
+      doautocmd <nomodeline> User LSCShowPreview
+    endif
   endif
   set previewwindow
   set winfixheight

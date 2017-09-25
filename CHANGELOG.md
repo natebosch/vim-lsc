@@ -25,6 +25,7 @@
 - Bug Fix: Handle null completions response.
 - Bug Fix: Don't include an 'id' field for messages which are notifications.
 - Add support for `window/showMessage` and `window/logMessage`.
+- Use `<nomodeline>` with `doautocmd`.
 
 # 0.2.5
 

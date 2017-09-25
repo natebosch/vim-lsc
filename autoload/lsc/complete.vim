@@ -137,7 +137,9 @@ function! s:SuggestCompletions(completion) abort
   endif
   setl completeopt-=longest
   setl completeopt+=menu,menuone,noinsert,noselect
-  if exists('#User#LSCAutocomplete') | doautocmd User LSCAutocomplete | endif
+  if exists('#User#LSCAutocomplete')
+    doautocmd <nomodeline> User LSCAutocomplete
+  endif
   call complete(start, suggestions)
 endfunction
 
