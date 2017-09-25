@@ -22,7 +22,7 @@ endfunction
 
 " Flushes changes for the current buffer.
 function! lsc#file#flushChanges() abort
-  call s:FlushChanges(expand('%:p'))
+  call s:FlushIfChanged(expand('%:p'))
 endfunction
 
 " Send the 'didOpen' message for a file.
@@ -58,14 +58,17 @@ function! lsc#file#onChange() abort
     call timer_stop(b:lsc_flush_timer)
   endif
   let b:lsc_flush_timer =
-      \ timer_start(500, {_->s:FlushChanges(expand('%:p'))}, {'repeat': 1})
+      \ timer_start(500, {_->s:FlushIfChanged(expand('%:p'))}, {'repeat': 1})
+endfunction
+
+" Flushes only if `onChange` had previously been called for the file and the
+" changes aren't yet flusehd.
+function! s:FlushIfChanged(file_path) abort
+  if exists('b:lsc_flush_timer') | call s:FlushChanges(a:file_path) | endif
 endfunction
 
 " Changes are flushed after 500ms of inactivity or before leaving the buffer.
 function! s:FlushChanges(file_path) abort
-  if !exists('b:lsc_flush_timer')
-    return
-  endif
   if !has_key(s:file_versions, a:file_path)
     call s:DidOpen(a:file_path)
     return
