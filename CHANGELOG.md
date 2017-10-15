@@ -26,6 +26,7 @@
 - Bug Fix: Don't include an 'id' field for messages which are notifications.
 - Add support for `window/showMessage` and `window/logMessage`.
 - Use `<nomodeline>` with `doautocmd`.
+- Bug Fix: Check for `lsc_flush_timer` before stopping it.
 
 # 0.2.5
 

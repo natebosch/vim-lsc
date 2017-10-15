@@ -74,8 +74,10 @@ function! s:FlushChanges(file_path) abort
     return
   endif
   let s:file_versions[a:file_path] += 1
-  call timer_stop(b:lsc_flush_timer)
-  unlet b:lsc_flush_timer
+  if exists('b:lsc_flush_timer')
+    call timer_stop(b:lsc_flush_timer)
+    unlet b:lsc_flush_timer
+  endif
   let buffer_content = join(getline(1, '$'), "\n")
   let params = {'textDocument':
       \   {'uri': lsc#util#documentUri(),
