@@ -178,7 +178,8 @@ function! s:OnExit(server_name) abort
   elseif old_status == 'exiting'
     let server_info.status= 'exited'
   elseif old_status == 'running'
-    let server_info.status= 'unexpected exit'
+    let server_info.status = 'unexpected exit'
+    call lsc#message#error('Command exited unexpectedly: '.a:server_name)
   endif
   for filetype in keys(g:lsc_server_commands)
     if g:lsc_server_commands[filetype] != a:server_name | continue | endif
