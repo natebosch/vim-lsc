@@ -27,6 +27,7 @@
 - Add support for `window/showMessage` and `window/logMessage`.
 - Use `<nomodeline>` with `doautocmd`.
 - Bug Fix: Check for `lsc_flush_timer` before stopping it.
+- Show an error if a user triggered call fails.
 
 # 0.2.5
 

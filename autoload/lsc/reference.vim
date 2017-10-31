@@ -23,7 +23,7 @@ function! lsc#reference#goToDefinition() abort
     let character = location.range.start.character + 1
     call s:goTo(file, line, character)
   endfunction
-  call lsc#server#call(&filetype, 'textDocument/definition',
+  call lsc#server#userCall('textDocument/definition',
       \ s:TextDocumentPositionParams(), function('Jump'))
 endfunction
 
@@ -37,8 +37,8 @@ function! lsc#reference#findReferences() abort
   call lsc#file#flushChanges()
   let params = s:TextDocumentPositionParams()
   let params.context = {'includeDeclaration': v:true}
-  call lsc#server#call(&filetype, 'textDocument/references',
-      \ params, function('<SID>setQuickFixReferences'))
+  call lsc#server#userCall('textDocument/references', params,
+      \ function('<SID>setQuickFixReferences'))
 endfunction
 
 function! s:setQuickFixReferences(results) abort
@@ -104,8 +104,8 @@ endfunction
 function! lsc#reference#hover() abort
   call lsc#file#flushChanges()
   let params = s:TextDocumentPositionParams()
-  call lsc#server#call(&filetype, 'textDocument/hover',
-      \ params, function('<SID>showHover'))
+  call lsc#server#userCall('textDocument/hover', params,
+      \ function('<SID>showHover'))
 endfunction
 
 function! s:showHover(result) abort

@@ -52,6 +52,17 @@ function! lsc#server#restart() abort
   endif
 endfunction
 
+" A server call explicitly initiated by the user for the current buffer.
+"
+" Expects the call to succeed and shows an error if it does not.
+function! lsc#server#userCall(method, params, callback) abort
+  let result = lsc#server#call(&filetype, a:method, a:params, a:callback)
+  if !result
+    call lsc#message#error('Failed to call '.a:method)
+    call lsc#message#error('Server status: '.lsc#server#status(&filetype))
+  endif
+endfunction
+
 " Call a method on the language server for `file_type`.
 "
 " Formats a message calling `method` with parameters `params`. If called with 4
