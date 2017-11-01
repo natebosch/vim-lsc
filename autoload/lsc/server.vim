@@ -37,7 +37,7 @@ function! lsc#server#kill(file_type) abort
   if !has_key(s:servers, command) | return | endif
   call lsc#server#call(a:file_type, 'shutdown', '')
   call lsc#server#call(a:file_type, 'exit', '')
-  let s:servers[command]['satus'] = 'exiting'
+  let s:servers[command]['status'] = 'exiting'
 endfunction
 
 function! lsc#server#restart() abort
