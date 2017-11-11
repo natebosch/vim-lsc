@@ -32,7 +32,7 @@ function! s:DidOpen(file_path) abort
   let buffer_content = join(getbufline(bufnr, 1, '$'), "\n")
   let filetype = getbufvar(bufnr, '&filetype')
   let params = {'textDocument':
-      \   {'uri': lsc#util#documentUri(a:file_path),
+      \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'languageId': filetype,
       \    'version': 1,
       \    'text': buffer_content
@@ -80,7 +80,7 @@ function! s:FlushChanges(file_path) abort
   endif
   let buffer_content = join(getline(1, '$'), "\n")
   let params = {'textDocument':
-      \   {'uri': lsc#util#documentUri(),
+      \   {'uri': lsc#uri#documentUri(),
       \    'version': s:file_versions[a:file_path],
       \   },
       \ 'contentChanges': [{'text': buffer_content}],

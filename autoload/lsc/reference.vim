@@ -18,7 +18,7 @@ function! lsc#reference#goToDefinition() abort
     else
       let location = a:result
     endif
-    let file = lsc#util#documentPath(location.uri)
+    let file = lsc#uri#documentPath(location.uri)
     let line = location.range.start.line + 1
     let character = location.range.start.character + 1
     call s:goTo(file, line, character)
@@ -28,7 +28,7 @@ function! lsc#reference#goToDefinition() abort
 endfunction
 
 function! s:TextDocumentPositionParams() abort
-  return { 'textDocument': {'uri': lsc#util#documentUri()},
+  return { 'textDocument': {'uri': lsc#uri#documentUri()},
       \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
       \ }
 endfunction
@@ -67,7 +67,7 @@ endfunction
 function! s:QuickFixItem(location) abort
   let item = {'lnum': a:location.range.start.line + 1,
       \ 'col': a:location.range.start.character + 1}
-  let file_path = lsc#util#documentPath(a:location.uri)
+  let file_path = lsc#uri#documentPath(a:location.uri)
   let item.filename = fnamemodify(file_path, ':~:.')
   let bufnr = bufnr(file_path)
   if bufnr != -1 && bufloaded(bufnr)

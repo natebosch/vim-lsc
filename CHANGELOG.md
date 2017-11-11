@@ -28,6 +28,7 @@
 - Use `<nomodeline>` with `doautocmd`.
 - Bug Fix: Check for `lsc_flush_timer` before stopping it.
 - Show an error if a user triggered call fails.
+- Bug Fix: URI encode file paths.
 
 # 0.2.5
 

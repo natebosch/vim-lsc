@@ -3,7 +3,7 @@ function! lsc#dispatch#message(message) abort
   if has_key(a:message, 'method')
     if a:message['method'] ==? 'textDocument/publishDiagnostics'
       let params = a:message['params']
-      let file_path = lsc#util#documentPath(params['uri'])
+      let file_path = lsc#uri#documentPath(params['uri'])
       call lsc#diagnostics#setForFile(file_path, params['diagnostics'])
     elseif a:message['method'] ==? 'window/showMessage'
       let params = a:message['params']

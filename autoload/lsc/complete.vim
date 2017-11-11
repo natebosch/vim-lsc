@@ -117,7 +117,7 @@ function! s:startCompletion() abort
     endif
   endfunction
   call lsc#file#flushChanges()
-  let params = { 'textDocument': {'uri': lsc#util#documentUri()},
+  let params = { 'textDocument': {'uri': lsc#uri#documentUri()},
       \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
       \ }
   call lsc#server#call(&filetype, 'textDocument/completion', params,
