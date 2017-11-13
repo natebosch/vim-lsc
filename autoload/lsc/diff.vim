@@ -1,110 +1,65 @@
 " Computes a simplistic diff between [old] and [new].
 "
-" Old and new text are lists of lines as returned from `getline(1, '$')`.
-"
 " Returns a dict with keys `range`, `rangeLength`, and `text` matching the LSP
 " definition of `TextDocumentContentChangeEvent`.
+"
+" Finds a single change between the common prefix, and common postfix.
 function! lsc#diff#compute(old, new) abort
-  let start = s:FirstDifference(a:old, a:new, v:false)
-
-  if len(a:old) <= start[0]
-    " This is an insert at end, shift it to before the last newline
-    let start = [len(a:old) - 1, len(a:old[-1])]
-    let end_inclusive = [-1, -1]
+  let start = s:FirstDifference(a:old, a:new)
+  if strlen(a:old) <= start
+    let start = strlen(a:old)
+    let end_inclusive = -1
   else
-    let old_trail = a:old[start[0]+1:]
-    let new_trail = a:new[start[0]+1:]
-    if start[1] < len(a:old[start[0]])
-      let old_trail = [a:old[start[0]][start[1]:]] + old_trail
-      let new_trail = [a:new[start[0]][start[1]:]] + new_trail
-    endif
-    let end_inclusive = s:FirstDifference(old_trail, new_trail, v:true)
+    let end_inclusive = s:LastDifference(a:old[start:], a:new[start:])
   endif
 
   " End is exclusive, using positive offsets
-  let end = [len(a:old) + end_inclusive[0],
-      \ strlen(a:old[end_inclusive[0]]) + end_inclusive[1] + 1]
+  let end = strlen(a:old) + end_inclusive + 1
 
-  let end_new = [len(a:new) + end_inclusive[0],
-      \ strlen(a:new[end_inclusive[0]]) + end_inclusive[1] + 1]
+  let end_new = strlen(a:new) + end_inclusive + 1
 
-  let text = s:Extract(a:new, start, end_new)
+  let text = start == end_new ? '' : a:new[start:end_new-1]
 
-  return { 'range': s:Range(start[0], start[1], end[0], end[1]),
-      \ 'rangeLength': s:Length(a:old, start[0], start[1], end[0], end[1]),
+  return { 'range': s:Range(a:old, start, end),
+      \ 'rangeLength': end - start,
       \ 'text': text
       \}
 endfunction
 
-" Finds the [line, column] of the first character which is different between
-" [old] and [new].
-"
-" If [rev] is [v:true] searchs backwards and returns negative offsets.
-function! s:FirstDifference(old, new, rev) abort
-  let length = min([len(a:old), len(a:new)])
-  let line = 0
-  while line < length
-    let index = a:rev ? -1 * line - 1 : line
-    let old_line = a:old[index]
-    let new_line = a:new[index]
-    if old_line !=# new_line
-      let result = [index, s:StringDiffChar(old_line, new_line, a:rev)]
-      return result
-    endif
-    let line += 1
-  endwhile
-  let index = a:rev ? -1 * line : line
-  let character = a:rev ? -1 * len(a:old[line-1]) - 1 : 0
-  return [index, character]
-endfunction
-
-" Finds the index of the first character which is different between [old] and
-" [new].
-"
-" If [rev] is [v:true] searchs backwards and returns a negative offset.
-function! s:StringDiffChar(old, new, rev) abort
+function! s:FirstDifference(old, new) abort
   let length = min([strlen(a:old), strlen(a:new)])
-  let character = 0
-  while character < length
-    let index = a:rev ? -1 * character - 1 : character
-    if a:old[index:index] !=# a:new[index:index]
-      return index
-    endif
-    let character += 1
+  let i = 0
+  while i < length
+    if a:old[i:i] !=# a:new[i:i] | break | endif
+    let i += 1
   endwhile
-  return a:rev ? -1 * character - 1 : character
+  return i
 endfunction
 
-" Translate from arguments to named keys.
-function! s:Range(startline, startcol, endline, endcol) abort
-  return {'start': {'line': a:startline, 'character': a:startcol},
-      \   'end': {'line': a:endline, 'character': a:endcol}}
-endfunction
-
-" Calculate the length of a range within [lines].
-function! s:Length(lines, startline, startcol, endline, endcol) abort
-  if a:startline == a:endline | return a:endcol - a:startcol | endif
-  let length = len(a:lines[a:startline]) + 1 - a:startcol
-  let current_line = a:startline + 1
-  while current_line < a:endline
-    let length += len(a:lines[current_line]) + 1 | " +1 for \n
-    let current_line += 1
+function! s:LastDifference(old, new) abort
+  let length = min([strlen(a:old), strlen(a:new)])
+  let i = -1
+  while i >= -1 * length
+    if a:old[i:i] !=# a:new[i:i] | break | endif
+    let i -= 1
   endwhile
-  let length += a:endcol
-  return length
+  return i
 endfunction
 
-function! s:Extract(lines, start, end) abort
-  if a:start == a:end | return '' | endif
-  if a:start[0] == a:end[0]
-    return a:lines[a:start[0]][a:start[1]:a:end[1]-1]
+function! s:OffsetToPosition(text, offset) abort
+  if a:offset == 0 | return [0, 0] | endif
+  let prefix = a:text[:a:offset - 1]
+  let parts = split(prefix, "\n")
+  if prefix[-1:-1] == "\n"
+    return [len(parts), 0]
+  else
+    return [len(parts) - 1, len(parts[-1])]
   endif
-  let result = a:lines[a:start[0]][a:start[1]:]."\n"
-  for line in a:lines[a:start[0]+1:a:end[0]-1]
-    let result .= line."\n"
-  endfor
-  if a:end[1] > 0
-    let result .= a:lines[a:end[0]][:a:end[1]-1]
-  endif
-  return result
+endfunction
+
+function! s:Range(text, start, end) abort
+  let start_range = s:OffsetToPosition(a:text, a:start)
+  let end_range = s:OffsetToPosition(a:text, a:end)
+  return {'start': {'line': start_range[0], 'character': start_range[1]},
+      \   'end': {'line': end_range[0], 'character': end_range[1]}}
 endfunction

@@ -2,117 +2,117 @@ function! TestDiff() abort
   " First and last lines swapped
   call s:TestDiff(
       \ [0,0,2,3], 11, "baz\nbar\nfoo",
-      \ ['foo', 'bar', 'baz'],
-      \ ['baz', 'bar', 'foo']
+      \ "foo\nbar\nbaz",
+      \ "baz\nbar\nfoo"
       \ )
 
   " Middle line changed
   call s:TestDiff(
       \ [1,0,1,3], 3, 'new',
-      \ ['foo', 'bar', 'baz'],
-      \ ['foo', 'new', 'baz']
+      \ "foo\nbar\nbaz",
+      \ "foo\nnew\nbaz"
       \ )
 
   " Middle characters changed
   call s:TestDiff(
       \ [1,1,1,2], 1, 'x',
-      \ ['foo', 'bar', 'baz'],
-      \ ['foo', 'bxr', 'baz']
+      \ "foo\nbar\nbaz",
+      \ "foo\nbxr\nbaz"
       \ )
 
   " End of line changed
   call s:TestDiff(
       \ [1,1,1,3], 2, 'y',
-      \ ['foo', 'bar', 'baz'],
-      \ ['foo', 'by', 'baz']
+      \ "foo\nbar\nbaz",
+      \ "foo\nby\nbaz"
       \ )
 
   " End of file changed
   call s:TestDiff(
       \ [2,1,2,3], 2, 'y',
-      \ ['foo', 'bar', 'baz'],
-      \ ['foo', 'bar', 'by'])
+      \ "foo\nbar\nbaz",
+      \ "foo\nbar\nby")
 
   " Characters inserted
   call s:TestDiff(
       \ [1,1,1,1], 0, 'e',
-      \ ['foo', 'bar', 'baz'],
-      \ ['foo', 'bear', 'baz']
+      \ "foo\nbar\nbaz",
+      \ "foo\nbear\nbaz"
       \ )
 
   " Characters inserted at beginning
   call s:TestDiff(
       \ [0,0,0,0], 0, 'a',
-      \ ['foo', 'bar', 'baz'],
-      \ ['afoo', 'bar', 'baz']
+      \ "foo\nbar\nbaz",
+      \ "afoo\nbar\nbaz"
       \ )
 
   " Line inserted
   call s:TestDiff(
       \ [1,0,1,0], 0, "more\n",
-      \ ['foo', 'bar', 'baz'],
-      \ ['foo', 'more', 'bar', 'baz']
+      \ "foo\nbar\nbaz",
+      \ "foo\nmore\nbar\nbaz"
       \ )
 
   " Line inserted at end
   call s:TestDiff(
       \ [2,3,2,3], 0, "\nanother",
-      \ ['foo', 'bar', 'baz'],
-      \ ['foo', 'bar', 'baz', 'another']
+      \ "foo\nbar\nbaz",
+      \ "foo\nbar\nbaz\nanother"
       \ )
 
   " Change spanning lines
   call s:TestDiff(
       \ [0,2,2,1], 7, "r\nmany\nlines\nsp",
-      \ ['foo', 'bar', 'baz'],
-      \ ['for', 'many', 'lines', 'spaz']
+      \ "foo\nbar\nbaz",
+      \ "for\nmany\nlines\nspaz"
       \ )
 
   " Delete within a line
   call s:TestDiff(
       \ [1,1,1,2], 1, '',
-      \ ['foo', 'bar', 'baz'],
-      \ ['foo', 'br', 'baz']
+      \ "foo\nbar\nbaz",
+      \ "foo\nbr\nbaz"
       \ )
 
   " Delete across a line
   call s:TestDiff(
       \ [1,1,2,1], 4, '',
-      \ ['foo', 'bar', 'qux'],
-      \ ['foo', 'bux'],
+      \ "foo\nbar\nqux",
+      \ "foo\nbux",
       \ )
 
   " Delete entire line
   call s:TestDiff(
       \ [1,0,2,0], 4, '',
-      \ ['foo', 'bar', 'qux'],
-      \ ['foo', 'qux'],
+      \ "foo\nbar\nqux",
+      \ "foo\nqux",
       \ )
 
   " Delete multiple lines
   call s:TestDiff(
       \ [1,0,3,0], 8, '',
-      \ ['foo', 'bar', 'baz', 'qux'],
-      \ ['foo', 'qux'],
+      \ "foo\nbar\nbaz\nqux",
+      \ "foo\nqux",
       \ )
 
   " Delete with repeated substring
   call s:TestDiff(
       \ [0, 4, 0, 6], 2, '',
-      \ ['ABABAB'],
-      \ ['ABAB'])
+      \ "ABABAB",
+      \ "ABAB")
 
   " Delete at beginning
   call s:TestDiff(
       \ [0, 0, 0, 1], 1, '',
-      \ ['foo', 'bar', 'baz'],
-      \ ['oo', 'bar', 'baz'])
+      \ "foo\nbar\nbaz",
+      \ "oo\nbar\nbaz")
 
   " Delete at end
   call s:TestDiff(
       \ [2, 2, 2, 3], 1, '',
-      \ ['foo', 'bar', 'baz'],
-      \ ['foo', 'bar', 'ba'])
+      \ "foo\nbar\nbaz",
+      \ "foo\nbar\nba")
 endfunction
 
 function! s:TestDiff(range, length, text, old, new) abort
