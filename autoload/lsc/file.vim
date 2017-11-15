@@ -1,6 +1,10 @@
 if !exists('s:initialized')
   " file path -> file version
   let s:file_versions = {}
+  " file path -> file content
+  let s:file_content = {}
+  " filetype -> boolean
+  let s:allowed_incremental_sync = {}
 endif
 
 " Send a 'didOpen' message for all open files of type `filetype` if they aren't
@@ -40,6 +44,10 @@ function! s:DidOpen(file_path) abort
       \ }
   if lsc#server#call(filetype, 'textDocument/didOpen', params)
     let s:file_versions[a:file_path] = 1
+    let s:file_content[a:file_path] = buffer_content
+    if s:AllowIncrementalSync(filetype)
+      let s:file_content[a:file_path] = buffer_content
+    endif
   endif
 endfunction
 
@@ -49,6 +57,7 @@ function! lsc#file#clean(filetype) abort
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
     if has_key(s:file_versions, buffer.name)
       unlet s:file_versions[buffer.name]
+      unlet s:file_content[buffer.name]
     endif
   endfor
 endfunction
@@ -83,15 +92,34 @@ function! s:FlushChanges(file_path, filetype) abort
     unlet b:lsc_flush_timer
   endif
   let buffer_content = join(getline(1, '$'), "\n")
+  let allow_incremental = s:AllowIncrementalSync(a:filetype)
+  if allow_incremental
+    let change = lsc#diff#compute(s:file_content[a:file_path], buffer_content)
+  else
+    let change = {'text': buffer_content}
+  endif
   let params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(),
       \    'version': s:file_versions[a:file_path],
       \   },
-      \ 'contentChanges': [{'text': buffer_content}],
+      \ 'contentChanges': [change],
       \ }
   call lsc#server#call(a:filetype, 'textDocument/didChange', params)
+  if allow_incremental
+    let s:file_content[a:file_path] = buffer_content
+  endif
 endfunction
 
 function! lsc#file#version() abort
   return get(s:file_versions, expand('%:p'), '')
+endfunction
+
+function! lsc#file#enableIncrementalSync(filetype) abort
+  let s:allowed_incremental_sync[a:filetype] = v:true
+endfunction
+
+function! s:AllowIncrementalSync(filetype) abort
+  return exists('g:lsc_enable_incremental_sync')
+      \ && g:lsc_enable_incremental_sync
+      \ && get(s:allowed_incremental_sync, a:filetype, v:false)
 endfunction

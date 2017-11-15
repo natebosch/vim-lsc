@@ -160,6 +160,23 @@ function! s:CheckCapabilities(init_results, command) abort
         endfor
       endif
     endif
+    if has_key(capabilities, 'textDocumentSync')
+      let text_document_sync = capabilities['textDocumentSync']
+      let supports_incremental = v:false
+      if type(text_document_sync) == v:t_dict
+        if has_key(text_document_sync, 'change')
+          let supports_incremental = text_document_sync['change'] == 2
+        endif
+      else
+        let supports_incremental = text_document_sync == 2
+      endif
+      if supports_incremental
+        for filetype in keys(g:lsc_server_commands)
+          if g:lsc_server_commands[filetype] != a:command | continue | endif
+          call lsc#file#enableIncrementalSync(filetype)
+        endfor
+      endif
+    endif
   endif
 endfunction
 

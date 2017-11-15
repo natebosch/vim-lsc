@@ -1,6 +1,9 @@
-# 0.2.7
+# 0.2.7-dev
 
-- Bug Fix; Use buffer filetype rather than current filetype when flushing file
+- Add support for `TextDocumentSyncKind.Incremental`. There is a new setting
+  called `g:lsc_enable_incremental_sync` which is defaulted to `v:false` to
+  allow the client to attempt incremental syncs. This feature is experimental.
+- Bug Fix: Use buffer filetype rather than current filetype when flushing file
   changes for background buffers.
 
 # 0.2.6
