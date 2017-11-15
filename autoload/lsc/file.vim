@@ -8,7 +8,7 @@ endif
 function! lsc#file#trackAll(filetype) abort
   for buffer in getbufinfo({'loaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    call s:FlushChanges(buffer.name)
+    call s:FlushChanges(buffer.name, a:filetype)
   endfor
 endfunction
 
@@ -17,12 +17,12 @@ endfunction
 function! lsc#file#onOpen() abort
   call lsc#server#start(&filetype)
   call lsc#config#mapKeys()
-  call s:FlushChanges(expand('%:p'))
+  call s:FlushChanges(expand('%:p'), &filetype)
 endfunction
 
 " Flushes changes for the current buffer.
 function! lsc#file#flushChanges() abort
-  call s:FlushIfChanged(expand('%:p'))
+  call s:FlushIfChanged(expand('%:p'), &filetype)
 endfunction
 
 " Send the 'didOpen' message for a file.
@@ -58,17 +58,21 @@ function! lsc#file#onChange() abort
     call timer_stop(b:lsc_flush_timer)
   endif
   let b:lsc_flush_timer =
-      \ timer_start(500, {_->s:FlushIfChanged(expand('%:p'))}, {'repeat': 1})
+      \ timer_start(500,
+      \   {_->s:FlushIfChanged(expand('%:p'), &filetype)},
+      \   {'repeat': 1})
 endfunction
 
 " Flushes only if `onChange` had previously been called for the file and the
 " changes aren't yet flusehd.
-function! s:FlushIfChanged(file_path) abort
-  if exists('b:lsc_flush_timer') | call s:FlushChanges(a:file_path) | endif
+function! s:FlushIfChanged(file_path, filetype) abort
+  if exists('b:lsc_flush_timer')
+    call s:FlushChanges(a:file_path, a:filetype)
+  endif
 endfunction
 
 " Changes are flushed after 500ms of inactivity or before leaving the buffer.
-function! s:FlushChanges(file_path) abort
+function! s:FlushChanges(file_path, filetype) abort
   if !has_key(s:file_versions, a:file_path)
     call s:DidOpen(a:file_path)
     return
@@ -85,7 +89,7 @@ function! s:FlushChanges(file_path) abort
       \   },
       \ 'contentChanges': [{'text': buffer_content}],
       \ }
-  call lsc#server#call(&filetype, 'textDocument/didChange', params)
+  call lsc#server#call(a:filetype, 'textDocument/didChange', params)
 endfunction
 
 function! lsc#file#version() abort

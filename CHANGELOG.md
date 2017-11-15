@@ -1,3 +1,8 @@
+# 0.2.7
+
+- Bug Fix; Use buffer filetype rather than current filetype when flushing file
+  changes for background buffers.
+
 # 0.2.6
 
 - Send file updates after re-reading already open file. Fixes some cases where
