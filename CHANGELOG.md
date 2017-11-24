@@ -5,6 +5,7 @@
   allow the client to attempt incremental syncs. This feature is experimental.
 - Bug Fix: Use buffer filetype rather than current filetype when flushing file
   changes for background buffers.
+- Update the diagnostic under the cursor when diagnostics change for the file.
 
 # 0.2.6
 

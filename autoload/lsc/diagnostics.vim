@@ -100,6 +100,7 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   endif
   call lsc#diagnostics#updateLocationList(a:file_path)
   call lsc#highlights#updateDisplayed()
+  call lsc#cursor#onMove()
 endfunction
 
 " Updates location list for all windows showing [file_path].
