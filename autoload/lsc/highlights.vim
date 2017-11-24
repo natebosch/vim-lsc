@@ -1,6 +1,6 @@
 " Refresh highlight matches on all visible windows.
 function! lsc#highlights#updateDisplayed() abort
-  if s:DeferForSelect() | return | endif
+  if s:DeferForMode() | return | endif
   call lsc#util#winDo('call lsc#highlights#update()')
 endfunction
 
@@ -30,12 +30,13 @@ function! lsc#highlights#clear() abort
   let w:lsc_diagnostic_matches = []
 endfunction
 
-" If vim is in select mode return true and attempt to schedule an update to
-" highlights for after returning to normal mode. If vim enters insert mode the
-" text will be changed and highlights will update anyway.
-function! s:DeferForSelect() abort
+" If vim is in select or visual mode return true and attempt to schedule an
+" update to highlights for after returning to normal mode. If vim enters insert
+" mode the text will be changed and highlights will update anyway.
+function! s:DeferForMode() abort
   let mode = mode()
-  if mode == 's' || mode == 'S' || mode == '\<c-s>'
+  if mode == 's' || mode == 'S' || mode == '\<c-s>' ||
+      \ mode == 'v' || mode == 'V' || mode == '\<c-v>'
     call lsc#util#once('CursorHold,CursorMoved',
         \ function('lsc#highlights#updateDisplayed'))
     return v:true
