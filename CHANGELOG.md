@@ -6,6 +6,7 @@
 - Bug Fix: Use buffer filetype rather than current filetype when flushing file
   changes for background buffers.
 - Update the diagnostic under the cursor when diagnostics change for the file.
+- Bug Fix: Don't change diagnostic highlights while in visual mode.
 
 # 0.2.6
 

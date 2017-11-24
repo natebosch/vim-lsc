@@ -35,8 +35,8 @@ endfunction
 " mode the text will be changed and highlights will update anyway.
 function! s:DeferForMode() abort
   let mode = mode()
-  if mode == 's' || mode == 'S' || mode == '\<c-s>' ||
-      \ mode == 'v' || mode == 'V' || mode == '\<c-v>'
+  if mode == 's' || mode == 'S' || mode == "\<c-s>" ||
+      \ mode == 'v' || mode == 'V' || mode == "\<c-v>"
     call lsc#util#once('CursorHold,CursorMoved',
         \ function('lsc#highlights#updateDisplayed'))
     return v:true
