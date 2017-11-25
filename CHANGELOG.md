@@ -1,4 +1,4 @@
-# 0.2.7-dev
+# 0.2.7
 
 - Add support for `TextDocumentSyncKind.Incremental`. There is a new setting
   called `g:lsc_enable_incremental_sync` which is defaulted to `v:false` to
