@@ -13,6 +13,7 @@ if !exists('s:initialized')
   " - calls. The last 10 calls made to the server
   " - messages. The last 10 messages from the server
   " - init_result. The response to the initialization call
+  " - filetypes. List of filetypes handled by this server.
   let s:servers = {}
   let s:initialized = v:true
 endif
@@ -111,21 +112,23 @@ function! s:Start(command) abort
     let job = job_start(a:command, job_options)
     let channel = job_getchannel(job)
   endif
-  let s:servers[a:command] = {
+  let server = {
       \ 'status': 'starting',
       \ 'buffer': '',
       \ 'channel': channel,
       \ 'calls': [],
       \ 'messages': [],
+      \ 'filetypes': s:FileTypesForServer(a:command),
       \}
+  let s:servers[a:command] = server
   let ch_id = ch_info(channel)['id']
   let s:server_names[ch_id] = a:command
   function! OnInitialize(init_result) closure abort
-    let s:servers[a:command].init_result = a:init_result
+    let server.init_result = a:init_result
+    let server.status = 'running'
     if type(a:init_result) == v:t_dict
-      call s:CheckCapabilities(a:init_result, a:command)
+      call s:CheckCapabilities(a:init_result, server)
     endif
-    let s:servers[a:command]['status'] = 'running'
     for filetype in keys(g:lsc_server_commands)
       if g:lsc_server_commands[filetype] != a:command | continue | endif
       call lsc#file#trackAll(filetype)
@@ -146,7 +149,20 @@ function! s:Start(command) abort
       \ params, function('OnInitialize'), v:true)
 endfunction
 
-function! s:CheckCapabilities(init_results, command) abort
+" Returns a list of filetypes handled by [server_name]
+function! s:FileTypesForServer(server_name) abort
+  return filter(keys(g:lsc_server_commands),
+      \ {idx, val -> s:ServerForFileType(val) == a:server_name})
+endfunction
+
+" Returns the server name which handles [filetype]
+function! s:ServerForFileType(filetype) abort
+  " TODO - handle dictionaries
+  " TODO - multiple servers?
+  return g:lsc_server_commands[a:filetype]
+endfunction
+
+function! s:CheckCapabilities(init_results, server) abort
   " TODO: Check with more depth IE whether go to definition works
   if has_key(a:init_results, 'capabilities')
     let capabilities = a:init_results['capabilities']
@@ -154,8 +170,7 @@ function! s:CheckCapabilities(init_results, command) abort
       let completion_provider = capabilities['completionProvider']
       if has_key(completion_provider, 'triggerCharacters')
         let trigger_characters = completion_provider['triggerCharacters']
-        for filetype in keys(g:lsc_server_commands)
-          if g:lsc_server_commands[filetype] != a:command | continue | endif
+        for filetype in a:server.filetypes
           call lsc#complete#setTriggers(filetype, trigger_characters)
         endfor
       endif
@@ -171,8 +186,7 @@ function! s:CheckCapabilities(init_results, command) abort
         let supports_incremental = text_document_sync == 2
       endif
       if supports_incremental
-        for filetype in keys(g:lsc_server_commands)
-          if g:lsc_server_commands[filetype] != a:command | continue | endif
+        for filetype in a:server.filetypes
           call lsc#file#enableIncrementalSync(filetype)
         endfor
       endif
