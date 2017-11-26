@@ -1,3 +1,7 @@
+# 0.2.8-dev
+
+- Don't track files which are not `modifiable`.
+
 # 0.2.7
 
 - Add support for `TextDocumentSyncKind.Incremental`. There is a new setting

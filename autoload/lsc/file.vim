@@ -33,6 +33,7 @@ endfunction
 function! s:DidOpen(file_path) abort
   let bufnr = bufnr(a:file_path)
   if !bufloaded(bufnr) | return | endif
+  if !getbufvar(bufnr, '&modifiable') | return | endif
   let buffer_content = join(getbufline(bufnr, 1, '$'), "\n")
   let filetype = getbufvar(bufnr, '&filetype')
   let params = {'textDocument':
