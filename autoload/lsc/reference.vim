@@ -68,7 +68,7 @@ function! s:QuickFixItem(location) abort
   let item = {'lnum': a:location.range.start.line + 1,
       \ 'col': a:location.range.start.character + 1}
   let file_path = lsc#uri#documentPath(a:location.uri)
-  let item.filename = fnamemodify(file_path, ':~:.')
+  let item.filename = fnamemodify(file_path, ':.')
   let bufnr = bufnr(file_path)
   if bufnr != -1 && bufloaded(bufnr)
     let item.text = getbufline(bufnr, item.lnum)[0]

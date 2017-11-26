@@ -1,6 +1,7 @@
 # 0.2.8-dev
 
 - Don't track files which are not `modifiable`.
+- Bug Fix: Fix jumping from quickfix item to files under home directory.
 
 # 0.2.7
 
