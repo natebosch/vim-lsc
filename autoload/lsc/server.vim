@@ -211,18 +211,21 @@ endfunction
 " Clean up stored state about a running server.
 function! s:OnExit(server_name) abort
   let server_info = s:servers[a:server_name]
-  unlet server_info.buffer
   unlet server_info.channel
   let old_status = server_info.status
   if old_status == 'starting'
     let server_info.status= 'failed'
     call lsc#message#error('Failed to initialize server: '.a:server_name)
+    if server_info.buffer !=# ''
+      call lsc#message#error('Last received: '.server_info.buffer)
+    endif
   elseif old_status == 'exiting'
     let server_info.status= 'exited'
   elseif old_status == 'running'
     let server_info.status = 'unexpected exit'
     call lsc#message#error('Command exited unexpectedly: '.a:server_name)
   endif
+  unlet server_info.buffer
   for filetype in keys(g:lsc_server_commands)
     if g:lsc_server_commands[filetype] != a:server_name | continue | endif
     call lsc#complete#clean(filetype)
