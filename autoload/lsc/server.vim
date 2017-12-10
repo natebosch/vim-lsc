@@ -36,8 +36,8 @@ endfunction
 function! lsc#server#kill(file_type) abort
   let command = g:lsc_server_commands[a:file_type]
   if !has_key(s:servers, command) | return | endif
-  call lsc#server#call(a:file_type, 'shutdown', '')
-  call lsc#server#call(a:file_type, 'exit', '')
+  call lsc#server#call(a:file_type, 'shutdown', v:null)
+  call lsc#server#call(a:file_type, 'exit', v:null)
   let s:servers[command]['status'] = 'exiting'
 endfunction
 
@@ -70,6 +70,7 @@ endfunction
 " arguments the fourth should be a funcref which will be called when the server
 " returns a result for this call.
 function! lsc#server#call(file_type, method, params, ...) abort
+  " If there is a callback this is a request
   if a:0 >= 1
     let [call_id, message] = lsc#protocol#formatRequest(a:method, a:params)
     call lsc#dispatch#registerCallback(call_id, a:1)
@@ -83,17 +84,7 @@ function! lsc#server#call(file_type, method, params, ...) abort
   endif
   let command = g:lsc_server_commands[a:file_type]
   if !has_key(s:servers, command) | return v:false | endif
-  let server_info = s:servers[command]
-  if server_info.status != 'running' && !override_initialize
-    return v:false
-  endif
-  let channel = server_info.channel
-  if ch_status(channel) != 'open' | return v:false | endif
-  call ch_sendraw(channel, message)
-  let stored_call = {'method': a:method, 'params': a:params}
-  if exists('l:call_id') | let stored_call.call_id = call_id | endif
-  call lsc#util#shift(server_info.calls, 10, stored_call)
-  return v:true
+  return s:servers[command].send(message, override_initialize)
 endfunction
 
 " Start a language server using `command` if it isn't already running.
@@ -120,6 +111,16 @@ function! s:Start(command) abort
       \ 'messages': [],
       \ 'filetypes': s:FileTypesForServer(a:command),
       \}
+  function server.send(message, ...) abort
+    if self.status != 'running' && !(a:0 >= 1 && a:1) |
+      return v:false
+    endif
+    let channel = self.channel
+    if ch_status(channel) != 'open' | return v:false | endif
+    call ch_sendraw(channel, lsc#protocol#encode(a:message))
+    call lsc#util#shift(self.calls, 10, a:message)
+    return v:true
+  endfunction
   let s:servers[a:command] = server
   let ch_id = ch_info(channel)['id']
   let s:server_names[ch_id] = a:command

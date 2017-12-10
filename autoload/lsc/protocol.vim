@@ -4,33 +4,37 @@ if !exists('s:lsc_last_id')
   let s:lsc_last_id = 0
 endif
 
-" Format a json rpc string calling `method` with serialized `params` and prepend
-" the headers for the language server protocol std io pipe format. Uses a
-" monotonically increasing message id.
+" Create a dictionary for the request calling `method` with parameters `params`
+" and the next availalbe ID.
 "
-" Returns [Id, formatted message]
+" Returns [ID, message dictionary]
 function! lsc#protocol#formatRequest(method, params) abort
   let s:lsc_last_id += 1
-  return [s:lsc_last_id, s:Format(a:method, a:params, s:lsc_last_id)]
+  let message = s:Format(a:method, a:params, s:lsc_last_id)
+  return [s:lsc_last_id, message]
 endfunction
 
-" Format a json rpc string notifying with `method`.
+" Create a dictionary for the notification calling `method` with parameters
+" `params`.
 "
-" Like `formatRequest` but without the 'id' field. Returns the formatted
-" message.
+" Like `formatRequest` but without the 'id' field.
+" Returns [formatted message, message dictionary]
 function! lsc#protocol#formatNotification(method, params) abort
-  return s:Format(a:method, a:params)
+  return s:Format(a:method, a:params, v:null)
 endfunction
 
-function! s:Format(method, params, ...) abort
-  let message = {'jsonrpc': '2.0', 'method': a:method}
-  if type(a:params) != v:t_string || a:params != ''
-    let message['params'] = a:params
-  endif
-  if a:0 >= 1
-    let message['id'] = a:1
-  endif
-  let encoded = json_encode(message)
+
+function! s:Format(method, params, id) abort
+  let message = {'method': a:method}
+  if type(a:params) != v:t_none | let message['params'] = a:params | endif
+  if type(a:id) != v:t_none | let message['id'] = a:id | endif
+  return message
+endfunction
+
+" Prepend the JSON RPC headers and serialize to JSON.
+function! lsc#protocol#encode(message) abort
+  let a:message['jsonrpc'] = '2.0'
+  let encoded = json_encode(a:message)
   let length = len(encoded)
   return "Content-Length: ".length."\r\n\r\n".encoded
 endfunction
