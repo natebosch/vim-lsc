@@ -68,7 +68,11 @@ function! s:consumeMessage(server) abort
   endtry
   if exists('l:content')
     call lsc#util#shift(a:server.messages, 10, content)
-    call lsc#dispatch#message(content)
+    try
+      call lsc#dispatch#message(content)
+    catch
+      call lsc#message#error('Error dispatching message: '.string(v:exception))
+    endtry
   endif
   let remaining_message = message[message_end:]
   let a:server.buffer = remaining_message
