@@ -4,11 +4,11 @@ function! lsc#uri#documentUri(...) abort
   else
     let file_path = expand('%:p')
   endif
-  return 'file://'.s:EncodePath(file_path)
+  return s:filePrefix().s:EncodePath(file_path)
 endfunction
 
 function! lsc#uri#documentPath(uri) abort
-  return s:DecodePath(substitute(a:uri, '^file://', '', 'v'))
+  return s:DecodePath(substitute(a:uri, '^'.s:filePrefix(), '', 'v'))
 endfunction
 
 function! s:EncodePath(value) abort
@@ -29,4 +29,12 @@ endfunction
 function! s:DecodeChar(hexcode)
   let charcode = str2nr(a:hexcode, 16)
   return nr2char(charcode)
+endfunction
+
+function! s:filePrefix(...) abort
+  if has('win32')
+    return 'file:///'
+  else
+    return 'file://'
+  endif
 endfunction
