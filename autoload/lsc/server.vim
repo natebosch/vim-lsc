@@ -43,10 +43,10 @@ endfunction
 
 function! lsc#server#restart() abort
   let command = g:lsc_server_commands[&filetype]
-  let server_info = s:servers[command]
-  let old_status = server_info.status
+  let old_status = lsc#server#status(&filetype)
   if old_status == 'starting' || old_status == 'running'
     call lsc#server#kill(&filetype)
+    let server_info = s:servers[command]
     let server_info.status = 'restarting'
   else
     call s:Start(command)
