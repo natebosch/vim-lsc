@@ -43,10 +43,10 @@ endfunction
 
 function! lsc#server#restart() abort
   let command = g:lsc_server_commands[&filetype]
-  let server_info = s:servers[command]
-  let old_status = server_info.status
+  let old_status = lsc#server#status(&filetype)
   if old_status == 'starting' || old_status == 'running'
     call lsc#server#kill(&filetype)
+    let server_info = s:servers[command]
     let server_info.status = 'restarting'
   else
     call s:Start(command)
@@ -92,8 +92,7 @@ function! s:Start(command) abort
   if has_key(s:servers, a:command) && has_key(s:servers[a:command], 'channel')
     return
   endif
-
-  if a:command =~? ':'
+  if !filereadable(a:command)
     let channel_options = {'mode': 'raw', 'callback': 'lsc#server#callback'}
     let channel = ch_open(a:command, channel_options)
   else
