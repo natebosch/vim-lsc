@@ -92,8 +92,7 @@ function! s:Start(command) abort
   if has_key(s:servers, a:command) && has_key(s:servers[a:command], 'channel')
     return
   endif
-
-  if a:command =~? ':'
+  if a:command =~# '[^:]\+:\d\+'
     let channel_options = {'mode': 'raw', 'callback': 'lsc#server#callback'}
     let channel = ch_open(a:command, channel_options)
   else
