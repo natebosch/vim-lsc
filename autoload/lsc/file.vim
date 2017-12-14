@@ -43,6 +43,12 @@ function! s:DidOpen(file_path) abort
       \    'text': buffer_content
       \   }
       \ }
+  if has_key(g:lsc_metadata_extraFlags, filetype)
+    let Func = function(g:lsc_metadata_extraFlags[filetype])
+    let flag = Func(a:file_path, filetype)
+    let params.metadata = {}
+    let params.metadata.extraFlags = flag
+  endif
   if lsc#server#call(filetype, 'textDocument/didOpen', params)
     let s:file_versions[a:file_path] = 1
     let s:file_content[a:file_path] = buffer_content
