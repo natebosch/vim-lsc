@@ -3,23 +3,20 @@
 "endif
 "let g:loaded_lsc = 1
 
-" file_type -> command
-if !exists('g:lsc_server_commands')
-  let g:lsc_server_commands = {}
+if !exists('g:lsc_servers_by_filetype')
+  " filetype -> server name
+  let g:lsc_servers_by_filetype = {}
 endif
 if !exists('g:lsc_enable_autocomplete')
   let g:lsc_enable_autocomplete = v:true
-endif
-if !exists('s:disabled_filetypes')
-  let s:disabled_filetypes = {}
 endif
 
 command! LSClientGoToDefinition call lsc#reference#goToDefinition()
 command! LSClientFindReferences call lsc#reference#findReferences()
 command! LSClientShowHover call lsc#reference#hover()
 command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
-command! LSClientDisable call <SID>Disable()
-command! LSClientEnable call <SID>Enable()
+command! LSClientDisable call lsc#server#disable()
+command! LSClientEnable call lsc#server#enable()
 
 " Returns the status of the language server for the current filetype or empty
 " string if it is not configured.
@@ -30,18 +27,14 @@ endfunction
 " RegisterLanguageServer
 "
 " Registers a command as the server to start the first time a file with type
-" file_type is seen. As long as the server is running it won't be restarted on
+" filetype is seen. As long as the server is running it won't be restarted on
 " subsequent appearances of this file type. If the server exits it will be
 " restarted the next time a window or tab is entered with this file type.
-function! RegisterLanguageServer(file_type, command) abort
-  if has_key(g:lsc_server_commands, a:file_type)
-      \ && a:command != g:lsc_server_commands[a:file_type]
-    throw 'Already have a server command for '.a:file_type
-  endif
-  let g:lsc_server_commands[a:file_type] = a:command
+function! RegisterLanguageServer(filetype, config) abort
+  call lsc#server#register(a:filetype, a:config)
   for buffer in getbufinfo({'loaded': v:true})
-    if getbufvar(buffer.bufnr, '&filetype') == a:file_type
-      call lsc#server#start(a:file_type)
+    if getbufvar(buffer.bufnr, '&filetype') == a:filetype
+      call lsc#server#start(a:filetype)
       return
     endif
   endfor
@@ -65,7 +58,7 @@ augroup LSC
   " Window local state is only correctly maintained for the current tab.
   autocmd TabEnter * call lsc#util#winDo('call LSCEnsureCurrentWindowState()')
 
-  autocmd BufNewFile,BufReadPost * call <SID>IfEnabled('lsc#file#onOpen')
+  autocmd BufNewFile,BufReadPost * call <SID>OnOpen()
   autocmd TextChanged,TextChangedI,CompleteDone *
       \ call <SID>IfEnabled('lsc#file#onChange')
   autocmd BufLeave * call <SID>IfEnabled('lsc#file#flushChanges')
@@ -95,7 +88,7 @@ endfunction
 " Update or clear state local to the current window.
 function! LSCEnsureCurrentWindowState() abort
   let w:lsc_window_initialized = v:true
-  if !has_key(g:lsc_server_commands, &filetype)
+  if !has_key(g:lsc_servers_by_filetype, &filetype)
     if exists('w:lsc_diagnostic_matches')
       call lsc#highlights#clear()
     endif
@@ -110,27 +103,23 @@ endfunction
 
 " Run `function` if LSC is enabled for the current filetype.
 function! s:IfEnabled(function) abort
-  if has_key(g:lsc_server_commands, &filetype)
-      \ && !has_key(s:disabled_filetypes, &filetype)
-    exec 'call '.a:function.'()'
-  endif
-endfunction
-
-function! s:Disable() abort
-  let s:disabled_filetypes[&filetype] = v:true
-  call lsc#server#kill(&filetype)
-endfunction
-
-function! s:Enable() abort
-  silent! unlet s:disabled_filetypes[&filetype]
-  call lsc#server#start(&filetype)
+  if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
+  if !lsc#server#filetypeActive(&filetype) | return | endif
+  exec 'call '.a:function.'()'
 endfunction
 
 " Exit all open language servers.
 function! s:OnVimQuit() abort
-  for file_type in keys(g:lsc_server_commands)
+  for file_type in keys(g:lsc_servers_by_filetype)
     call lsc#server#kill(file_type)
   endfor
+endfunction
+
+function! s:OnOpen() abort
+  if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
+  call lsc#config#mapKeys()
+  if !lsc#server#filetypeActive(&filetype) | return | endif
+  call lsc#file#onOpen()
 endfunction
 
 " Highlight groups {{{2

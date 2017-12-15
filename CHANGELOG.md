@@ -3,6 +3,7 @@
 - Don't track files which are not `modifiable`.
 - Bug Fix: Fix jumping from quickfix item to files under home directory.
 - Only update diagnostic under cursor when the change is for the current file.
+- Add support for additional per-server config.
 
 # 0.2.7
 

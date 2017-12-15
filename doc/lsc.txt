@@ -18,15 +18,28 @@ SETUP                                           *lsc-setup*
 There is no install step for vim-lsc. Configure the filetypes that are tracked
 by installed language servers in the variable "g:lsc_server_commands". Each
 value in this dict should be a string which corresponds to either an
-executable in your "$PATH", or a "host:port" pair. If multiple filetypes are
-tracked by the same server they should be entered as separate keys with the
-same value. For example:
+executable in your "$PATH", and absolute path to an executable, or a
+"host:port" pair. If multiple filetypes are tracked by the same server they
+should be entered as separate keys with the same value. The value may also be
+a `dict` to allow for additional configuration. Allowed keys are:
+- 'command': Required. The command as above
+- 'name': Optional. A friendly name for the server. Defaults to the command
+- 'enabled': Optiona. Set to `v:false` to avoid starting the server until
+  calling |:LSClientEnable|
+
+
+For example:
 
 >
  let g:lsc_server_commands = {
      \ 'dart': 'dart_language_server',
      \ 'html': 'dart_language_server',
      \ 'typescript': 'localhost:8000',
+     \ 'lua': {
+     \   'name': 'lua',
+     \   'command': 'lua-ls',
+     \   'enabled': v:false,
+     \ },
      \}
 <
 

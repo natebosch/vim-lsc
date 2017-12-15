@@ -1,16 +1,19 @@
 " Refresh highlight matches on all visible windows.
 function! lsc#highlights#updateDisplayed() abort
   if s:DeferForMode() | return | endif
-  call lsc#util#winDo('call lsc#highlights#update()')
+  call lsc#util#winDo('call lsc#highlights#updateIfActive()')
+endfunction
+
+function! lsc#highlights#updateIfActive() abort
+  if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
+  call lsc#highlights#update()
 endfunction
 
 " Refresh highlight matches in the current window.
 function! lsc#highlights#update() abort
   if s:CurrentWindowIsFresh() | return | endif
   call lsc#highlights#clear()
-  if !has_key(g:lsc_server_commands, &filetype) || &diff
-    return
-  endif
+  if &diff | return | endif
   for line in values(lsc#diagnostics#forFile(expand('%:p')))
     for diagnostic in line
       let match = matchaddpos(diagnostic.group, [diagnostic.range])
