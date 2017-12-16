@@ -20,6 +20,7 @@ if !exists('s:initialized')
   "   - name: Same as the key into `s:servers`
   "   - command: Executable
   "   - enabled: (optional) Whether the server should be started.
+  "   - message_hooks: (optional) Functions call to override params
   let s:servers = {}
   let s:initialized = v:true
 endif
@@ -74,22 +75,24 @@ endfunction
 " Formats a message calling `method` with parameters `params`. If called with 4
 " arguments the fourth should be a funcref which will be called when the server
 " returns a result for this call.
+"
+" If the server has a configured `message_hook` for `method` it will be run to
+" adjust `params`.
 function! lsc#server#call(filetype, method, params, ...) abort
   if !has_key(g:lsc_servers_by_filetype, a:filetype) | return v:false | endif
+  let server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
+  if server.status != 'running' && !(a:0 >= 2 && a:2)
+      return v:false
+  endif
+  let params = lsc#config#messageHook(server, a:method, a:params)
   " If there is a callback this is a request
   if a:0 >= 1
-    let [call_id, message] = lsc#protocol#formatRequest(a:method, a:params)
+    let [call_id, message] = lsc#protocol#formatRequest(a:method, l:params)
     call lsc#dispatch#registerCallback(call_id, a:1)
   else
-    let message = lsc#protocol#formatNotification(a:method, a:params)
+    let message = lsc#protocol#formatNotification(a:method, l:params)
   endif
-  if a:0 >= 2
-    let override_initialize = a:2
-  else
-    let override_initialize = v:false
-  endif
-  let server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
-  return server.send(message, override_initialize)
+  return server.send(message)
 endfunction
 
 " Start a language server using `command` if it isn't already running.
@@ -292,10 +295,7 @@ function! lsc#server#register(filetype, config) abort
       \ 'filetypes': [a:filetype],
       \ 'config': config,
       \}
-  function server.send(message, ...) abort
-    if self.status != 'running' && !(a:0 >= 1 && a:1) |
-      return v:false
-    endif
+  function server.send(message) abort
     let channel = self.channel
     if ch_status(channel) != 'open' | return v:false | endif
     call ch_sendraw(channel, lsc#protocol#encode(a:message))

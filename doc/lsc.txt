@@ -21,12 +21,9 @@ value in this dict should be a string which corresponds to either an
 executable in your "$PATH", and absolute path to an executable, or a
 "host:port" pair. If multiple filetypes are tracked by the same server they
 should be entered as separate keys with the same value. The value may also be
-a `dict` to allow for additional configuration. Allowed keys are:
-- 'command': Required. The command as above
-- 'name': Optional. A friendly name for the server. Defaults to the command
-- 'enabled': Optiona. Set to `v:false` to avoid starting the server until
-  calling |:LSClientEnable|
-
+a `dict` to allow for additional configuration. Set |lsc-server-customization|
+for allowed keys. `'command'` is required and matches the command above when a
+dict is not used.
 
 For example:
 
@@ -218,6 +215,54 @@ screen instead of as a horizontal split:
 >
  autocmd User LSCShowPreview wincmd H | vertical resize 80
 <
+SERVER CUSTOMIZATION                            *lsc-server-cusomization*
+
+When the server configuration is a `dict` (see |lsc-setup|) the following
+advanced behavior can be configured.
+
+                                                *lsc-server-command*
+`'command'`: (Required). The command to run or a "host:port" pair. See
+|lsc-setup|.
+
+                                                *lsc-server-name*
+`'name'`: A friendly name for the server. Only the first configuration with a
+given name is used. Defaults to the same value as `'command'`. Filetypes which
+are configured with the same name use the same server.
+
+                                                *lsc-server-enabled*
+`'enabled'`: Set to `v:false` so aoid starting the server until
+|:LSClientEnable| is called.
+
+                                                *lsc-server-message_hooks*
+`'message_hooks'`: Set to a dictionary where the keys are LSP method names and
+the values are |funcref|s which may modify the '`params`' for that call. The
+function must take two arguments, the method name being called (for example
+`'textDocument/didOpen'`) and the parameters dict. For requests which take no
+parameters the second value may be `v:null`.The modified or new params should
+be returned by the function.
+
+For example:
+>
+ function! AddExtraArgs(method, params) abort!
+   " Can read existing params if needed
+   let filename = a:params.document.uri
+   " Can modify params...
+   let a:params.metadata = {}
+   let a:params.metadata.extraFlags = ['-Wall']
+   " But they still need to be returned
+   return a:params
+ endfunction
+
+ let g:lsc_server_commands = {
+     \ 'c': {
+     \    'command': 'clangd',
+     \    'message_hooks': {
+     \        'textDocument/didOpen': function('AddExtraArgs'),
+     \    },
+     \  },
+     \}
+<
+
 DEBUGGING TIPS                                  *lsc-debugging*
 
 If you are having difficulty with integration with a particular language

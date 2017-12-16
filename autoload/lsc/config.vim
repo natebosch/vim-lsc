@@ -29,3 +29,15 @@ function! lsc#config#mapKeys() abort
     execute 'setlocal '.maps['Completion'].'=lsc#complete#complete'
   endif
 endfunction
+
+function! lsc#config#messageHook(server, method, params) abort
+  if !has_key(a:server.config, 'message_hooks') | return a:params | endif
+  let hooks = a:server.config.message_hooks
+  if !has_key(hooks, a:method) | return a:params | endif
+  try
+    return hooks[a:method](a:method, a:params)
+  catch
+    call lsc#message#error('Failed to run message hook for '.a:method)
+    return a:params
+  endtry
+endfunction
