@@ -278,7 +278,7 @@ function! lsc#server#register(filetype, config) abort
   endif
   let g:lsc_servers_by_filetype[a:filetype] = config.name
   if has_key(s:servers, config.name)
-    call add(s:servers[config.name].filteyps, a:filetype)
+    call add(s:servers[config.name].filetypes, a:filetype)
     return
   endif
   let initial_status = 'not started'
