@@ -6,6 +6,9 @@
 - Add support for additional per-server config.
 - Bug Fix: If using `g:lsc_enable_incremental_sync` correctly handles multiple
   blank lines in a row.
+- Add support for overriding the `params` for certain methods.
+- Bug Fix: Correct paths on Windows.
+- Bug Fix: Allow restarting a server which failed to start initially.
 
 # 0.2.7
 
