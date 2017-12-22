@@ -4,6 +4,8 @@
 - Bug Fix: Fix jumping from quickfix item to files under home directory.
 - Only update diagnostic under cursor when the change is for the current file.
 - Add support for additional per-server config.
+- Bug Fix: If using `g:lsc_enable_incremental_sync` correctly handles multiple
+  blank lines in a row.
 
 # 0.2.7
 

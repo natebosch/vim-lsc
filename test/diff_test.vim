@@ -113,6 +113,13 @@ function! TestDiff() abort
       \ [2, 2, 2, 3], 1, '',
       \ "foo\nbar\nbaz",
       \ "foo\nbar\nba")
+
+  " Handles multiple blank lines
+  call s:TestDiff(
+      \ [5,1,5,2], 1, 'x',
+      \ "\n\n\n\nfoo\nbar\nbaz",
+      \ "\n\n\n\nfoo\nbxr\nbaz"
+      \ )
 endfunction
 
 function! s:TestDiff(range, length, text, old, new) abort

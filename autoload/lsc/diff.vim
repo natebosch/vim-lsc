@@ -49,9 +49,9 @@ endfunction
 function! s:OffsetToPosition(text, offset) abort
   if a:offset == 0 | return [0, 0] | endif
   let prefix = a:text[:a:offset - 1]
-  let parts = split(prefix, "\n")
+  let parts = split(prefix, "\n", v:true)
   if prefix[-1:-1] == "\n"
-    return [len(parts), 0]
+    return [len(parts) - 1, 0]
   else
     return [len(parts) - 1, len(parts[-1])]
   endif
