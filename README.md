@@ -46,6 +46,7 @@ let g:lsc_auto_map = v:true " Use defaults
 let g:lsc_auto_map = {
     \ 'GoToDefinition': '<C-]>',
     \ 'FindReferences': 'gr',
+    \ 'FindCodeActions': 'ga',
     \ 'ShowHover': 'K',
     \ 'Completion': 'completefunc',
     \}
@@ -118,3 +119,14 @@ While the cursor is on any identifier call `LSClientShowHover` (`K` if using the
 default mappings) to request hover text and show it in a preview window.
 Override the direction of the split by setting `g:lsc_preview_split_direction`
 to either `'below'` or `'above'`.
+
+### Code Actions (experimental)
+
+While this is still experimental it is opt-in. Add
+`let g:lsc_enable_apply_edit = v:true` to allow edits to files (since these are
+the most likely result of code actions). Call `LSClientFindCodeActions` (`ga` if
+using the default mappings) to look for code actions available at the cursor
+location.
+
+Support is very limited for now. Edits can only be applied in the active buffer
+to prevent.

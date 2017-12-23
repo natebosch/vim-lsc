@@ -134,7 +134,7 @@ function! s:Start(server) abort
   endif
   let params = {'processId': getpid(),
       \ 'rootUri': lsc#uri#documentUri(getcwd()),
-      \ 'capabilities': s:client_capabilities,
+      \ 'capabilities': s:ClientCapabilities(),
       \ 'trace': trace_level
       \}
   call lsc#server#call(&filetype, 'initialize',
@@ -224,9 +224,16 @@ function! lsc#server#callback(channel, message) abort
   call lsc#protocol#consumeMessage(server_info)
 endfunction
 
-" Supports no workspace capabilities - missing value means no support
-let s:client_capabilities = {
-    \ 'workspace': {},
+" Missing value means no support
+function! s:ClientCapabilities() abort
+  let applyEdit = v:false
+  if exists('g:lsc_enable_apply_edit') && g:lsc_enable_apply_edit
+    let applyEdit = v:true
+  endif
+  return {
+    \ 'workspace': {
+    \   'applyEdit': applyEdit,
+    \   },
     \ 'textDocument': {
     \   'synchronization': {
     \     'willSave': v:false,
@@ -239,6 +246,7 @@ let s:client_capabilities = {
     \   'definition': {'dynamicRegistration': v:false},
     \ }
     \}
+endfunction
 
 function! lsc#server#filetypeActive(filetype) abort
   let server = s:servers[g:lsc_servers_by_filetype[a:filetype]]

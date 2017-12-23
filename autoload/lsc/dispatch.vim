@@ -1,5 +1,5 @@
 " Handle messages received from the server.
-function! lsc#dispatch#message(message) abort
+function! lsc#dispatch#message(server, message) abort
   if has_key(a:message, 'method')
     if a:message['method'] ==? 'textDocument/publishDiagnostics'
       let params = a:message['params']
@@ -11,6 +11,14 @@ function! lsc#dispatch#message(message) abort
     elseif a:message['method'] ==? 'window/logMessage'
       let params = a:message['params']
       call lsc#message#log(params['message'], params['type'])
+    elseif a:message['method'] ==? 'workspace/applyEdit'
+      let params = a:message['params']
+      let applied = lsc#edit#apply(params)
+      if has_key(a:message, 'id')
+        let id = a:message['id']
+        let response = {'applied': applied}
+        call a:server.send(lsc#protocol#formatResponse(id, response))
+      endif
     else
       echom 'Got notification: '.a:message['method'].
           \ ' params: '.string(a:message['params'])

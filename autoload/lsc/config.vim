@@ -1,6 +1,7 @@
 let s:default_maps = {
     \ 'GoToDefinition': '<C-]>',
     \ 'FindReferences': 'gr',
+    \ 'FindCodeActions': 'ga',
     \ 'ShowHover': 'K',
     \ 'Completion': 'completefunc',
     \}
@@ -20,7 +21,12 @@ function! lsc#config#mapKeys() abort
     return
   endif
 
-  for command in ['GoToDefinition', 'FindReferences', 'ShowHover']
+  for command in [
+      \ 'GoToDefinition',
+      \ 'FindReferences',
+      \ 'ShowHover',
+      \ 'FindCodeActions',
+      \]
     if has_key(maps, command)
       execute 'nnoremap <buffer>'.maps[command].' :LSClient'.command.'<CR>'
     endif

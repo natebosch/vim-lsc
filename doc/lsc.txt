@@ -75,6 +75,13 @@ If the preview window is not visible it will |split| the window and size it no
 bigger than |previewheight|. Override the direction of the split by setting
 |g:lsc_preview_split_direction| to either |above| or |below|.
 
+                                                *:LSClientFindCodeActions*
+Check for available actions at the cursor's position and display them in a
+menu. Sends a "textDocument/codeAction" request to get the available choices,
+and if one is selected sends a "workspace/executeCommand". Typically actions
+end up triggering workspace edits so this command is likely only useful if
+|g:lsc_enable_apply_edit| is set to `v:true`.
+
                                                 *:LSClientRestartServer*
 Sends requests to the server for the current filetype to "shutdown" and
 "exit", and after the process exits, restarts it. If the server is
@@ -193,6 +200,11 @@ the old content and send a single change for the content in between. Certain
 edits which simultaneously change content near the beginning and end of the
 buffer can cause large changes to be sent, but in most cases the messages will
 be smaller than with full syncs.
+
+                                                *lsc-configure-edits*
+                                                *g:lsc_enable_apply_edit*
+By default the client will not modify any buffer in response to
+`workspace/applyEdit` calls. To enable edits set to `v:true`.
 
 AUTOCMDS                                        *lsc-autocmds*
 

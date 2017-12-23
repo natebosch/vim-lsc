@@ -1,4 +1,4 @@
-# 0.2.8-dev
+# 0.2.8
 
 - Don't track files which are not `modifiable`.
 - Bug Fix: Fix jumping from quickfix item to files under home directory.
@@ -9,6 +9,8 @@
 - Add support for overriding the `params` for certain methods.
 - Bug Fix: Correct paths on Windows.
 - Bug Fix: Allow restarting a server which failed to start initially.
+- Add experimental support for `textDocument/codeActions` and
+  `workspace/applyEdit`
 
 # 0.2.7
 

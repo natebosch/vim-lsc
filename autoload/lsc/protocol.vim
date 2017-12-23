@@ -23,6 +23,10 @@ function! lsc#protocol#formatNotification(method, params) abort
   return s:Format(a:method, a:params, v:null)
 endfunction
 
+" Create a dictionary for the response to a call.
+function! lsc#protocol#formatResponse(id, result) abort
+  return {'id': a:id, 'result': a:result}
+endfunction
 
 function! s:Format(method, params, id) abort
   let message = {'method': a:method}
@@ -69,7 +73,7 @@ function! s:consumeMessage(server) abort
   if exists('l:content')
     call lsc#util#shift(a:server.messages, 10, content)
     try
-      call lsc#dispatch#message(content)
+      call lsc#dispatch#message(a:server, content)
     catch
       call lsc#message#error('Error dispatching message: '.string(v:exception))
     endtry
