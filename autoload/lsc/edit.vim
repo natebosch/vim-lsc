@@ -78,12 +78,16 @@ function! lsc#edit#apply(params) abort
       return v:false
     endif
   endfor
+  let view = winsaveview()
+  let alternate=@#
   for [uri, edits] in items(changes)
     for edit in edits
       " Expect edit is in current buffer
       call s:Apply(edit)
     endfor
   endfor
+  call winrestview(view)
+  let @#=alternate
   return v:true
 endfunction
 

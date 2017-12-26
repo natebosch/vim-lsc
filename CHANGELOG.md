@@ -2,6 +2,7 @@
 
 - Add an argument to `lsc#edit#findCodeActions` to pass a callback to choose an
   action.
+- Save and restore window view when applying a workspace edit.
 
 # 0.2.8
 
