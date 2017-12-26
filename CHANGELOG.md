@@ -4,6 +4,7 @@
   action.
 - Save and restore window view when applying a workspace edit.
 - Bug fix: Handle zero width edits at the end of a line.
+- Add support for `textDocument/rename`.
 
 # 0.2.8
 

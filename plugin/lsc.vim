@@ -19,6 +19,11 @@ command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
 command! LSClientDisable call lsc#server#disable()
 command! LSClientEnable call lsc#server#enable()
 
+if exists('g:lsc_enable_apply_edit') && g:lsc_enable_apply_edit
+  command! -nargs=? LSClientRename call lsc#edit#rename(<args>)
+endif
+
+
 " Returns the status of the language server for the current filetype or empty
 " string if it is not configured.
 function! LSCServerStatus() abort

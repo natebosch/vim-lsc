@@ -2,6 +2,7 @@ let s:default_maps = {
     \ 'GoToDefinition': '<C-]>',
     \ 'FindReferences': 'gr',
     \ 'FindCodeActions': 'ga',
+    \ 'Rename': 'gR',
     \ 'ShowHover': 'K',
     \ 'Completion': 'completefunc',
     \}
@@ -31,6 +32,11 @@ function! lsc#config#mapKeys() abort
       execute 'nnoremap <buffer>'.maps[command].' :LSClient'.command.'<CR>'
     endif
   endfor
+  if exists('g:lsc_enable_apply_edit') && g:lsc_enable_apply_edit
+    if has_key(maps, 'Rename')
+      execute 'nnoremap <buffer>'.maps['Rename'].' :LSClientRename<CR>'
+    endif
+  endif
   if !g:lsc_enable_autocomplete && has_key(maps, 'Completion')
     execute 'setlocal '.maps['Completion'].'=lsc#complete#complete'
   endif

@@ -1,5 +1,6 @@
 if !exists('s:initialized')
   let s:find_actions_id = 1
+  let s:rename_id = 1
   let s:initialized = v:true
 endif
 
@@ -63,14 +64,48 @@ function! s:isFindActionsValid(old_pos, find_actions_id) abort
       \ a:old_pos == getcurpos()
 endfunction
 
+function! lsc#edit#rename(...) abort
+  call lsc#file#flushChanges()
+  if a:0 >= 1
+    let new_name = a:1
+  else
+    let new_name = input('Enter a new name: ')
+  endif
+  let s:rename_id += 1
+  let old_pos = getcurpos()
+  let rename_id = s:rename_id
+  function! ApplyEdit(result) closure abort
+    if !s:isRenameValid(old_pos, rename_id)
+      call lsc#message#show('Rename ignored')
+      return
+    endif
+    call lsc#edit#apply(a:result)
+  endfunction
+  let params = s:TextDocumentPositionParams()
+  let params.newName = new_name
+  call lsc#server#userCall('textDocument/rename', params, function('ApplyEdit'))
+endfunction
+
+function! s:TextDocumentPositionParams() abort
+  return { 'textDocument': {'uri': lsc#uri#documentUri()},
+      \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
+      \ }
+endfunction
+
+function! s:isRenameValid(old_pos, rename_id) abort
+  return a:rename_id == s:rename_id &&
+      \ a:old_pos == getcurpos()
+endfunction
+
+
 " Applies a workspace edit and returns `v:true` if it was successful.
-function! lsc#edit#apply(params) abort
+function! lsc#edit#apply(workspace_edit) abort
   if !exists('g:lsc_enable_apply_edit')
       \ || !g:lsc_enable_apply_edit
-      \ || !has_key(a:params.edit, 'changes')
+      \ || !has_key(a:workspace_edit, 'changes')
     return v:false
   endif
-  let changes = a:params.edit.changes
+  let changes = a:workspace_edit.changes
   " Only applying changes in open files for now
   for uri in keys(changes)
     if lsc#uri#documentPath(uri) != expand('%:p')

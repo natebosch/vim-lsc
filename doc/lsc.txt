@@ -80,7 +80,15 @@ Check for available actions at the cursor's position and display them in a
 menu. Sends a "textDocument/codeAction" request to get the available choices,
 and if one is selected sends a "workspace/executeCommand". Typically actions
 end up triggering workspace edits so this command is likely only useful if
-|g:lsc_enable_apply_edit| is set to `v:true`.
+|g:lsc_enable_apply_edit| is set to `v:true`. With |lsc-default-map| this
+command is bound to "ga".
+
+                                                *:LSClientRename*
+Request to rename the symbol under the cursor. Sends a "textDocument/rename"
+request. If an argument is given it must be a String and will be used as the
+replacement name. If no argument is given a prompt will ask for the new name.
+This command only exists if |g:lscEnable_apply_edit| is `v:true`. With
+|lsc-default-map| this command is bount to "gR".
 
                                                 *:LSClientRestartServer*
 Sends requests to the server for the current filetype to "shutdown" and
@@ -176,9 +184,11 @@ set to the vim-lsc completion function, this will only have effect if
                                                 *lsc-default-map*
 The default mapping for keys, if you've opted in to "g:lsc_auto_map" are:
 
-<C-]>                   `:LSClientGoToDefinition`
-gr                      `:LSClientFindReferences`
-K                       `:LSClientShowHover`
+<C-]>                   |:LSClientGoToDefinition|
+gr                      |:LSClientFindReferences|
+ga                      |:LSClientFindCodeActions|
+gR                      |:LSClientRename|
+K                       |:LSClientShowHover|
 
 If "g:lsc_enable_autocomplete" is set to "v:false" then |completefunc| will be
 set to the vim-lsc completion function.

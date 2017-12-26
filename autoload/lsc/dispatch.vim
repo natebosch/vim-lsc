@@ -13,7 +13,7 @@ function! lsc#dispatch#message(server, message) abort
       call lsc#message#log(params['message'], params['type'])
     elseif a:message['method'] ==? 'workspace/applyEdit'
       let params = a:message['params']
-      let applied = lsc#edit#apply(params)
+      let applied = lsc#edit#apply(params.edit)
       if has_key(a:message, 'id')
         let id = a:message['id']
         let response = {'applied': applied}
