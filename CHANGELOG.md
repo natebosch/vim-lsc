@@ -3,6 +3,7 @@
 - Add an argument to `lsc#edit#findCodeActions` to pass a callback to choose an
   action.
 - Save and restore window view when applying a workspace edit.
+- Bug fix: Handle zero width edits at the end of a line.
 
 # 0.2.8
 

@@ -96,9 +96,15 @@ function! s:Apply(edit) abort
   let old_paste = &paste
   set paste
   if s:IsEmptyRange(a:edit.range)
-    let command = printf('%dG%d|i%s',
+    if a:edit.range.start.character >= len(getline(a:edit.range.start.line + 1))
+      let insert = 'a'
+    else
+      let insert = 'i'
+    endif
+    let command = printf('%dG%d|%s%s',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
+        \ insert,
         \ a:edit.newText
         \)
   else
