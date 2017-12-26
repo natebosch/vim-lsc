@@ -3,7 +3,12 @@ if !exists('s:initialized')
   let s:initialized = v:true
 endif
 
-function! lsc#edit#findCodeActions() abort
+function! lsc#edit#findCodeActions(...) abort
+  if a:0 > 0
+    let ActionFilter = a:1
+  else
+    let ActionFilter = function("<SID>ActionMenu")
+  endif
   call lsc#file#flushChanges()
   let s:find_actions_id += 1
   let old_pos = getcurpos()
@@ -17,17 +22,11 @@ function! lsc#edit#findCodeActions() abort
       call lsc#message#show('No actions available')
       return
     endif
-    let choices = ['Choose an action:']
-    let idx = 0
-    while idx < len(a:result)
-      call add(choices, string(idx+1).' - '.a:result[idx]['title'])
-      let idx += 1
-    endwhile
-    let choice = inputlist(choices)
-    if choice > 0
+    let choice = ActionFilter(a:result)
+    if type(choice) == v:t_dict
       call lsc#server#userCall('workspace/executeCommand',
-          \ {'command': a:result[choice - 1]['command'],
-          \ 'arguments': a:result[choice - 1]['arguments']},
+          \ {'command': choice['command'],
+          \ 'arguments': choice['arguments']},
           \ {_->0})
     endif
   endfunction
@@ -43,6 +42,20 @@ function! s:TextDocumentRangeParams() abort
       \   'end': {'line': line('.') - 1, 'character': col('.')}},
       \ 'context': {'diagnostics': []}
       \}
+endfunction
+
+function! s:ActionMenu(actions)
+  let choices = ['Choose an action:']
+  let idx = 0
+  while idx < len(a:actions)
+    call add(choices, string(idx+1).' - '.a:actions[idx]['title'])
+    let idx += 1
+  endwhile
+  let choice = inputlist(choices)
+  if choice > 0
+    return a:actions[choice - 1]
+  endif
+  return v:false
 endfunction
 
 function! s:isFindActionsValid(old_pos, find_actions_id) abort

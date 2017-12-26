@@ -1,3 +1,8 @@
+# 0.2.9-dev
+
+- Add an argument to `lsc#edit#findCodeActions` to pass a callback to choose an
+  action.
+
 # 0.2.8
 
 - Don't track files which are not `modifiable`.
