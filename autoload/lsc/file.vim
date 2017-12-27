@@ -3,6 +3,8 @@ if !exists('s:initialized')
   let s:file_versions = {}
   " file path -> file content
   let s:file_content = {}
+  " file path -> flush timer
+  let s:flush_timers = {}
   " filetype -> boolean
   let s:allowed_incremental_sync = {}
 endif
@@ -63,20 +65,27 @@ function! lsc#file#clean(filetype) abort
   endfor
 endfunction
 
-function! lsc#file#onChange() abort
-  if exists('b:lsc_flush_timer')
-    call timer_stop(b:lsc_flush_timer)
+function! lsc#file#onChange(...) abort
+  if a:0 >= 1
+    let file_path = a:1
+    let filetype = getbufvar(file_path, '&filetype')
+  else
+    let file_path = expand('%:p')
+    let filetype = &filetype
   endif
-  let b:lsc_flush_timer =
+  if has_key(s:flush_timers, file_path)
+    call timer_stop(s:flush_timers[file_path])
+  endif
+  let s:flush_timers[file_path] =
       \ timer_start(500,
-      \   {_->s:FlushIfChanged(expand('%:p'), &filetype)},
+      \   {_->s:FlushIfChanged(file_path, filetype)},
       \   {'repeat': 1})
 endfunction
 
 " Flushes only if `onChange` had previously been called for the file and the
 " changes aren't yet flusehd.
 function! s:FlushIfChanged(file_path, filetype) abort
-  if exists('b:lsc_flush_timer')
+  if has_key(s:flush_timers, a:file_path)
     call s:FlushChanges(a:file_path, a:filetype)
   endif
 endfunction
@@ -88,11 +97,12 @@ function! s:FlushChanges(file_path, filetype) abort
     return
   endif
   let s:file_versions[a:file_path] += 1
-  if exists('b:lsc_flush_timer')
-    call timer_stop(b:lsc_flush_timer)
-    unlet b:lsc_flush_timer
+  let buffer_vars = getbufvar(a:file_path, '')
+  if has_key(s:flush_timers, a:file_path)
+    call timer_stop(s:flush_timers[a:file_path])
+    unlet s:flush_timers[a:file_path]
   endif
-  let buffer_content = join(getline(1, '$'), "\n")
+  let buffer_content = join(getbufline(a:file_path, 1, '$'), "\n")
   let allow_incremental = s:AllowIncrementalSync(a:filetype)
   if allow_incremental
     let change = lsc#diff#compute(s:file_content[a:file_path], buffer_content)
@@ -100,7 +110,7 @@ function! s:FlushChanges(file_path, filetype) abort
     let change = {'text': buffer_content}
   endif
   let params = {'textDocument':
-      \   {'uri': lsc#uri#documentUri(),
+      \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'version': s:file_versions[a:file_path],
       \   },
       \ 'contentChanges': [change],

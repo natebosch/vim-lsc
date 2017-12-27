@@ -5,6 +5,7 @@
 - Save and restore window view when applying a workspace edit.
 - Bug fix: Handle zero width edits at the end of a line.
 - Add support for `textDocument/rename`.
+- Support `TextEdit`s in non-current buffers.
 
 # 0.2.8
 

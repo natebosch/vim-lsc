@@ -105,31 +105,35 @@ function! lsc#edit#apply(workspace_edit) abort
       \ || !has_key(a:workspace_edit, 'changes')
     return v:false
   endif
-  let changes = a:workspace_edit.changes
-  " Only applying changes in open files for now
-  for uri in keys(changes)
-    if lsc#uri#documentPath(uri) != expand('%:p')
-      call lsc#message#error('Can only apply edits in the current buffer')
-      return v:false
-    endif
-  endfor
   let view = winsaveview()
+  let old_paste = &paste
+  set paste
   let alternate=@#
-  for [uri, edits] in items(changes)
-    for edit in edits
-      " Expect edit is in current buffer
-      call s:Apply(edit)
-    endfor
-  endfor
+  let old_buffer = bufnr('%')
+
+  call s:ApplyAll(a:workspace_edit.changes)
+
+  if old_buffer != bufnr('%') | execute 'buffer' old_buffer | endif
+  if len(alternate) > 0 | let @#=alternate | endif
+  let &paste = old_paste
   call winrestview(view)
-  let @#=alternate
   return v:true
 endfunction
 
-" Apply a `TextEdit` to the current buffer.
-function! s:Apply(edit) abort
-  let old_paste = &paste
-  set paste
+function! s:ApplyAll(changes) abort
+  for [uri, edits] in items(a:changes)
+    for edit in edits
+      call s:Apply(uri, edit)
+    endfor
+  endfor
+endfunction
+
+" Apply a `TextEdit` to the buffer at [uri].
+function! s:Apply(uri, edit) abort
+  let file_path = lsc#uri#documentPath(a:uri)
+  if expand('%:p') !~# file_path
+    execute 'edit' file_path
+  endif
   if s:IsEmptyRange(a:edit.range)
     if a:edit.range.start.character >= len(getline(a:edit.range.start.line + 1))
       let insert = 'a'
@@ -158,7 +162,7 @@ function! s:Apply(edit) abort
         \)
   endif
   execute 'normal!' command
-  let &paste = old_paste
+  call lsc#file#onChange(file_path)
 endfunction
 
 function! s:IsEmptyRange(range) abort
