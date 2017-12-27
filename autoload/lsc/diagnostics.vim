@@ -141,6 +141,17 @@ function! s:MarkManagingLocList(window_id, file_path, version) abort
   call settabwinvar(tabnr, winnr, 'lsc_diagnostics_version', a:version)
 endfunction
 
+" Returns the total number of diagnostics in all files.
+function! lsc#diagnostics#count() abort
+  let total = 0
+  for file_path in keys(s:file_diagnostics)
+    for line in values(lsc#diagnostics#forFile(file_path))
+      let total += len(line)
+    endfor
+  endfor
+  return total
+endfunction
+
 " Whether the location list has the most up to date diagnostics.
 "
 " Multiple events can cause the location list for a window to get updated. Track
