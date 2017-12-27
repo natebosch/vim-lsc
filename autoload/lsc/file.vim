@@ -26,6 +26,14 @@ function! lsc#file#onOpen() abort
   call s:FlushChanges(expand('%:p'), &filetype)
 endfunction
 
+function! lsc#file#onClose(file_path) abort
+  let full_path = fnamemodify(a:file_path, ':p')
+  let params = {'textDocument': {'uri': lsc#uri#documentUri(full_path)}}
+  call lsc#server#call(&filetype, 'textDocument/didClose', params)
+  unlet s:file_versions[full_path]
+  unlet s:file_content[full_path]
+endfunction
+
 " Flushes changes for the current buffer.
 function! lsc#file#flushChanges() abort
   call s:FlushIfChanged(expand('%:p'), &filetype)

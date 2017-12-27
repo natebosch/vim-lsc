@@ -69,6 +69,7 @@ augroup LSC
   autocmd TextChanged,TextChangedI,CompleteDone *
       \ call <SID>IfEnabled('lsc#file#onChange')
   autocmd BufLeave * call <SID>IfEnabled('lsc#file#flushChanges')
+  autocmd BufUnload * call <SID>IfEnabled('lsc#file#onClose', expand("<afile>"))
 
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
 
@@ -109,10 +110,10 @@ function! LSCEnsureCurrentWindowState() abort
 endfunction
 
 " Run `function` if LSC is enabled for the current filetype.
-function! s:IfEnabled(function) abort
+function! s:IfEnabled(function, ...) abort
   if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
   if !lsc#server#filetypeActive(&filetype) | return | endif
-  exec 'call '.a:function.'()'
+  call call(a:function, a:000)
 endfunction
 
 " Exit all open language servers.
