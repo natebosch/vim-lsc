@@ -90,6 +90,12 @@ replacement name. If no argument is given a prompt will ask for the new name.
 This command only exists if |g:lscEnable_apply_edit| is `v:true`. With
 |lsc-default-map| this command is bount to "gR".
 
+                                                *:LSClientAllDiagnostics*
+Popupate the quickfix list with all diagnostics that have been sent by the
+server, spanning all files. Depending on the server implementation this may
+show all diagnostics for open files, or also diagnostics for files that have
+not yet been opened.
+
                                                 *:LSClientRestartServer*
 Sends requests to the server for the current filetype to "shutdown" and
 "exit", and after the process exits, restarts it. If the server is

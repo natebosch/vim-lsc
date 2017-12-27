@@ -36,13 +36,6 @@ function! lsc#diagnostics#clean(filetype) abort
   endfor
 endfunction
 
-" Converts between an internal diagnostic and an item for the location list.
-function! s:locationListItem(bufnr, diagnostic) abort
-  return {'bufnr': a:bufnr,
-      \ 'lnum': a:diagnostic.range[0], 'col': a:diagnostic.range[1],
-      \ 'text': a:diagnostic.message, 'type': a:diagnostic.type}
-endfunction
-
 " Finds the highlight group given a diagnostic severity level
 function! s:SeverityGroup(severity) abort
     if a:severity == 1
@@ -109,11 +102,12 @@ endfunction
 function! lsc#diagnostics#updateLocationList(file_path) abort
   let bufnr = bufnr(a:file_path)
   if bufnr == -1 | return | endif
+  let file_ref = {'bufnr': bufnr}
   let diagnostics_version = s:DiagnosticsVersion(a:file_path)
   for window_id in lsc#util#windowsForFile(a:file_path)
     if !s:WindowIsCurrent(window_id, a:file_path, diagnostics_version)
       if !exists('l:items')
-        let items = s:LocationListItems(bufnr, a:file_path)
+        let items = s:ListItems(a:file_path, file_ref)
       endif
       call setloclist(window_id, items)
       call s:MarkManagingLocList(window_id, a:file_path, diagnostics_version)
@@ -122,16 +116,29 @@ function! lsc#diagnostics#updateLocationList(file_path) abort
   endfor
 endfunction
 
-function! s:LocationListItems(bufnr, file_path) abort
+" Returns a list of quick fix or location list items for the diagnostics in
+" [file_path].
+"
+" [file_ref] is a dict with either 'bufnr' or 'filename'.
+function! s:ListItems(file_path, file_ref) abort
   let items = []
   for line in values(lsc#diagnostics#forFile(a:file_path))
     for diagnostic in line
-      call add(items, s:locationListItem(a:bufnr, diagnostic))
+      call add(items, s:ListItem(diagnostic, a:file_ref))
     endfor
   endfor
   call sort(items, 'lsc#util#compareQuickFixItems')
   return items
 endfunction
+
+" Converts between an internal diagnostic and an item for the location list.
+function! s:ListItem(diagnostic, file_ref) abort
+  let item = {'lnum': a:diagnostic.range[0], 'col': a:diagnostic.range[1],
+      \ 'text': a:diagnostic.message, 'type': a:diagnostic.type}
+  call extend(item, a:file_ref)
+  return item
+endfunction
+
 
 function! s:MarkManagingLocList(window_id, file_path, version) abort
   let window_info = getwininfo(a:window_id)[0]
@@ -150,6 +157,23 @@ function! lsc#diagnostics#count() abort
     endfor
   endfor
   return total
+endfunction
+
+" Finds all diagnostics and populates the quickfix list.
+function! lsc#diagnostics#showInQuickFix() abort
+  let all_diagnostics = []
+  for file_path in keys(s:file_diagnostics)
+    let bufnr = bufnr(file_path)
+    if bufnr == -1
+      let file_ref = {'filename': fnamemodify(file_path, ':.')}
+    else
+      let file_ref = {'bufnr': bufnr}
+    endif
+    call extend(all_diagnostics, s:ListItems(file_path, file_ref))
+  endfor
+  call sort(all_diagnostics, 'lsc#util#compareQuickFixItems')
+  call setqflist(all_diagnostics)
+  copen
 endfunction
 
 " Whether the location list has the most up to date diagnostics.

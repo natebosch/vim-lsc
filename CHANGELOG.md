@@ -7,6 +7,8 @@
 - Add support for `textDocument/rename`.
 - Support `TextEdit`s in non-current buffers.
 - Add `lsc#diagnostics#count()`
+- Add `:LSClientAllDiagnostics` which populates the quickfix list with
+  diagnostics across all files that have been sent by any server.
 
 # 0.2.8
 
