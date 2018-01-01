@@ -9,6 +9,7 @@
 - Add `lsc#diagnostics#count()`
 - Add `:LSClientAllDiagnostics` which populates the quickfix list with
   diagnostics across all files that have been sent by any server.
+- Bug fix: Don't make callback functions global.
 
 # 0.2.8
 

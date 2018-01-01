@@ -1,9 +1,3 @@
-if !exists('s:initialized')
-  let s:find_actions_id = 1
-  let s:rename_id = 1
-  let s:initialized = v:true
-endif
-
 function! lsc#edit#findCodeActions(...) abort
   if a:0 > 0
     let ActionFilter = a:1
@@ -11,28 +5,24 @@ function! lsc#edit#findCodeActions(...) abort
     let ActionFilter = function("<SID>ActionMenu")
   endif
   call lsc#file#flushChanges()
-  let s:find_actions_id += 1
-  let old_pos = getcurpos()
-  let find_actions_id = s:find_actions_id
-  function! SelectAction(result) closure abort
-    if !s:isFindActionsValid(old_pos, find_actions_id)
-      call lsc#message#show('Actions ignored')
-      return
-    endif
-    if type(a:result) != v:t_list || len(a:result) == 0
-      call lsc#message#show('No actions available')
-      return
-    endif
-    let choice = ActionFilter(a:result)
-    if type(choice) == v:t_dict
-      call lsc#server#userCall('workspace/executeCommand',
-          \ {'command': choice['command'],
-          \ 'arguments': choice['arguments']},
-          \ {_->0})
-    endif
-  endfunction
   call lsc#server#userCall('textDocument/codeAction',
-      \ s:TextDocumentRangeParams(), function('SelectAction'))
+      \ s:TextDocumentRangeParams(),
+      \ lsc#util#gateResult('CodeActions', function('<SID>SelectAction'),
+      \     v:null, [ActionFilter]))
+endfunction
+
+function! s:SelectAction(result, action_filter) abort
+  if type(a:result) != v:t_list || len(a:result) == 0
+    call lsc#message#show('No actions available')
+    return
+  endif
+  let choice = a:action_filter(a:result)
+  if type(choice) == v:t_dict
+    call lsc#server#userCall('workspace/executeCommand',
+        \ {'command': choice['command'],
+        \ 'arguments': choice['arguments']},
+        \ {_->0})
+  endif
 endfunction
 
 " TODO - handle visual selection for range
@@ -59,11 +49,6 @@ function! s:ActionMenu(actions)
   return v:false
 endfunction
 
-function! s:isFindActionsValid(old_pos, find_actions_id) abort
-  return a:find_actions_id == s:find_actions_id &&
-      \ a:old_pos == getcurpos()
-endfunction
-
 function! lsc#edit#rename(...) abort
   call lsc#file#flushChanges()
   if a:0 >= 1
@@ -71,19 +56,10 @@ function! lsc#edit#rename(...) abort
   else
     let new_name = input('Enter a new name: ')
   endif
-  let s:rename_id += 1
-  let old_pos = getcurpos()
-  let rename_id = s:rename_id
-  function! ApplyEdit(result) closure abort
-    if !s:isRenameValid(old_pos, rename_id)
-      call lsc#message#show('Rename ignored')
-      return
-    endif
-    call lsc#edit#apply(a:result)
-  endfunction
   let params = s:TextDocumentPositionParams()
   let params.newName = new_name
-  call lsc#server#userCall('textDocument/rename', params, function('ApplyEdit'))
+  call lsc#server#userCall('textDocument/rename', params,
+      \ lsc#util#gateResult('Rename', function('lsc#edit#apply')))
 endfunction
 
 function! s:TextDocumentPositionParams() abort
@@ -91,12 +67,6 @@ function! s:TextDocumentPositionParams() abort
       \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
       \ }
 endfunction
-
-function! s:isRenameValid(old_pos, rename_id) abort
-  return a:rename_id == s:rename_id &&
-      \ a:old_pos == getcurpos()
-endfunction
-
 
 " Applies a workspace edit and returns `v:true` if it was successful.
 function! lsc#edit#apply(workspace_edit) abort

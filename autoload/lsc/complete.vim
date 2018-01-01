@@ -33,7 +33,6 @@ if !exists('s:initialized')
   let s:next_char = ''
   " filetype -> ?, used as a Set
   let s:completion_waiting = {}
-  let s:completion_id = 1
   let s:completion_canceled = v:false
   let s:initialized = v:true
   " filetype -> [trigger characters]
@@ -84,44 +83,35 @@ function! s:isCompletable() abort
   return word =~ '^\w*$'
 endfunction
 
-" Whether the completion should still go through.
-"
-" - A new completion has not been started
-" - Cursor position hasn't changed
-" - Completion was not canceled
-" TODO: Allow cursor position to change some
-function! s:isCompletionValid(old_pos, completion_id) abort
-  return a:completion_id == s:completion_id &&
-      \ a:old_pos == getcurpos() &&
-      \ !s:completion_canceled
-endfunction
-
 function! s:startCompletion() abort
-  let s:completion_id += 1
   let s:completion_canceled = v:false
   call s:MarkCompleting(&filetype)
-  let old_pos = getcurpos()
-  let completion_id = s:completion_id
-  let filetype = &filetype
-  function! OnComplete(completion) closure abort
-    let completions = s:CompletionItems(a:completion)
-    call s:MarkNotCompleting(filetype)
-    if s:isCompletionValid(old_pos, completion_id)
-      if (g:lsc_enable_autocomplete)
-        call s:SuggestCompletions(completions)
-      else
-        let b:lsc_completion = completions
-      endif
-    else
-      let b:lsc_is_completing = v:false
-    endif
-  endfunction
   call lsc#file#flushChanges()
   let params = { 'textDocument': {'uri': lsc#uri#documentUri()},
       \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
       \ }
   call lsc#server#call(&filetype, 'textDocument/completion', params,
-      \ funcref('OnComplete'))
+      \ lsc#util#gateResult('Complete',
+      \     funcref('<SID>OnResult'), funcref('<SID>OnSkip')))
+endfunction
+
+function! s:OnResult(completion) abort
+  call s:MarkNotCompleting(&filetype)
+  if s:completion_canceled
+    let b:lsc_is_completing = v:false
+  endif
+  let completions = s:CompletionItems(a:completion)
+  if (g:lsc_enable_autocomplete)
+    call s:SuggestCompletions(completions)
+  else
+    let b:lsc_completion = completions
+  endif
+endfunction
+
+" TODO this could be the wrong buffer?
+function! s:OnSkip(completion) abort
+  call s:MarkNotCompleting(&filetype)
+  let b:lsc_is_completing = v:false
 endfunction
 
 function! s:SuggestCompletions(completion) abort

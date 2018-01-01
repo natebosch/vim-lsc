@@ -1,30 +1,25 @@
 function! lsc#reference#goToDefinition() abort
   call lsc#file#flushChanges()
-  let s:goto_definition_id += 1
-  let old_pos = getcurpos()
-  let goto_definition_id = s:goto_definition_id
-  function! Jump(result) closure abort
-    if !s:isGoToValid(old_pos, goto_definition_id)
-      echom 'GoToDefinition skipped'
-      return
-    endif
-    if type(a:result) == v:t_none ||
-        \ (type(a:result) == v:t_list && len(a:result) == 0)
-      call lsc#message#error('No definition found')
-      return
-    endif
-    if type(a:result) == type([])
-      let location = a:result[0]
-    else
-      let location = a:result
-    endif
-    let file = lsc#uri#documentPath(location.uri)
-    let line = location.range.start.line + 1
-    let character = location.range.start.character + 1
-    call s:goTo(file, line, character)
-  endfunction
   call lsc#server#userCall('textDocument/definition',
-      \ s:TextDocumentPositionParams(), function('Jump'))
+      \ s:TextDocumentPositionParams(),
+      \ lsc#util#gateResult('GoToDefinition', function('<SID>GoToDefinition')))
+endfunction
+
+function! s:GoToDefinition(result) abort
+  if type(a:result) == v:t_none ||
+      \ (type(a:result) == v:t_list && len(a:result) == 0)
+    call lsc#message#error('No definition found')
+    return
+  endif
+  if type(a:result) == type([])
+    let location = a:result[0]
+  else
+    let location = a:result
+  endif
+  let file = lsc#uri#documentPath(location.uri)
+  let line = location.range.start.line + 1
+  let character = location.range.start.character + 1
+  call s:goTo(file, line, character)
 endfunction
 
 function! s:TextDocumentPositionParams() abort
@@ -76,16 +71,6 @@ function! s:QuickFixItem(location) abort
     let item.text = readfile(file_path, '', item.lnum)[item.lnum - 1]
   endif
   return item
-endfunction
-
-if !exists('s:initialized')
-  let s:goto_definition_id = 1
-  let s:initialized = v:true
-endif
-
-function! s:isGoToValid(old_pos, goto_definition_id) abort
-  return a:goto_definition_id == s:goto_definition_id &&
-      \ a:old_pos == getcurpos()
 endfunction
 
 function! s:goTo(file, line, character) abort

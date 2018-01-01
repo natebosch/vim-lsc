@@ -1,3 +1,8 @@
+if !exists('s:initialized')
+  let s:callback_gates = {}
+  let s:initialized = v:true
+endif
+
 " Run `command` in all windows, keeping old open window.
 function! lsc#util#winDo(command) abort
   let current_window = winnr()
@@ -107,4 +112,40 @@ endfunction
 function! lsc#util#shift(list, max_length, value) abort
   call add(a:list, a:value)
   if len(a:list) > a:max_length | call remove(a:list, 0) | endif
+endfunction
+
+function! lsc#util#gateResult(name, callback, ...)
+  if !has_key(s:callback_gates, a:name)
+    let s:callback_gates[a:name] = 0
+  else
+    let s:callback_gates[a:name] += 1
+  endif
+  let gate = s:callback_gates[a:name]
+  let old_pos = getcurpos()
+  if a:0 >= 1 && type(a:1) == v:t_func
+    let OnSkip = a:1
+  else
+    let OnSkip = v:false
+  endif
+  if a:0 >= 2 && type(a:2) == v:t_list
+    let extra_args = a:2
+  endif
+  return function('<SID>Gated', [a:name, gate, old_pos, a:callback, OnSkip])
+endfunction
+
+function! s:Gated(name, gate, old_pos, on_call, on_skip, ...) abort
+  if exists('l:extra_args')
+    let args = extend(deepcopy(a:000), l:extra_args)
+  else
+    let args = a:000
+  endif
+  if s:callback_gates[a:name] != a:gate ||
+      \ a:old_pos != getcurpos()
+    call lsc#message#show('Skipping '.a:name)
+    if type(a:on_skip) == v:t_func
+      call call(a:on_skip, args)
+    endif
+  else
+    call call(a:on_call, args)
+  endif
 endfunction
