@@ -129,19 +129,21 @@ function! lsc#util#gateResult(name, callback, ...)
   endif
   if a:0 >= 2 && type(a:2) == v:t_list
     let extra_args = a:2
+  else
+    let extra_args = []
   endif
-  return function('<SID>Gated', [a:name, gate, old_pos, a:callback, OnSkip])
+  return function('<SID>Gated',
+      \ [a:name, gate, old_pos, a:callback, OnSkip, extra_args])
 endfunction
 
-function! s:Gated(name, gate, old_pos, on_call, on_skip, ...) abort
-  if exists('l:extra_args')
-    let args = extend(deepcopy(a:000), l:extra_args)
+function! s:Gated(name, gate, old_pos, on_call, on_skip, extra_args, ...) abort
+  if !empty('a:extra_args')
+    let args = extend(deepcopy(a:000), a:extra_args)
   else
     let args = a:000
   endif
   if s:callback_gates[a:name] != a:gate ||
       \ a:old_pos != getcurpos()
-    call lsc#message#show('Skipping '.a:name)
     if type(a:on_skip) == v:t_func
       call call(a:on_skip, args)
     endif
