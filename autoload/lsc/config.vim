@@ -49,7 +49,8 @@ function! lsc#config#messageHook(server, method, params) abort
   try
     return hooks[a:method](a:method, a:params)
   catch
-    call lsc#message#error('Failed to run message hook for '.a:method)
+    call lsc#message#error('Failed to run message hook for '.a:method.
+        \': '.v:exception)
     return a:params
   endtry
 endfunction
