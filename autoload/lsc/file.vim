@@ -30,7 +30,7 @@ function! lsc#file#onClose(file_path) abort
   let full_path = fnamemodify(a:file_path, ':p')
   let params = {'textDocument': {'uri': lsc#uri#documentUri(full_path)}}
   call lsc#server#call(&filetype, 'textDocument/didClose', params)
-  if has_key(s:file_version, full_path)
+  if has_key(s:file_versions, full_path)
     unlet s:file_versions[full_path]
   endif
   if has_key(s:file_content, full_path)
