@@ -133,7 +133,7 @@ function! s:Start(server) abort
     let trace_level = 'off'
   endif
   let params = {'processId': getpid(),
-      \ 'rootUri': lsc#uri#documentUri(exists('g:loaded_rooter')? FindRootDirectory() : getcwd()),
+      \ 'rootUri': lsc#uri#documentUri(getcwd()),
       \ 'capabilities': s:ClientCapabilities(),
       \ 'trace': trace_level
       \}
