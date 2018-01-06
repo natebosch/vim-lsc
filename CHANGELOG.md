@@ -10,6 +10,7 @@
 - Add `:LSClientAllDiagnostics` which populates the quickfix list with
   diagnostics across all files that have been sent by any server.
 - Bug fix: Don't make callback functions global.
+- Reduce performance impact of a large number of files with empty diagnostics.
 
 # 0.2.8
 

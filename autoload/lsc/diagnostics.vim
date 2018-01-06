@@ -1,4 +1,4 @@
-if !exists('s:file_diagnostsics')
+if !exists('s:file_diagnostics')
   " file path -> line number -> [diagnostic]
   "
   " Diagnostics are dictionaries with:
@@ -77,19 +77,29 @@ function! s:DiagnosticsVersion(file_path) abort
 endfunction
 
 function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
-  call map(a:diagnostics, {_, diagnostic -> s:Convert(diagnostic)})
-  let diagnostics_by_line = {}
-  for diagnostic in a:diagnostics
-    if !has_key(diagnostics_by_line, diagnostic.range[0])
-      let diagnostics_by_line[diagnostic.range[0]] = []
-    endif
-    call add(diagnostics_by_line[diagnostic.range[0]], diagnostic)
-  endfor
-  let s:file_diagnostics[a:file_path] = diagnostics_by_line
+  if empty(a:diagnostics) && !has_key(s:file_diagnostics, a:file_path)
+    return
+  endif
   if has_key(s:diagnostic_versions, a:file_path)
     let s:diagnostic_versions[a:file_path] += 1
   else
     let s:diagnostic_versions[a:file_path] = 1
+  endif
+  call map(a:diagnostics, {_, diagnostic -> s:Convert(diagnostic)})
+  if !empty(a:diagnostics)
+    let diagnostics_by_line = {}
+    for diagnostic in a:diagnostics
+      if !has_key(diagnostics_by_line, diagnostic.range[0])
+        let line = []
+        let diagnostics_by_line[diagnostic.range[0]] = line
+      else
+        let line = diagnostics_by_line[diagnostic.range[0]]
+      endif
+      call add(line, diagnostic)
+    endfor
+    let s:file_diagnostics[a:file_path] = diagnostics_by_line
+  else
+    unlet s:file_diagnostics[a:file_path]
   endif
   call lsc#diagnostics#updateLocationList(a:file_path)
   call lsc#highlights#updateDisplayed()
