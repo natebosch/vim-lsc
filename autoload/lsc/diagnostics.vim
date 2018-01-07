@@ -159,12 +159,17 @@ function! s:MarkManagingLocList(window_id, file_path, version) abort
 endfunction
 
 " Returns the total number of diagnostics in all files.
+"
+" If the number grows very large returns instead a String like `'500+'`
 function! lsc#diagnostics#count() abort
   let total = 0
   for file_path in keys(s:file_diagnostics)
     for line in values(lsc#diagnostics#forFile(file_path))
       let total += len(line)
     endfor
+    if total > 500
+      return string(total).'+'
+    endif
   endfor
   return total
 endfunction
