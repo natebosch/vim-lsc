@@ -263,29 +263,27 @@ are configured with the same name use the same server.
 
                                                 *lsc-server-message_hooks*
 `'message_hooks'`: Set to a dictionary where the keys are LSP method names and
-the values are |funcref|s which may modify the '`params`' for that call. The
-function must take two arguments, the method name being called (for example
-`'textDocument/didOpen'`) and the parameters dict. For requests which take no
-parameters the second value may be `v:null`.The modified or new params should
-be returned by the function.
+the values are either |funcref|s which may modify '`params`' for the call, or
+dicts of values to merge in to the '`params`'. If the value is a dict then
+each value within the dict should be either a value that can be translated
+into json (including nested dicts) or a |funcref| which will return a value
+for that key. Functions must take two arguments, the method name being called
+(for example `'textDocument/didOpen'`) and the parameters dict. For requests
+which take no parameters the second value may be `v:null`. The modified or new
+params should be returned by the function.
 
 For example:
 >
- function! AddExtraArgs(method, params) abort!
-   " Can read existing params if needed
-   let filename = a:params.document.uri
-   " Can modify params...
-   let a:params.metadata = {}
-   let a:params.metadata.extraFlags = ['-Wall']
-   " But they still need to be returned
-   return a:params
- endfunction
-
  let g:lsc_server_commands = {
      \ 'c': {
      \    'command': 'clangd',
      \    'message_hooks': {
-     \        'textDocument/didOpen': function('AddExtraArgs'),
+     \        'initialize': {
+     \            'initializationOptions': {'foo': 'bar'},
+     \            'rootUri': {method, params ->
+     \                          lsc#uri#documentUri(FindProjectRoot())},
+     \        }
+     \        'textDocument/didOpen': {'metadata': {'extraFlags': ['-Wall']}},
      \    },
      \  },
      \}

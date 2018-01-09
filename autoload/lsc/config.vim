@@ -46,11 +46,59 @@ function! lsc#config#messageHook(server, method, params) abort
   if !has_key(a:server.config, 'message_hooks') | return a:params | endif
   let hooks = a:server.config.message_hooks
   if !has_key(hooks, a:method) | return a:params | endif
+  let hook = hooks[a:method]
+  if type(hook) == v:t_func
+    return s:RunHookFunction(hook a:method, a:params)
+  elseif type(hook) == v:t_dict
+    return s:MergeHookDict(hook, a:method, a:params)
+  else
+    call lsc#message#error('Message hook must be a function or a dict. '.
+        \' Invalid config for '.a:method)
+    return a:params
+  endif
+endfunction
+
+function! s:RunHookFunction(Hook, method, params) abort
   try
-    return hooks[a:method](a:method, a:params)
+    return a:Hook(a:method, a:params)
   catch
     call lsc#message#error('Failed to run message hook for '.a:method.
         \': '.v:exception)
     return a:params
   endtry
+endfunction
+
+function! s:MergeHookDict(hook, method, params) abort
+  let resolved = s:ResolveHookDict(a:hook, a:method, a:params)
+  for key in keys(resolved)
+    let a:params[key] = resolved[key]
+  endfor
+  return a:params
+endfunction
+
+" If any key at any level within [hook] is a function, run it with [method] and
+" [params] as arguments.
+function! s:ResolveHookDict(hook, method, params) abort
+  if !s:HasFunction(a:hook) | return a:hook | endif
+  let copied = deepcopy(a:hook)
+  for key in keys(a:hook)
+    if type(a:hook[key]) == v:t_dict
+      let copied[key] = s:ResolveHookDict(a:hook[key], a:method, a:params)
+    elseif type(a:hook[key]) == v:t_func
+      let Func = a:hook[key]
+      let copied[key] = Func(a:method, a:params)
+    endif
+  endfor
+  return copied
+endfunction
+
+function! s:HasFunction(hook) abort
+  for Value in values(a:hook)
+    if type(Value) == v:t_dict && s:HasFunction(Value)
+      return v:true
+    elseif type(Value) == v:t_func
+      return v:true
+    endif
+  endfor
+  return v:false
 endfunction
