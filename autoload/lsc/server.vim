@@ -19,6 +19,7 @@ if !exists('s:initialized')
   " - config. Config dict. Contains:
   "   - name: Same as the key into `s:servers`
   "   - command: Executable
+  "   - initialization_options: (optional) User provided initialization options.
   "   - enabled: (optional) Whether the server should be started.
   "   - message_hooks: (optional) Functions call to override params
   let s:servers = {}
@@ -126,6 +127,11 @@ function! s:Start(server) abort
       call lsc#file#trackAll(filetype)
     endfor
   endfunction
+  if has_key(a:server.config, 'initialization_options')
+    let init_opts = a:server.config.initialization_options
+  else
+    let init_opts = {}
+  endif
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
     let trace_level = g:lsc_trace_level
@@ -135,7 +141,8 @@ function! s:Start(server) abort
   let params = {'processId': getpid(),
       \ 'rootUri': lsc#uri#documentUri(getcwd()),
       \ 'capabilities': s:ClientCapabilities(),
-      \ 'trace': trace_level
+      \ 'trace': trace_level,
+      \ 'initializationOptions': init_opts
       \}
   call lsc#server#call(&filetype, 'initialize',
       \ params, function('OnInitialize'), v:true)
