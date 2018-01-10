@@ -21,7 +21,7 @@ function! lsc#highlights#update() abort
     endfor
   endfor
   call s:MarkCurrentWindowFresh()
-endfunction!
+endfunction
 
 " Remove all highlighted matches in the current window.
 function! lsc#highlights#clear() abort
