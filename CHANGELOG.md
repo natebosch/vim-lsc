@@ -13,6 +13,7 @@
 - Reduce performance impact of a large number of files with empty diagnostics.
 - Allow `message_hooks` values to be a `dict` which gets merged into `params`.
   Supports inner values which are functions that get called to resolve values.
+- Support highlights for multi-line diagnostics.
 
 # 0.2.8
 
