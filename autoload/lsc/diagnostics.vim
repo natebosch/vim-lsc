@@ -26,7 +26,6 @@ function! s:Convert(diagnostic) abort
         \]]
     " Renders strangely until a `redraw!` if lines are mixed with line ranges
     call extend(range, map(range(start.line + 2, end.line), {_, l->[l,0,99]}))
-    echom 'Using: '.string(range)
     call add(range, [
         \ end.line + 1,
         \ 1,
