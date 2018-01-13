@@ -14,6 +14,8 @@
 - Allow `message_hooks` values to be a `dict` which gets merged into `params`.
   Supports inner values which are functions that get called to resolve values.
 - Support highlights for multi-line diagnostics.
+- Split up large messages into chunks to avoid potential deadlocks where output
+  buffer becomes full but it isn't read.
 
 # 0.2.8
 

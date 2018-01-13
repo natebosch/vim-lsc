@@ -302,13 +302,25 @@ function! lsc#server#register(filetype, config) abort
       \ 'messages': [],
       \ 'filetypes': [a:filetype],
       \ 'config': config,
+      \ 'send_buffer': '',
       \}
   function server.send(message) abort
-    let channel = self.channel
-    if ch_status(channel) != 'open' | return v:false | endif
-    call ch_sendraw(channel, lsc#protocol#encode(a:message))
+    if ch_status(self.channel) != 'open' | return v:false | endif
     call lsc#util#shift(self.calls, 10, a:message)
+    let self.send_buffer .= lsc#protocol#encode(a:message)
+    call self.flush(v:null)
     return v:true
+  endfunction
+  function server.flush(_) abort
+    if len(self.send_buffer) <= 1024
+      call ch_sendraw(self.channel, self.send_buffer)
+      let self.send_buffer = ''
+    else
+      let to_send = self.send_buffer[:1023]
+      let self.send_buffer = self.send_buffer[1024:]
+      call ch_sendraw(self.channel, to_send)
+      call timer_start(0, self.flush)
+    endif
   endfunction
   let s:servers[config.name] = server
 endfunction
