@@ -16,6 +16,7 @@
 - Support highlights for multi-line diagnostics.
 - Split up large messages into chunks to avoid potential deadlocks where output
   buffer becomes full but it isn't read.
+- Improve performance of incremental diff.
 
 # 0.2.8
 

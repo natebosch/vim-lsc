@@ -61,6 +61,20 @@ function! TestDiff() abort
       \ "foo\nbar\nbaz\nanother"
       \ )
 
+  " Line inserted at beginning
+  call s:TestDiff(
+      \ [0,0,0,0], 0, "line\n",
+      \ "foo\nbar\nbaz",
+      \ "line\nfoo\nbar\nbaz"
+      \ )
+
+  " Line inserted at beginning with same leading characters
+  call s:TestDiff(
+      \ [0,3,0,3], 0, "line\n// ",
+      \ "// foo\n// bar\n// baz",
+      \ "// line\n// foo\n// bar\n// baz"
+      \ )
+
   " Change spanning lines
   call s:TestDiff(
       \ [0,2,2,1], 7, "r\nmany\nlines\nsp",
@@ -71,8 +85,8 @@ function! TestDiff() abort
   " Delete within a line
   call s:TestDiff(
       \ [1,1,1,2], 1, '',
-      \ "foo\nbar\nbaz",
-      \ "foo\nbr\nbaz"
+      \ "ab\ncde\nfghi",
+      \ "ab\nce\nfghi"
       \ )
 
   " Delete across a line
@@ -108,6 +122,24 @@ function! TestDiff() abort
       \ "foo\nbar\nbaz",
       \ "oo\nbar\nbaz")
 
+  " Delete line at beginning
+  call s:TestDiff(
+      \ [0, 0, 1, 0], 4, '',
+      \ "foo\nbar\nbaz",
+      \ "bar\nbaz")
+
+  " Delete line at beginning with same leading characters
+  call s:TestDiff(
+      \ [0, 3, 1, 3], 7, '',
+      \ "// foo\n// bar\n// baz",
+      \ "// bar\n// baz")
+
+  " Delete lines at beginning with same leading characters
+  call s:TestDiff(
+      \ [0, 3, 2, 3], 14, '',
+      \ "// foo\n// bar\n// baz",
+      \ "// baz")
+
   " Delete at end
   call s:TestDiff(
       \ [2, 2, 2, 3], 1, '',
@@ -125,7 +157,8 @@ endfunction
 function! s:TestDiff(range, length, text, old, new) abort
   let start = {'line': a:range[0], 'character': a:range[1]}
   let end = {'line': a:range[2], 'character': a:range[3]}
-  let result = lsc#diff#compute(a:old, a:new)
+  let result = lsc#diff#compute(split(a:old, "\n", v:true),
+      \ split(a:new, "\n", v:true))
   call assert_equal({'start': start}, {'start': result.range.start})
   call assert_equal({'end': end}, {'end': result.range.end})
   call assert_equal({'length': a:length}, {'length': result.rangeLength})
@@ -153,4 +186,5 @@ function! s:RunTests(...)
   endfor
 endfunction
 
+messages clear
 call s:RunTests('TestDiff')

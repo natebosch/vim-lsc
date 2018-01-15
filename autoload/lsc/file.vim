@@ -48,18 +48,17 @@ function! s:DidOpen(file_path) abort
   let bufnr = bufnr(a:file_path)
   if !bufloaded(bufnr) | return | endif
   if !getbufvar(bufnr, '&modifiable') | return | endif
-  let buffer_content = join(getbufline(bufnr, 1, '$'), "\n")
+  let buffer_content = getbufline(bufnr, 1, '$')
   let filetype = getbufvar(bufnr, '&filetype')
   let params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'languageId': filetype,
       \    'version': 1,
-      \    'text': buffer_content
+      \    'text': join(buffer_content, "\n")
       \   }
       \ }
   if lsc#server#call(filetype, 'textDocument/didOpen', params)
     let s:file_versions[a:file_path] = 1
-    let s:file_content[a:file_path] = buffer_content
     if s:AllowIncrementalSync(filetype)
       let s:file_content[a:file_path] = buffer_content
     endif
@@ -72,7 +71,9 @@ function! lsc#file#clean(filetype) abort
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
     if has_key(s:file_versions, buffer.name)
       unlet s:file_versions[buffer.name]
-      unlet s:file_content[buffer.name]
+      if has_key(s:file_content, buffer.name)
+        unlet s:file_content[buffer.name]
+      endif
     endif
   endfor
 endfunction
@@ -114,12 +115,12 @@ function! s:FlushChanges(file_path, filetype) abort
     call timer_stop(s:flush_timers[a:file_path])
     unlet s:flush_timers[a:file_path]
   endif
-  let buffer_content = join(getbufline(a:file_path, 1, '$'), "\n")
+  let buffer_content = getbufline(a:file_path, 1, '$')
   let allow_incremental = s:AllowIncrementalSync(a:filetype)
   if allow_incremental
     let change = lsc#diff#compute(s:file_content[a:file_path], buffer_content)
   else
-    let change = {'text': buffer_content}
+    let change = {'text': join(buffer_content, "\n")}
   endif
   let params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
