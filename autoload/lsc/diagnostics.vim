@@ -3,8 +3,7 @@ if !exists('s:file_diagnostics')
   "
   " Diagnostics are dictionaries with:
   " 'group': The highlight group, like 'lscDiagnosticError'.
-  " 'range': 1-based [start line, start column, length] or list of these ranges
-  "     for multi-line diagnostics.
+  " 'ranges': 1-based [[start line, start column, length]]
   " 'message': The message to display.
   " 'type': Single letter representation of severity for location list.
   let s:file_diagnostics = {}
@@ -19,23 +18,23 @@ function! s:Convert(diagnostic) abort
   let start = a:diagnostic.range.start
   let end = a:diagnostic.range.end
   if end.line > start.line
-    let range =[[
+    let ranges =[[
         \ start.line + 1,
         \ start.character + 1,
         \ 99
         \]]
     " Renders strangely until a `redraw!` if lines are mixed with line ranges
-    call extend(range, map(range(start.line + 2, end.line), {_, l->[l,0,99]}))
-    call add(range, [
+    call extend(ranges, map(range(start.line + 2, end.line), {_, l->[l,0,99]}))
+    call add(ranges, [
         \ end.line + 1,
         \ 1,
         \ end.character
         \])
   else
-    let range = [
+    let ranges = [[
         \ start.line + 1,
         \ start.character + 1,
-        \ end.character - start.character]
+        \ end.character - start.character]]
   endif
   let group = <SID>SeverityGroup(a:diagnostic.severity)
   let type = <SID>SeverityType(a:diagnostic.severity)
@@ -43,7 +42,7 @@ function! s:Convert(diagnostic) abort
   if has_key(a:diagnostic, 'code')
     let message = message.' ['.a:diagnostic.code.']'
   endif
-  return {'group': group, 'range': range, 'message': message, 'type': type}
+  return {'group': group, 'ranges': ranges, 'message': message, 'type': type}
 endfunction
 
 function! lsc#diagnostics#clean(filetype) abort
@@ -106,8 +105,7 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   if !empty(a:diagnostics)
     let diagnostics_by_line = {}
     for diagnostic in a:diagnostics
-      let line_number = type(diagnostic.range[0]) == v:t_list ?
-          \ string(diagnostic.range[0][0]) : string(diagnostic.range[0])
+      let line_number = string(diagnostic.ranges[0][0])
       if !has_key(diagnostics_by_line, line_number)
         let line = []
         let diagnostics_by_line[line_number] = line
@@ -162,8 +160,7 @@ endfunction
 
 " Converts between an internal diagnostic and an item for the location list.
 function! s:ListItem(diagnostic, file_ref) abort
-  let range = type(a:diagnostic.range[0]) == v:t_list ?
-      \ a:diagnostic.range[0] : a:diagnostic.range
+  let range = a:diagnostic.ranges[0]
   let item = {'lnum': range[0], 'col': range[1],
       \ 'text': a:diagnostic.message, 'type': a:diagnostic.type}
   call extend(item, a:file_ref)
@@ -247,8 +244,7 @@ function! lsc#diagnostics#underCursor() abort
   let closest_diagnostic = {}
   let closest_distance = -1
   for diagnostic in diagnostics
-    let range = type(diagnostic.range[0]) == v:t_list ?
-        \ diagnostic.range[0] : diagnostic.range
+    let range = diagnostic.ranges[0]
     let start = range[1]
     let end = range[1] + range[2]
     let distance = min([abs(start - col), abs(end - col)])
