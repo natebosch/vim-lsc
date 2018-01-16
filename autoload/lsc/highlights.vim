@@ -16,9 +16,7 @@ function! lsc#highlights#update() abort
   if &diff | return | endif
   for line in values(lsc#diagnostics#forFile(expand('%:p')))
     for diagnostic in line
-      let range = type(diagnostic.range[0]) == v:t_list ?
-          \ diagnostic.range : [diagnostic.range]
-      let match = matchaddpos(diagnostic.group, range)
+      let match = matchaddpos(diagnostic.group, diagnostic.ranges)
       call add(w:lsc_diagnostic_matches, match)
     endfor
   endfor
