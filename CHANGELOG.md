@@ -17,6 +17,7 @@
 - Split up large messages into chunks to avoid potential deadlocks where output
   buffer becomes full but it isn't read.
 - Improve performance of incremental diff.
+- Print messages received on stderr.
 
 # 0.2.8
 
