@@ -15,34 +15,14 @@ endif
 " Converts between an LSP diagnostic and the internal representation used for
 " highlighting.
 function! s:Convert(diagnostic) abort
-  let start = a:diagnostic.range.start
-  let end = a:diagnostic.range.end
-  if end.line > start.line
-    let ranges =[[
-        \ start.line + 1,
-        \ start.character + 1,
-        \ 99
-        \]]
-    " Renders strangely until a `redraw!` if lines are mixed with line ranges
-    call extend(ranges, map(range(start.line + 2, end.line), {_, l->[l,0,99]}))
-    call add(ranges, [
-        \ end.line + 1,
-        \ 1,
-        \ end.character
-        \])
-  else
-    let ranges = [[
-        \ start.line + 1,
-        \ start.character + 1,
-        \ end.character - start.character]]
-  endif
   let group = <SID>SeverityGroup(a:diagnostic.severity)
   let type = <SID>SeverityType(a:diagnostic.severity)
   let message = a:diagnostic.message
   if has_key(a:diagnostic, 'code')
     let message = message.' ['.a:diagnostic.code.']'
   endif
-  return {'group': group, 'ranges': ranges, 'message': message, 'type': type}
+  return {'group': group, 'message': message, 'type': type,
+      \ 'ranges': lsc#convert#rangeToHighlights(a:diagnostic.range)}
 endfunction
 
 function! lsc#diagnostics#clean(filetype) abort
@@ -245,6 +225,7 @@ function! lsc#diagnostics#underCursor() abort
   let closest_distance = -1
   for diagnostic in diagnostics
     let range = diagnostic.ranges[0]
+    echom 'Checking in range: '.string(range)
     let start = range[1]
     let end = range[1] + range[2]
     let distance = min([abs(start - col), abs(end - col)])

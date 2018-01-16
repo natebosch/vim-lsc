@@ -170,6 +170,15 @@ function! s:CheckCapabilities(init_results, server) abort
         endfor
       endif
     endif
+    if has_key(capabilities, 'documentHighlightsProvider')
+      if capabilities['documentHighlightsProvider']
+        call lsc#cursor#enableReferenceHighlights(filetype)
+      else
+        echom 'Present but false'
+      endif
+    else
+      echom 'Not present'
+    endif
   endif
 endfunction
 
@@ -209,6 +218,7 @@ function! s:OnExit(server_name) abort
     call lsc#complete#clean(filetype)
     call lsc#diagnostics#clean(filetype)
     call lsc#file#clean(filetype)
+    call lsc#cursor#clean()
   endfor
   if old_status == 'restarting'
     call s:Start(server)
