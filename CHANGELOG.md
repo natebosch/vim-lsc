@@ -18,6 +18,7 @@
   buffer becomes full but it isn't read.
 - Improve performance of incremental diff.
 - Print messages received on stderr.
+- Don't open an empty quickfix list when no references are found.
 
 # 0.2.8
 

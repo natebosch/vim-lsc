@@ -37,6 +37,10 @@ function! lsc#reference#findReferences() abort
 endfunction
 
 function! s:setQuickFixReferences(results) abort
+  if empty(a:results)
+    call lsc#message#show('No references found')
+    return
+  endif
   call map(a:results, {_, ref -> s:QuickFixItem(ref)})
   call sort(a:results, 'lsc#util#compareQuickFixItems')
   call setqflist(a:results)
