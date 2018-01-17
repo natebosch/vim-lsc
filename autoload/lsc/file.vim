@@ -1,4 +1,5 @@
 if !exists('s:initialized')
+  let s:initialized = v:true
   " file path -> file version
   let s:file_versions = {}
   " file path -> file content
