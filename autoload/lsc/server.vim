@@ -108,6 +108,7 @@ function! s:Start(server) abort
   else
     let job_options = {'in_io': 'pipe', 'in_mode': 'raw',
         \ 'out_io': 'pipe', 'out_mode': 'raw', 'out_cb': 'lsc#server#callback',
+        \ 'err_io': 'pipe', 'err_mode': 'nl', 'err_cb': 'lsc#server#errCallback',
         \ 'exit_cb': 'lsc#server#onExit'}
     let job = job_start(command, job_options)
     let channel = job_getchannel(job)
@@ -232,6 +233,12 @@ function! lsc#server#callback(channel, message) abort
   let server_info = s:servers[server_name]
   let server_info.buffer .= a:message
   call lsc#protocol#consumeMessage(server_info)
+endfunction
+
+function! lsc#server#errCallback(channel,  message) abort
+  let ch_id = ch_info(a:channel)['id']
+  let server_name = s:servers_by_channel[ch_id]
+  call lsc#message#error('StdErr from '.server_name.': '.a:message)
 endfunction
 
 " Missing value means no support
