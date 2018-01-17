@@ -16,7 +16,7 @@ function! lsc#highlights#update() abort
   if &diff | return | endif
   for line in values(lsc#diagnostics#forFile(expand('%:p')))
     for diagnostic in line
-      let match = matchaddpos(diagnostic.group, diagnostic.ranges)
+      let match = matchaddpos(diagnostic.group, diagnostic.ranges, -1)
       call add(w:lsc_diagnostic_matches, match)
     endfor
   endfor
