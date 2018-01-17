@@ -52,12 +52,8 @@ function s:HandleHighlights(request_number, highlights) abort
   call lsc#cursor#clearReferenceHighlights()
   if empty(a:highlights) | return | endif
   call map(a:highlights, {_, reference -> s:ConvertReference(reference)})
-  call sort(a:highlights, {a, b ->
-      \ a.ranges[0][0] > b.ranges[0][0] ? 1 : a.ranges[0][1] - b.ranges[0][1]})
-  if !s:InHighlight(a:highlights)
-    " Call again?
-    return
-  endif
+  if !s:InHighlight(a:highlights) | return | endif
+
   let w:lsc_reference_highlights = a:highlights
   let w:lsc_reference_matches = []
   for reference in a:highlights
