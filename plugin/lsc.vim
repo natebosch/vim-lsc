@@ -148,5 +148,5 @@ if !hlexists('lscDiagnosticHint')
   highlight link lscDiagnosticHint SpellCap
 endif
 if !hlexists('lscReference')
-  highlight link lscReference SpellCap
+  highlight link lscReference CursorColumn
 endif
