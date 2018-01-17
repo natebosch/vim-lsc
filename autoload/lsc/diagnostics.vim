@@ -225,7 +225,6 @@ function! lsc#diagnostics#underCursor() abort
   let closest_distance = -1
   for diagnostic in diagnostics
     let range = diagnostic.ranges[0]
-    echom 'Checking in range: '.string(range)
     let start = range[1]
     let end = range[1] + range[2]
     let distance = min([abs(start - col), abs(end - col)])
