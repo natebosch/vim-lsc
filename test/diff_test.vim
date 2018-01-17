@@ -55,6 +55,7 @@ function! TestDiff() abort
       \ )
 
   " Line inserted at end
+  " It's important this appears to *prefix* the newline
   call s:TestDiff(
       \ [2,3,2,3], 0, "\nanother",
       \ "foo\nbar\nbaz",
@@ -145,6 +146,12 @@ function! TestDiff() abort
       \ [2, 2, 2, 3], 1, '',
       \ "foo\nbar\nbaz",
       \ "foo\nbar\nba")
+
+  " Delete lines at end
+  call s:TestDiff(
+      \ [0, 3, 2, 3], 8, '',
+      \ "foo\nbar\nbaz",
+      \ "foo")
 
   " Handles multiple blank lines
   call s:TestDiff(
