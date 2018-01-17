@@ -19,6 +19,7 @@
 - Improve performance of incremental diff.
 - Print messages received on stderr.
 - Don't open an empty quickfix list when no references are found.
+- Don't mask `hlsearch` with diagnostics.
 
 # 0.2.8
 
