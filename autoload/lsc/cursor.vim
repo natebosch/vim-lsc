@@ -49,22 +49,19 @@ function s:HandleHighlights(request_number, highlights) abort
   if !s:highlights_pending | return | endif
   let s:highlights_pending = v:false
   if a:request_number != s:highlights_request | return | endif
-  call map(a:highlights, {_, reference -> s:ConvertReference(reference)})
   call lsc#cursor#clearReferenceHighlights()
-  if !s:InHighlight(a:highlights)
-    " Call again?
-    return
-  endif
+  if empty(a:highlights) | return | endif
+  call map(a:highlights, {_, reference -> s:ConvertReference(reference)})
   call sort(a:highlights, {a, b ->
       \ a.ranges[0][0] > b.ranges[0][0] ? 1 : a.ranges[0][1] - b.ranges[0][1]})
-  if exists('w:lsc_reference_highlights') &&
-      \ a:highlights == w:lsc_reference_highlights
+  if !s:InHighlight(a:highlights)
+    " Call again?
     return
   endif
   let w:lsc_reference_highlights = a:highlights
   let w:lsc_reference_matches = []
   for reference in a:highlights
-    let match = matchaddpos('lscReference', reference.ranges)
+    let match = matchaddpos('lscReference', reference.ranges, -5)
     call add(w:lsc_reference_matches, match)
   endfor
 endfunction
@@ -90,7 +87,7 @@ function! s:InHighlight(highlights) abort
   let col = col('.')
   for reference in a:highlights
     for range in reference.ranges
-      if line == range[0] && col >= range[1] && col <= range[1] + range[2]
+      if line == range[0] && col >= range[1] && col < range[1] + range[2]
         return v:true
       endif
     endfor
