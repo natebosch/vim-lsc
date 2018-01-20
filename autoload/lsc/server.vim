@@ -174,11 +174,7 @@ function! s:CheckCapabilities(init_results, server) abort
     if has_key(capabilities, 'documentHighlightsProvider')
       if capabilities['documentHighlightsProvider']
         call lsc#cursor#enableReferenceHighlights(filetype)
-      else
-        echom 'Present but false'
       endif
-    else
-      echom 'Not present'
     endif
   endif
 endfunction

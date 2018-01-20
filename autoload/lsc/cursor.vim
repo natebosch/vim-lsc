@@ -34,7 +34,6 @@ function! lsc#cursor#enableReferenceHighlights(filetype)
 endfunction
 
 function! s:ShowDiagnostic() abort
-  "TODO  - Check for normal mode? We dont' care about the cursor in visual mode
   let diagnostic = lsc#diagnostics#underCursor()
   if has_key(diagnostic, 'message')
     let max_width = &columns - 18
@@ -50,6 +49,9 @@ function! s:ShowDiagnostic() abort
 endfunction
 
 function! s:HighlightReferences() abort
+  if exists('g:lsc_reference_highlights') && !g:lsc_reference_highlights
+    return
+  endif
   if !has_key(s:highlight_support, &filetype) | return | endif
   if exists('w:lsc_reference_highlights') &&
       \ s:InHighlight(w:lsc_reference_highlights)

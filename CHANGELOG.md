@@ -1,3 +1,9 @@
+# 0.3.0-dev
+
+- Add highlighting based on references to the symbol under the cursor. Disable
+  with `let g:lsc_reference_highlights = v:false`. Customize highlighting with
+  the group `lscReference`.
+
 # 0.2.9-dev
 
 - Add an argument to `lsc#edit#findCodeActions` to pass a callback to choose an
