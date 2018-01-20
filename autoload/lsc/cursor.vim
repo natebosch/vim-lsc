@@ -10,11 +10,31 @@ function! lsc#cursor#onMove() abort
   call s:HighlightReferences()
 endfunction
 
+function! lsc#cursor#onWinLeave() abort
+  "TODO - Clear matches but don't forget them - if nothing changes when we
+  "reenter they should still be valid
+  call lsc#cursor#clearReferenceHighlights()
+endfunction
+
+function! lsc#cursor#onWinEnter() abort
+  "TODO - Recreate matches if we have them, or call if we don't
+endfunction
+
+function! lsc#cursor#onChange() abort
+  "TODO -  Reload references? highlights might be wrong...
+  "force even if in a highlight
+endfunction
+
+function! lsc#cursor#insertEnter() abort
+  call lsc#cursor#clearReferenceHighlights()
+endfunction
+
 function! lsc#cursor#enableReferenceHighlights(filetype)
   let s:highlight_support[a:filetype] = v:true
 endfunction
 
 function! s:ShowDiagnostic() abort
+  "TODO  - Check for normal mode? We dont' care about the cursor in visual mode
   let diagnostic = lsc#diagnostics#underCursor()
   if has_key(diagnostic, 'message')
     let max_width = &columns - 18
@@ -45,7 +65,8 @@ function! s:HighlightReferences() abort
       \ funcref('<SID>HandleHighlights', [s:highlights_request]))
 endfunction
 
-function s:HandleHighlights(request_number, highlights) abort
+function! s:HandleHighlights(request_number, highlights) abort
+  "TODO - What if we're in the wrong buffer?
   if !s:highlights_pending | return | endif
   let s:highlights_pending = v:false
   if a:request_number != s:highlights_request | return | endif

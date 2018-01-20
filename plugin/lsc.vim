@@ -72,6 +72,10 @@ augroup LSC
   autocmd BufUnload * call <SID>IfEnabled('lsc#file#onClose', expand("<afile>"))
 
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
+  autocmd WinLeave * call <SID>IfEnabled('lsc#cursor#onWinLeave')
+  autocmd WinEnter * call <SID>IfEnabled('lsc#cursor#onWinEnter')
+  autocmd TextChanged * call <SID>IfEnabled('lsc#cursor#onChange')
+  autocmd InsertEnter * call <SID>IfEnabled('lsc#cursor#insertEnter')
 
   autocmd TextChangedI * call <SID>IfEnabled('lsc#complete#textChanged')
   autocmd InsertCharPre * call <SID>IfEnabled('lsc#complete#insertCharPre')
@@ -103,7 +107,7 @@ function! LSCEnsureCurrentWindowState() abort
     if exists('w:lsc_diagnostics_version')
       call lsc#diagnostics#clear()
     endif
-    if exists('w:lsc_reference_highlights')
+    if exists('w:lsc_reference_matches')
       call lsc#cursor#clearReferenceHighlights()
     endif
     return
