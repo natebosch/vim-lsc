@@ -48,7 +48,7 @@ function! lsc#config#messageHook(server, method, params) abort
   if !has_key(hooks, a:method) | return a:params | endif
   let hook = hooks[a:method]
   if type(hook) == v:t_func
-    return s:RunHookFunction(hook a:method, a:params)
+    return s:RunHookFunction(hook, a:method, a:params)
   elseif type(hook) == v:t_dict
     return s:MergeHookDict(hook, a:method, a:params)
   else

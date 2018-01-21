@@ -4,7 +4,11 @@
   with `let g:lsc_reference_highlights = v:false`. Customize highlighting with
   the group `lscReference`.
 
-# 0.2.9-dev
+# 0.2.9+1
+
+- Fix error in calling function message hooks.
+
+# 0.2.9
 
 - Add an argument to `lsc#edit#findCodeActions` to pass a callback to choose an
   action.
