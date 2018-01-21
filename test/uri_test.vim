@@ -21,7 +21,7 @@ function! s:RunTest(test)
   else
     echom 'No errors in: '.a:test
   endif
-endfunction!
+endfunction
 
 function! s:RunTests(...)
   for test in a:000
