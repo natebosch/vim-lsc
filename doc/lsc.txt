@@ -60,6 +60,11 @@ under the cursor, including it's definition. Sends a "textDocument/references"
 request with the location set to the cursor's position. With
 |lsc-default-map| this command is bound to "gr".
 
+                                                *:LSClientDocumentSymbol*
+Populate the |quickfix| with a list of the symbols defined in the current
+buffer. Sends a "textDocument/documentSymbol" request. With |lsc-default-map|
+this command is bound to "gs".
+
                                                 *:LSClientShowHover*
 Open a |preview| window with hover information corresponding to the element
 under the cursor. Sends a "textDocument/hover" request with the location set
@@ -193,6 +198,7 @@ The default mapping for keys, if you've opted in to "g:lsc_auto_map" are:
 
 <C-]>                   |:LSClientGoToDefinition|
 gr                      |:LSClientFindReferences|
+gs                      |:LSClientDocumentSymbol|
 ga                      |:LSClientFindCodeActions|
 gR                      |:LSClientRename|
 K                       |:LSClientShowHover|

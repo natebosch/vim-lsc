@@ -4,6 +4,11 @@
   with `let g:lsc_reference_highlights = v:false`. Customize highlighting with
   the group `lscReference`.
 
+# 0.2.10-dev
+
+- Add `:LSClientDocumentSymbol` command to populate the quickfix list with
+  symbols in the current document.
+
 # 0.2.9+1
 
 - Fix error in calling function message hooks.

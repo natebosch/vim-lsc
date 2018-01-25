@@ -49,6 +49,7 @@ let g:lsc_auto_map = {
     \ 'GoToDefinition': '<C-]>',
     \ 'FindReferences': 'gr',
     \ 'FindCodeActions': 'ga',
+    \ 'DocumentSymbol': 'gs',
     \ 'ShowHover': 'K',
     \ 'Completion': 'completefunc',
     \}
@@ -121,6 +122,12 @@ cursor moves before the server responds the response will be ignored.
 
 While the cursor is on any identifier call `LSClientFindReferences` (`gr` if
 using the default mappings) to populate the quickfix list with usage locations.
+
+### Document Symbols
+
+In any enabled buffer call `LSClientDocumentSymbol` (`gs` if using the default
+mappings) to populate the quickfix list with the locations of all symbols in
+that document.
 
 ### Hover
 
