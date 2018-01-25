@@ -4,6 +4,7 @@ let s:default_maps = {
     \ 'FindCodeActions': 'ga',
     \ 'Rename': 'gR',
     \ 'ShowHover': 'K',
+    \ 'DocumentSymbol': 'gs',
     \ 'Completion': 'completefunc',
     \}
 
@@ -25,6 +26,7 @@ function! lsc#config#mapKeys() abort
   for command in [
       \ 'GoToDefinition',
       \ 'FindReferences',
+      \ 'DocumentSymbol',
       \ 'ShowHover',
       \ 'FindCodeActions',
       \]

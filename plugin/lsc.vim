@@ -14,6 +14,7 @@ endif
 command! LSClientGoToDefinition call lsc#reference#goToDefinition()
 command! LSClientFindReferences call lsc#reference#findReferences()
 command! LSClientShowHover call lsc#reference#hover()
+command! LSClientDocumentSymbol call lsc#reference#documentSymbols()
 command! LSClientFindCodeActions call lsc#edit#findCodeActions()
 command! LSClientAllDiagnostics call lsc#diagnostics#showInQuickFix()
 command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
