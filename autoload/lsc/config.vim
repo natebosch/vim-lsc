@@ -4,7 +4,7 @@ let s:default_maps = {
     \ 'FindCodeActions': 'ga',
     \ 'Rename': 'gR',
     \ 'ShowHover': 'K',
-    \ 'DocumentSymbol': 'gs',
+    \ 'DocumentSymbol': 'go',
     \ 'Completion': 'completefunc',
     \}
 
