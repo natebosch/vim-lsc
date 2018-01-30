@@ -49,7 +49,7 @@ let g:lsc_auto_map = {
     \ 'GoToDefinition': '<C-]>',
     \ 'FindReferences': 'gr',
     \ 'FindCodeActions': 'ga',
-    \ 'DocumentSymbol': 'gs',
+    \ 'DocumentSymbol': 'go',
     \ 'ShowHover': 'K',
     \ 'Completion': 'completefunc',
     \}
@@ -125,7 +125,7 @@ using the default mappings) to populate the quickfix list with usage locations.
 
 ### Document Symbols
 
-In any enabled buffer call `LSClientDocumentSymbol` (`gs` if using the default
+In any enabled buffer call `LSClientDocumentSymbol` (`go` if using the default
 mappings) to populate the quickfix list with the locations of all symbols in
 that document.
 
