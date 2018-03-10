@@ -31,6 +31,9 @@ function! lsc#highlights#clear() abort
     endfor
   endif
   let w:lsc_diagnostic_matches = []
+  if exists('w:lsc_highlights_version')
+    unlet w:lsc_highlights_version
+  endif
 endfunction
 
 " If vim is in select or visual mode return true and attempt to schedule an

@@ -56,11 +56,11 @@ augroup LSC
   " 1. Diagnostic highlights
   " 2. Diagnostic location list
   "
-  " The `BufWinEnter` event indicates most times when the buffer <-> window
+  " The `BufEnter` event indicates most times when the buffer <-> window
   " relationship can change. There are some exceptions where this event is not
   " fired such as `:split` and `:lopen` so `WinEnter` is used as a fallback with
   " a block to ensure it only happens once.
-  autocmd BufWinEnter * call LSCEnsureCurrentWindowState()
+  autocmd BufEnter * call LSCEnsureCurrentWindowState()
   autocmd WinEnter * call timer_start(1, function('<SID>OnWinEnter'))
 
   " Window local state is only correctly maintained for the current tab.

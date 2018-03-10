@@ -2,6 +2,9 @@
 
 - Add `:LSClientDocumentSymbol` command to populate the quickfix list with
   symbols in the current document.
+- Bug Fix: Clear highlighting when entering buffers that don't fire
+  `BufWinEnter` but do fire `BufEnter`. Restore highlights when opening a buffer
+  that in a window that previously had cleared highlights.
 
 # 0.2.9+1
 
