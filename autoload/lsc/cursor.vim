@@ -64,10 +64,10 @@ function! s:HighlightReferences() abort
       \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
       \ }
   call lsc#server#call(&filetype, 'textDocument/documentHighlight', params,
-      \ funcref('<SID>HandleHighlights', [s:highlights_request]))
+      \ funcref('<SID>HandleHighlights', [s:highlights_request, getcurpos()]))
 endfunction
 
-function! s:HandleHighlights(request_number, highlights) abort
+function! s:HandleHighlights(request_number, old_pos, highlights) abort
   "TODO - What if we're in the wrong buffer?
   if !s:highlights_pending | return | endif
   let s:highlights_pending = v:false
@@ -75,7 +75,12 @@ function! s:HandleHighlights(request_number, highlights) abort
   call lsc#cursor#clearReferenceHighlights()
   if empty(a:highlights) | return | endif
   call map(a:highlights, {_, reference -> s:ConvertReference(reference)})
-  if !s:InHighlight(a:highlights) | return | endif
+  if !s:InHighlight(a:highlights)
+    if a:old_pos != getcurpos()
+      call s:HighlightReferences()
+    endif
+    return
+  endif
 
   let w:lsc_reference_highlights = a:highlights
   let w:lsc_reference_matches = []
