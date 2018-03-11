@@ -75,8 +75,9 @@ augroup LSC
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
   autocmd WinLeave * call <SID>IfEnabled('lsc#cursor#onWinLeave')
   autocmd WinEnter * call <SID>IfEnabled('lsc#cursor#onWinEnter')
-  autocmd TextChanged * call <SID>IfEnabled('lsc#cursor#onChange')
   autocmd InsertEnter * call <SID>IfEnabled('lsc#cursor#insertEnter')
+  autocmd User LSCOnChangesFlushed
+      \ call <SID>IfEnabled('lsc#cursor#onChangesFlushed')
 
   autocmd TextChangedI * call <SID>IfEnabled('lsc#complete#textChanged')
   autocmd InsertCharPre * call <SID>IfEnabled('lsc#complete#insertCharPre')
@@ -115,7 +116,7 @@ function! LSCEnsureCurrentWindowState() abort
   endif
   call lsc#diagnostics#updateLocationList(expand('%:p'))
   call lsc#highlights#update()
-  call lsc#cursor#clearReferenceHighlights()
+  call lsc#cursor#onMove()
 endfunction
 
 " Run `function` if LSC is enabled for the current filetype.

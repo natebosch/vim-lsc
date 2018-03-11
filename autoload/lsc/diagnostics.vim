@@ -101,7 +101,7 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   call lsc#diagnostics#updateLocationList(a:file_path)
   call lsc#highlights#updateDisplayed()
   if(a:file_path ==# expand('%:p'))
-    call lsc#cursor#onMove()
+    call lsc#cursor#showDiagnostic()
   endif
 endfunction
 
