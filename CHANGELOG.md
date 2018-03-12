@@ -1,4 +1,4 @@
-# 0.2.10-dev
+# 0.2.10
 
 - Add `:LSClientDocumentSymbol` command to populate the quickfix list with
   symbols in the current document.
