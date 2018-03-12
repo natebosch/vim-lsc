@@ -11,13 +11,11 @@ function! lsc#cursor#onMove() abort
 endfunction
 
 function! lsc#cursor#onWinLeave() abort
-  "TODO - Clear matches but don't forget them - if nothing changes when we
-  "reenter they should still be valid
   call lsc#cursor#clearReferenceHighlights()
 endfunction
 
 function! lsc#cursor#onWinEnter() abort
-  "TODO - Recreate matches if we have them, or call if we don't
+  call s:HighlightReferences(v:false)
 endfunction
 
 function! lsc#cursor#insertEnter() abort
@@ -56,8 +54,8 @@ function! s:HighlightReferences(force_in_highlight) abort
   endif
   if !has_key(s:highlight_support, &filetype) | return | endif
   if !a:force_in_highlight &&
-      \ exists('w:lsc_reference_highlights') &&
-      \ s:InHighlight(w:lsc_reference_highlights)
+      \ exists('w:lsc_references') &&
+      \ s:InHighlight(w:lsc_references)
     return
   endif
   if has_key(s:pending, &filetype) && s:pending[&filetype]
@@ -89,7 +87,7 @@ function! s:HandleHighlights(request_number, old_pos, old_buf_nr, highlights)
     return
   endif
 
-  let w:lsc_reference_highlights = a:highlights
+  let w:lsc_references = a:highlights
   let w:lsc_reference_matches = []
   for reference in a:highlights
     let match = matchaddpos('lscReference', reference.ranges, -5)
@@ -104,7 +102,7 @@ function! lsc#cursor#clearReferenceHighlights() abort
       silent! call matchdelete(current_match)
     endfor
     unlet w:lsc_reference_matches
-    unlet w:lsc_reference_highlights
+    unlet w:lsc_references
   endif
 endfunction
 
