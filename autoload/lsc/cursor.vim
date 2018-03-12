@@ -69,13 +69,15 @@ function! s:HighlightReferences(force_in_highlight) abort
       \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
       \ }
   call lsc#server#call(&filetype, 'textDocument/documentHighlight', params,
-      \ funcref('<SID>HandleHighlights', [s:highlights_request, getcurpos()]))
+      \ funcref('<SID>HandleHighlights',
+      \ [s:highlights_request, getcurpos(), bufnr('%')]))
 endfunction
 
-function! s:HandleHighlights(request_number, old_pos, highlights) abort
-  "TODO - What if we're in the wrong buffer?
-  if !s:pending[&filetype] | return | endif
+function! s:HandleHighlights(request_number, old_pos, old_buf_nr, highlights)
+    \ abort
+  if !has_key(s:pending, &filetype) || !s:pending[&filetype] | return | endif
   let s:pending[&filetype] = v:false
+  if bufnr('%') != a:old_buf_nr | return | endif
   if a:request_number != s:highlights_request | return | endif
   call lsc#cursor#clearReferenceHighlights()
   if empty(a:highlights) | return | endif
