@@ -116,7 +116,7 @@ function! LSCEnsureCurrentWindowState() abort
   endif
   call lsc#diagnostics#updateLocationList(expand('%:p'))
   call lsc#highlights#update()
-  call lsc#cursor#onMove()
+  call lsc#cursor#onWinEnter()
 endfunction
 
 " Run `function` if LSC is enabled for the current filetype.
