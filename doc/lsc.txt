@@ -258,6 +258,10 @@ screen instead of as a horizontal split:
 >
  autocmd User LSCShowPreview wincmd H | vertical resize 80
 <
+                                                *autocmd-LSCOnChangesFlushed*
+Fires after LSC sends a `textDocument/didOpen` or `textDocument/didChange`
+request.
+
 SERVER CUSTOMIZATION                            *lsc-server-cusomization*
 
 When the server configuration is a `dict` (see |lsc-setup|) the following
