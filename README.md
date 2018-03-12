@@ -105,6 +105,13 @@ Disable autocomplete with `let g:lsc_enable_autocomplete = v:false`. When using
 manual completion the `completefunc` may have no results if completion is
 requested before the server responds with suggestions.
 
+### Reference Highlights
+
+If the server supports the `textDocument/documentHighlights` call references to
+the element under the cursor throughout the document will be highlighted.
+Disable with `let g:lsc_reference_highlights = v:false` or customize the
+highlighting with the group `lscReference`.
+
 ### Jump to definition
 
 While the cursor is on any identifier call `LSClientGoToDefinition` (`<C-]>` if

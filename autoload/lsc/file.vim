@@ -63,6 +63,7 @@ function! s:DidOpen(file_path) abort
     if s:AllowIncrementalSync(filetype)
       let s:file_content[a:file_path] = buffer_content
     endif
+    doautocmd <nomodeline> User LSCOnChangesFlushed
   endif
 endfunction
 
@@ -133,6 +134,7 @@ function! s:FlushChanges(file_path, filetype) abort
   if allow_incremental
     let s:file_content[a:file_path] = buffer_content
   endif
+  doautocmd <nomodeline> User LSCOnChangesFlushed
 endfunction
 
 function! lsc#file#version() abort

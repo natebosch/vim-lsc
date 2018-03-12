@@ -172,10 +172,11 @@ completion.
 
                                                 *lsc-configure-highlight*
 vim-lsc uses highlight groups "lscDiagnosticError", "lscDiagnosticWarning",
-"lscDiagnosticInfo", and "lscDiagnosticHint". By default "Error" is linked to
-|hl-Error|, "Warning" is linked to |hl-SpllBad|, and "Info" and "Hint" are
-linked to |hl-SpellCap|. Override this by setting or linking any of these
-highlight groups. For example:
+"lscDiagnosticInfo", "lscDiagnosticHint", and "lscReference". By default
+"Error" is linked to |hl-Error|, "Warning" is linked to |hl-SpllBad|, and
+"Info" and "Hint" are linked to |hl-SpellCap|. "Reference" is linked to
+|hl-CursorColumn|. Override this by setting or linking any of these highlight
+groups. For example:
 >
  highlight lscDiagnosticError ctermbg=160
  highlight link lscDiagnosticWarning SpellCap
@@ -226,7 +227,15 @@ be smaller than with full syncs.
                                                 *lsc-configure-edits*
                                                 *g:lsc_enable_apply_edit*
 By default the client will not modify any buffer in response to
-`workspace/applyEdit` calls. To enable edits set to `v:true`.
+`workspace/applyEdit` calls. To enable edits set `g:lsc_enable_apply_edit` to
+`v:true`.
+
+                                                *lsc-configure-references*
+                                                *g:lsc_reference_highlights*
+By default the client will highlight references to the element under the
+cursor whenver the server has support. Disable these highlights by setting
+`g:lsc_reference_highlights` to `v:false`. Configure highlighting with the
+`lscReference` highlight group. See |lsc-configure-highlight|.
 
 AUTOCMDS                                        *lsc-autocmds*
 
@@ -249,6 +258,10 @@ screen instead of as a horizontal split:
 >
  autocmd User LSCShowPreview wincmd H | vertical resize 80
 <
+                                                *autocmd-LSCOnChangesFlushed*
+Fires after LSC sends a `textDocument/didOpen` or `textDocument/didChange`
+request.
+
 SERVER CUSTOMIZATION                            *lsc-server-cusomization*
 
 When the server configuration is a `dict` (see |lsc-setup|) the following

@@ -1,3 +1,9 @@
+# 0.3.0-dev
+
+- Add highlighting based on references to the symbol under the cursor. Disable
+  with `let g:lsc_reference_highlights = v:false`. Customize highlighting with
+  the group `lscReference`.
+
 # 0.2.10
 
 - Add `:LSClientDocumentSymbol` command to populate the quickfix list with

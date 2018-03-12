@@ -73,6 +73,11 @@ augroup LSC
   autocmd BufUnload * call <SID>IfEnabled('lsc#file#onClose', expand("<afile>"))
 
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
+  autocmd WinLeave * call <SID>IfEnabled('lsc#cursor#onWinLeave')
+  autocmd WinEnter * call <SID>IfEnabled('lsc#cursor#onWinEnter')
+  autocmd InsertEnter * call <SID>IfEnabled('lsc#cursor#insertEnter')
+  autocmd User LSCOnChangesFlushed
+      \ call <SID>IfEnabled('lsc#cursor#onChangesFlushed')
 
   autocmd TextChangedI * call <SID>IfEnabled('lsc#complete#textChanged')
   autocmd InsertCharPre * call <SID>IfEnabled('lsc#complete#insertCharPre')
@@ -104,10 +109,14 @@ function! LSCEnsureCurrentWindowState() abort
     if exists('w:lsc_diagnostics_version')
       call lsc#diagnostics#clear()
     endif
+    if exists('w:lsc_reference_matches')
+      call lsc#cursor#clearReferenceHighlights()
+    endif
     return
   endif
   call lsc#diagnostics#updateLocationList(expand('%:p'))
   call lsc#highlights#update()
+  call lsc#cursor#onWinEnter()
 endfunction
 
 " Run `function` if LSC is enabled for the current filetype.
@@ -143,4 +152,7 @@ if !hlexists('lscDiagnosticInfo')
 endif
 if !hlexists('lscDiagnosticHint')
   highlight link lscDiagnosticHint SpellCap
+endif
+if !hlexists('lscReference')
+  highlight link lscReference CursorColumn
 endif
