@@ -55,7 +55,7 @@ function! s:HighlightReferences(force_in_highlight) abort
   if !has_key(s:highlight_support, &filetype) | return | endif
   if !a:force_in_highlight &&
       \ exists('w:lsc_references') &&
-      \ s:InHighlight(w:lsc_references)
+      \ lsc#cursor#isInReference(w:lsc_references) >= 0
     return
   endif
   if has_key(s:pending, &filetype) && s:pending[&filetype]
@@ -80,7 +80,8 @@ function! s:HandleHighlights(request_number, old_pos, old_buf_nr, highlights)
   call lsc#cursor#clearReferenceHighlights()
   if empty(a:highlights) | return | endif
   call map(a:highlights, {_, reference -> s:ConvertReference(reference)})
-  if !s:InHighlight(a:highlights)
+  call sort(a:highlights, function('<SID>CompareRange'))
+  if lsc#cursor#isInReference(a:highlights) == -1
     if a:old_pos != getcurpos()
       call s:HighlightReferences(v:true) endif
     endif
@@ -110,19 +111,32 @@ function! lsc#cursor#clean() abort
   let s:pending[&filetype] = v:false
 endfunction
 
-function! s:InHighlight(highlights) abort
+" Returns the index of the reference the cursor is positioned in, or -1 if it is
+" not in any reference.
+function! lsc#cursor#isInReference(references) abort
   let line = line('.')
   let col = col('.')
-  for reference in a:highlights
+  let idx = 0
+  for reference in a:references
     for range in reference.ranges
       if line == range[0] && col >= range[1] && col < range[1] + range[2]
-        return v:true
+        return idx
       endif
     endfor
+    let idx += 1
   endfor
-  return v:false
+  return -1
 endfunction
 
 function! s:ConvertReference(reference) abort
   return {'ranges': lsc#convert#rangeToHighlights(a:reference.range)}
+endfunction
+
+function! s:CompareRange(r1, r2) abort
+  let line_1 = a:r1.ranges[0][0]
+  let line_2 = a:r2.ranges[0][0]
+  if line_1 != line_2 | return line_1 > line_2 ? 1 : -1 | endif
+  let col_1 = a:r1.ranges[0][1]
+  let col_2 = a:r2.ranges[0][1]
+  return col_1 - col_2
 endfunction

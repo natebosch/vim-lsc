@@ -1,6 +1,8 @@
 let s:default_maps = {
     \ 'GoToDefinition': '<C-]>',
     \ 'FindReferences': 'gr',
+    \ 'NextReference': '<C-n>',
+    \ 'PreviousReference': '<C-p>',
     \ 'FindCodeActions': 'ga',
     \ 'Rename': 'gR',
     \ 'ShowHover': 'K',
@@ -26,6 +28,8 @@ function! lsc#config#mapKeys() abort
   for command in [
       \ 'GoToDefinition',
       \ 'FindReferences',
+      \ 'NextReference',
+      \ 'PreviousReference',
       \ 'DocumentSymbol',
       \ 'ShowHover',
       \ 'FindCodeActions',
