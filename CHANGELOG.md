@@ -3,6 +3,7 @@
 - Add highlighting based on references to the symbol under the cursor. Disable
   with `let g:lsc_reference_highlights = v:false`. Customize highlighting with
   the group `lscReference`.
+- Bug Fix: Capitalize variable handling message hooks to allow `funcref` values.
 
 # 0.2.10
 
