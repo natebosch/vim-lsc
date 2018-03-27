@@ -241,13 +241,9 @@ function! s:SymbolKind(kind) abort
   endif
 endfunction
 
-" Move the cursor to the next or previous reference in the same document to the
-" symbol under the cursor.
-"
 " If the server supports `textDocument/documentHighlights` and they are enabled,
-" use the active highlights.
-" TODO - Otherwise make a `textDocument/references` request and only use the
-" ones for the current document.
+" use the active highlights to move the cursor to the next or previous referene
+" in the same document to the symbol under the cursor.
 function! lsc#reference#findNext(direction) abort
   if exists('w:lsc_references')
     let idx = lsc#cursor#isInReference(w:lsc_references)
