@@ -48,11 +48,11 @@ function! lsc#config#messageHook(server, method, params) abort
   if !has_key(a:server.config, 'message_hooks') | return a:params | endif
   let hooks = a:server.config.message_hooks
   if !has_key(hooks, a:method) | return a:params | endif
-  let hook = hooks[a:method]
-  if type(hook) == v:t_func
-    return s:RunHookFunction(hook, a:method, a:params)
-  elseif type(hook) == v:t_dict
-    return s:MergeHookDict(hook, a:method, a:params)
+  let l:Hook = hooks[a:method]
+  if type(l:Hook) == v:t_func
+    return s:RunHookFunction(l:Hook, a:method, a:params)
+  elseif type(l:Hook) == v:t_dict
+    return s:MergeHookDict(l:Hook, a:method, a:params)
   else
     call lsc#message#error('Message hook must be a function or a dict. '.
         \' Invalid config for '.a:method)
