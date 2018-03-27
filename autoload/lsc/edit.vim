@@ -92,18 +92,30 @@ endfunction
 
 function! s:ApplyAll(changes) abort
   for [uri, edits] in items(a:changes)
+    let file_path = lsc#uri#documentPath(uri)
+    let bufnr = bufnr(file_path)
+    let cmd = 'keepjumps keepalt'
+    if bufnr !=# -1
+      let cmd .= ' b '.bufnr
+    else
+      let cmd .= ' edit '.file_path
+    endif
     for edit in edits
-      call s:Apply(uri, edit)
+      let cmd .= ' | execute "keepjumps normal! '.s:Apply(edit).'"'
     endfor
+    try
+      let was_paste = &paste
+      set paste
+      execute cmd
+    finally
+      let &paste = was_paste
+    endtry
+    call lsc#file#onChange(file_path)
   endfor
 endfunction
 
-" Apply a `TextEdit` to the buffer at [uri].
-function! s:Apply(uri, edit) abort
-  let file_path = lsc#uri#documentPath(a:uri)
-  if expand('%:p') !~# file_path
-    execute 'edit' file_path
-  endif
+" Find the command to apply a `TextEdit`.
+function! s:Apply(edit) abort
   if s:IsEmptyRange(a:edit.range)
     if a:edit.range.start.character >= len(getline(a:edit.range.start.line + 1))
       let insert = 'a'
@@ -131,8 +143,7 @@ function! s:Apply(uri, edit) abort
         \ a:edit.newText
         \)
   endif
-  execute 'normal!' command
-  call lsc#file#onChange(file_path)
+  return command
 endfunction
 
 function! s:IsEmptyRange(range) abort
