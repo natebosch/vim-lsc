@@ -92,50 +92,71 @@ endfunction
 
 function! s:ApplyAll(changes) abort
   for [uri, edits] in items(a:changes)
-    for edit in edits
-      call s:Apply(uri, edit)
+    let l:file_path = lsc#uri#documentPath(uri)
+    let l:bufnr = bufnr(l:file_path)
+    let l:cmd = 'keepjumps keepalt'
+    if l:bufnr !=# -1
+      let l:cmd .= ' b '.l:bufnr
+    else
+      let l:cmd .= ' edit '.l:file_path
+    endif
+    for edit in sort(edits, '<SID>CompareEdits')
+      let l:cmd .= ' | execute "keepjumps normal! '.s:Apply(edit).'"'
     endfor
+    try
+      let l:was_paste = &paste
+      set paste
+      execute l:cmd
+    finally
+      let &paste = l:was_paste
+    endtry
+    call lsc#file#onChange(l:file_path)
   endfor
 endfunction
 
-" Apply a `TextEdit` to the buffer at [uri].
-function! s:Apply(uri, edit) abort
-  let file_path = lsc#uri#documentPath(a:uri)
-  if expand('%:p') !~# file_path
-    execute 'edit' file_path
-  endif
+" Find the command to apply a `TextEdit`.
+function! s:Apply(edit) abort
   if s:IsEmptyRange(a:edit.range)
     if a:edit.range.start.character >= len(getline(a:edit.range.start.line + 1))
-      let insert = 'a'
+      let l:insert = 'a'
     else
-      let insert = 'i'
+      let l:insert = 'i'
     endif
-    let command = printf('%dG%d|%s%s',
+    return printf('%dG%d|%s%s',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
-        \ insert,
+        \ l:insert,
         \ a:edit.newText
         \)
   else
     " `back` handles end-exclusive range
-    let back = 'h'
-    if a:edit.range.end.character == 0
-      let back = 'k$'
-    endif
-    let command = printf('%dG%d|v%dG%d|%sc%s',
+    let l:back = a:edit.range.end.character == 0 ? 'k$' : 'h'
+    return printf('%dG%d|v%dG%d|%sc%s',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
         \ a:edit.range.end.line + 1,
         \ a:edit.range.end.character + 1,
-        \ back,
+        \ l:back,
         \ a:edit.newText
         \)
   endif
-  execute 'normal!' command
-  call lsc#file#onChange(file_path)
 endfunction
 
 function! s:IsEmptyRange(range) abort
   return a:range.start.line == a:range.end.line &&
       \ a:range.start.character == a:range.end.character
+endfunction
+
+" Orders edits such that those later in the document appear earlier, and inserts
+" at a given index always appear after an edit that starts at that index.
+" Assumes that edits have non-overlapping ranges.
+function! s:CompareEdits(e1, e2) abort
+  if a:e1.range.start.line != a:e2.range.start.line
+    return a:e2.range.start.line - a:e1.range.start.line
+  endif
+  if a:e1.range.start.character != a:e2.range.start.character
+    return a:e2.range.start.character - a:e1.range.start.character
+  endif
+  return !s:IsEmptyRange(a:e1.range) ? -1
+      \ : s:IsEmptyRange(a:e2.range) ? 0 : 1
 endfunction
