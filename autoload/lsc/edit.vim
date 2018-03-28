@@ -92,25 +92,25 @@ endfunction
 
 function! s:ApplyAll(changes) abort
   for [uri, edits] in items(a:changes)
-    let file_path = lsc#uri#documentPath(uri)
-    let bufnr = bufnr(file_path)
-    let cmd = 'keepjumps keepalt'
-    if bufnr !=# -1
-      let cmd .= ' b '.bufnr
+    let l:file_path = lsc#uri#documentPath(uri)
+    let l:bufnr = bufnr(l:file_path)
+    let l:cmd = 'keepjumps keepalt'
+    if l:bufnr !=# -1
+      let l:cmd .= ' b '.l:bufnr
     else
-      let cmd .= ' edit '.file_path
+      let l:cmd .= ' edit '.l:file_path
     endif
     for edit in sort(edits, '<SID>CompareEdits')
-      let cmd .= ' | execute "keepjumps normal! '.s:Apply(edit).'"'
+      let l:cmd .= ' | execute "keepjumps normal! '.s:Apply(edit).'"'
     endfor
     try
-      let was_paste = &paste
+      let l:was_paste = &paste
       set paste
-      execute cmd
+      execute l:cmd
     finally
-      let &paste = was_paste
+      let &paste = l:was_paste
     endtry
-    call lsc#file#onChange(file_path)
+    call lsc#file#onChange(l:file_path)
   endfor
 endfunction
 
@@ -118,32 +118,28 @@ endfunction
 function! s:Apply(edit) abort
   if s:IsEmptyRange(a:edit.range)
     if a:edit.range.start.character >= len(getline(a:edit.range.start.line + 1))
-      let insert = 'a'
+      let l:insert = 'a'
     else
-      let insert = 'i'
+      let l:insert = 'i'
     endif
-    let command = printf('%dG%d|%s%s',
+    return printf('%dG%d|%s%s',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
-        \ insert,
+        \ l:insert,
         \ a:edit.newText
         \)
   else
     " `back` handles end-exclusive range
-    let back = 'h'
-    if a:edit.range.end.character == 0
-      let back = 'k$'
-    endif
-    let command = printf('%dG%d|v%dG%d|%sc%s',
+    let l:back = a:edit.range.end.character == 0 ? 'k$' : 'h'
+    return printf('%dG%d|v%dG%d|%sc%s',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
         \ a:edit.range.end.line + 1,
         \ a:edit.range.end.character + 1,
-        \ back,
+        \ l:back,
         \ a:edit.newText
         \)
   endif
-  return command
 endfunction
 
 function! s:IsEmptyRange(range) abort
