@@ -83,7 +83,7 @@ function! s:HandleHighlights(request_number, old_pos, old_buf_nr, highlights)
   call sort(a:highlights, function('<SID>CompareRange'))
   if lsc#cursor#isInReference(a:highlights) == -1
     if a:old_pos != getcurpos()
-      call s:HighlightReferences(v:true) endif
+      call s:HighlightReferences(v:true)
     endif
     return
   endif
