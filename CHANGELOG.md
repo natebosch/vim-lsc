@@ -6,6 +6,8 @@
 - Add `LSClientNextReference` and `LSClientPreviousReference` command to jump to
   references when highlighting is enabled.
 - Bug Fix: Capitalize variable handling message hooks to allow `funcref` values.
+- Bug Fix: Order edits before applying them so that the offsets are correctly
+  matched to the original file.
 
 # 0.2.10
 
