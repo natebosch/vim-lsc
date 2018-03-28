@@ -100,7 +100,7 @@ function! s:ApplyAll(changes) abort
     else
       let cmd .= ' edit '.file_path
     endif
-    for edit in edits
+    for edit in sort(edits, '<SID>CompareEdits')
       let cmd .= ' | execute "keepjumps normal! '.s:Apply(edit).'"'
     endfor
     try
@@ -149,4 +149,18 @@ endfunction
 function! s:IsEmptyRange(range) abort
   return a:range.start.line == a:range.end.line &&
       \ a:range.start.character == a:range.end.character
+endfunction
+
+" Orders edits such that those later in the document appear earlier, and inserts
+" at a given index always appear after an edit that starts at that index.
+" Assumes that edits have non-overlapping ranges.
+function! s:CompareEdits(e1, e2) abort
+  if a:e1.range.start.line != a:e2.range.start.line
+    return a:e2.range.start.line - a:e1.range.start.line
+  endif
+  if a:e1.range.start.character != a:e2.range.start.character
+    return a:e2.range.start.character - a:e1.range.start.character
+  endif
+  return !s:IsEmptyRange(a:e1.range) ? -1
+      \ : s:IsEmptyRange(a:e2.range) ? 0 : 1
 endfunction
