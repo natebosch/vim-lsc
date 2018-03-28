@@ -48,6 +48,8 @@ let g:lsc_auto_map = v:true " Use defaults
 let g:lsc_auto_map = {
     \ 'GoToDefinition': '<C-]>',
     \ 'FindReferences': 'gr',
+    \ 'NextReference': '<C-n>',
+    \ 'PreviousReference': '<C-p>',
     \ 'FindCodeActions': 'ga',
     \ 'DocumentSymbol': 'go',
     \ 'ShowHover': 'K',
@@ -110,7 +112,9 @@ requested before the server responds with suggestions.
 If the server supports the `textDocument/documentHighlights` call references to
 the element under the cursor throughout the document will be highlighted.
 Disable with `let g:lsc_reference_highlights = v:false` or customize the
-highlighting with the group `lscReference`.
+highlighting with the group `lscReference`. Use `<c-n>`
+(`:LSClientNextReference`) or `<c-p>` (`:LSClientPReviousReference`) to jump to
+other reference to the currently highlighted element.
 
 ### Jump to definition
 
