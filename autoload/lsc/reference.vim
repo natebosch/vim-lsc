@@ -240,3 +240,22 @@ function! s:SymbolKind(kind) abort
     return 'TypeParameter'
   endif
 endfunction
+
+" If the server supports `textDocument/documentHighlights` and they are enabled,
+" use the active highlights to move the cursor to the next or previous referene
+" in the same document to the symbol under the cursor.
+function! lsc#reference#findNext(direction) abort
+  if exists('w:lsc_references')
+    let idx = lsc#cursor#isInReference(w:lsc_references)
+    if idx != -1 &&
+        \ idx + a:direction >= 0 &&
+        \ idx + a:direction < len(w:lsc_references)
+      let target = w:lsc_references[idx + a:direction].ranges[0][0:1]
+    endif
+  endif
+  if !exists('l:target')
+    return
+  endif
+  " Move with 'G' to ensure a jump is left
+  exec 'normal! '.target[0].'G'.target[1].'|'
+endfunction

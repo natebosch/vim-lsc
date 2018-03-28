@@ -60,6 +60,13 @@ under the cursor, including it's definition. Sends a "textDocument/references"
 request with the location set to the cursor's position. With
 |lsc-default-map| this command is bound to "gr".
 
+                                                *:LSClientNextReference*
+                                                *:LSClientPreviousReference*
+If there are reference highlights for the current buffer and the cursor is on
+an element with references, jump to the next/previous reference to that
+element. With |lsc-default-map| these are bound to "<c-n>" and "<c-p>"
+respectively.
+
                                                 *:LSClientDocumentSymbol*
 Populate the |quickfix| with a list of the symbols defined in the current
 buffer. Sends a "textDocument/documentSymbol" request. With |lsc-default-map|
