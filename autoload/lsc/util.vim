@@ -48,10 +48,18 @@ endfunction
 "
 " Items are compared with priority order:
 " filename > line > column
+"
+" filnames within cwd are always considered to have a lower sort than others.
 function! lsc#util#compareQuickFixItems(i1, i2) abort
   let file_1 = s:QuickFixFilename(a:i1)
   let file_2 = s:QuickFixFilename(a:i2)
-  if file_1 != file_2 | return file_1 > file_2 ? 1 : -1 | endif
+  if file_1 != file_2
+    let l:file_1_in_cwd = s:IsInCwd(l:file_1)
+    let l:file_2_in_cwd = s:IsInCwd(l:file_2)
+    if l:file_1_in_cwd && !l:file_2_in_cwd | return -1 | endif
+    if l:file_2_in_cwd && !l:file_1_in_cwd | return 1 | endif
+    return file_1 > file_2 ? 1 : -1
+  endif
   if a:i1.lnum != a:i2.lnum | return a:i1.lnum - a:i2.lnum | endif
   return a:i1.col - a:i2.col
 endfunction
@@ -61,6 +69,10 @@ function! s:QuickFixFilename(item) abort
     return a:item.filename
   endif
   return bufname(a:item.bufnr)
+endfunction
+
+function! s:IsInCwd(file_path) abort
+  return a:file_path =~# '^'.getcwd()
 endfunction
 
 " Populate a buffer with [lines] and show it as a preview window.
