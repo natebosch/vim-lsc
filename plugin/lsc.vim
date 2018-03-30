@@ -17,6 +17,8 @@ command! LSClientNextReference call lsc#reference#findNext(1)
 command! LSClientPreviousReference call lsc#reference#findNext(-1)
 command! LSClientShowHover call lsc#reference#hover()
 command! LSClientDocumentSymbol call lsc#reference#documentSymbols()
+command! -nargs=? LSClientWorkspaceSymbol
+    \ call lsc#search#workspaceSymbol(<args>)
 command! LSClientFindCodeActions call lsc#edit#findCodeActions()
 command! LSClientAllDiagnostics call lsc#diagnostics#showInQuickFix()
 command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')

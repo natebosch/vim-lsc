@@ -52,6 +52,7 @@ let g:lsc_auto_map = {
     \ 'PreviousReference': '<C-p>',
     \ 'FindCodeActions': 'ga',
     \ 'DocumentSymbol': 'go',
+    \ 'WorkspaceSymbol': 'gS',
     \ 'ShowHover': 'K',
     \ 'Completion': 'completefunc',
     \}
@@ -129,9 +130,14 @@ using the default mappings) to populate the quickfix list with usage locations.
 
 ### Document Symbols
 
-In any enabled buffer call `LSClientDocumentSymbol` (`go` if using the default
-mappings) to populate the quickfix list with the locations of all symbols in
-that document.
+Call `LSClientDocumentSymbol` (`go` if using the default mappings) to populate
+the quickfix list with the locations of all symbols in that document.
+
+### Workspace Symbol Search
+
+Call `LSClientWorkspaceSymbol` with a no arguments, or with a single String
+argument. (`gS` if using the default mappings) to query the server for symbols
+matching a search string. Results will populate the quickfix list.
 
 ### Hover
 

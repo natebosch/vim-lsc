@@ -72,6 +72,12 @@ Populate the |quickfix| with a list of the symbols defined in the current
 buffer. Sends a "textDocument/documentSymbol" request. With |lsc-default-map|
 this command is bound to "go".
 
+                                                *:LSClientWorkspaceSymbol*
+Populate the |quickfix| with a list of the symbols matching a search string.
+Sends a "workspace/symbol" request. With no arguments this will prompt for a
+search string, with one string argument it will search matching the argument.
+With |lsc-default-map| this command is bound to "gS".
+
                                                 *:LSClientShowHover*
 Open a |preview| window with hover information corresponding to the element
 under the cursor. Sends a "textDocument/hover" request with the location set
@@ -205,7 +211,10 @@ The default mapping for keys, if you've opted in to "g:lsc_auto_map" are:
 
 <C-]>                   |:LSClientGoToDefinition|
 gr                      |:LSClientFindReferences|
+<C-n>                   |:LSClientNextReferences|
+<C-p>                   |:LSClientPreviousReferences|
 go                      |:LSClientDocumentSymbol|
+gS                      |:LSClientWorkspaceSymbol|
 ga                      |:LSClientFindCodeActions|
 gR                      |:LSClientRename|
 K                       |:LSClientShowHover|

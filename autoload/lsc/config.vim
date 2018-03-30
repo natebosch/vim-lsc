@@ -7,6 +7,7 @@ let s:default_maps = {
     \ 'Rename': 'gR',
     \ 'ShowHover': 'K',
     \ 'DocumentSymbol': 'go',
+    \ 'WorkspaceSymbol': 'gS',
     \ 'Completion': 'completefunc',
     \}
 
@@ -31,6 +32,7 @@ function! lsc#config#mapKeys() abort
       \ 'NextReference',
       \ 'PreviousReference',
       \ 'DocumentSymbol',
+      \ 'WorkspaceSymbol',
       \ 'ShowHover',
       \ 'FindCodeActions',
       \]

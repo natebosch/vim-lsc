@@ -51,7 +51,6 @@ endfunction
 "
 " QuickFix Item: (as used)
 " 'filename': file path if file is not open
-" 'bufnr': buffer number if the file is open in a buffer
 " 'lnum': line number
 " 'col': column number
 " 'text': The content of the referenced line
@@ -119,127 +118,15 @@ endfunction
 function! s:setQuickFixSymbols(results) abort
   if empty(a:results)
     call lsc#message#show('No symbols found')
+    return
   endif
 
-  let file_path = lsc#uri#documentPath(a:results[0].location.uri)
-  call map(a:results, {_, symbol -> s:QuickFixSymbol(bufnr(file_path), symbol)})
+  call map(a:results, {_, symbol -> lsc#convert#quickFixSymbol(symbol)})
   call sort(a:results, 'lsc#util#compareQuickFixItems')
   call setqflist(a:results)
   copen
 endfunction
 
-" Conver an LSP SymbolInformation to a quick fix item.
-"
-" Both representations are dictionaries.
-"
-" SymbolInformation:
-" 'location':
-"   'uri': file:// URI
-"   'range': {'start': {'line', 'characater'}, 'end': {'line', 'character'}}
-" 'name': The symbol's name
-" 'kind': Integer kind
-" 'containerName': The element this symbol is inside
-"
-" QuickFix Item: (as used)
-" 'bufnr': This buffer
-" 'lnum': line number
-" 'col': column number
-" 'text': "SymbolName" [kind] (in containerName)?
-function! s:QuickFixSymbol(bufnr, symbol) abort
-  let item = {'lnum': a:symbol.location.range.start.line + 1,
-      \ 'col': a:symbol.location.range.start.character + 1,
-      \ 'bufnr': a:bufnr}
-  let text = '"'.a:symbol.name.'"'
-  if !empty(a:symbol.kind)
-    let text .= ' ['.s:SymbolKind(a:symbol.kind).']'
-  endif
-  if !empty(a:symbol.containerName)
-    let text .= ' in '.a:symbol.containerName
-  endif
-  let item.text = text
-  return item
-endfunction
-
-function! s:SymbolKind(kind) abort
-  if a:kind == 1
-    return 'File'
-  endif
-  if a:kind == 2
-    return 'Module'
-  endif
-  if a:kind == 3
-    return 'Namespace'
-  endif
-  if a:kind == 4
-    return 'Package'
-  endif
-  if a:kind == 5
-    return 'Class'
-  endif
-  if a:kind == 6
-    return 'Method'
-  endif
-  if a:kind == 7
-    return 'Property'
-  endif
-  if a:kind == 8
-    return 'Field'
-  endif
-  if a:kind == 9
-    return 'Constructor'
-  endif
-  if a:kind == 10
-    return 'Enum'
-  endif
-  if a:kind == 11
-    return 'Interface'
-  endif
-  if a:kind == 12
-    return 'Function'
-  endif
-  if a:kind == 13
-    return 'Variable'
-  endif
-  if a:kind == 14
-    return 'Constant'
-  endif
-  if a:kind == 15
-    return 'String'
-  endif
-  if a:kind == 16
-    return 'Number'
-  endif
-  if a:kind == 17
-    return 'Boolean'
-  endif
-  if a:kind == 18
-    return 'Array'
-  endif
-  if a:kind == 19
-    return 'Object'
-  endif
-  if a:kind == 20
-    return 'Key'
-  endif
-  if a:kind == 21
-    return 'Null'
-  endif
-  if a:kind == 22
-    return 'EnumMember'
-  endif
-  if a:kind == 23
-    return 'Struct'
-  endif
-  if a:kind == 24
-    return 'Event'
-  endif
-  if a:kind == 25
-    return 'Operator'
-  endif
-  if a:kind == 26
-    return 'TypeParameter'
-  endif
-endfunction
 
 " If the server supports `textDocument/documentHighlights` and they are enabled,
 " use the active highlights to move the cursor to the next or previous referene

@@ -8,6 +8,7 @@
 - Bug Fix: Capitalize variable handling message hooks to allow `funcref` values.
 - Bug Fix: Order edits before applying them so that the offsets are correctly
   matched to the original file.
+- Add `LSClientWorkspaceSymbol`.
 
 # 0.2.10
 
