@@ -9,6 +9,7 @@
 - Bug Fix: Order edits before applying them so that the offsets are correctly
   matched to the original file.
 - Add `LSClientWorkspaceSymbol`.
+- Add `LSClientFindImplementations`.
 
 # 0.2.10
 

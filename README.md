@@ -50,6 +50,7 @@ let g:lsc_auto_map = {
     \ 'FindReferences': 'gr',
     \ 'NextReference': '<C-n>',
     \ 'PreviousReference': '<C-p>',
+    \ 'FindImplementations': 'gI',
     \ 'FindCodeActions': 'ga',
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
@@ -127,6 +128,12 @@ cursor moves before the server responds the response will be ignored.
 
 While the cursor is on any identifier call `LSClientFindReferences` (`gr` if
 using the default mappings) to populate the quickfix list with usage locations.
+
+### Find implementations
+
+While the cursor is on any identifier call `LSClientFindImplementations` (`gI`
+if using the default mappings) to populate the quickfix list with implementation
+locations.
 
 ### Document Symbols
 

@@ -27,12 +27,19 @@ function! lsc#reference#findReferences() abort
   let params = lsc#params#documentPosition()
   let params.context = {'includeDeclaration': v:true}
   call lsc#server#userCall('textDocument/references', params,
-      \ function('<SID>setQuickFixReferences'))
+      \ function('<SID>setQuickFixLocations', ['references']))
 endfunction
 
-function! s:setQuickFixReferences(results) abort
+function! lsc#reference#findImplementations() abort
+  call lsc#file#flushChanges()
+  call lsc#server#userCall('textDocument/implementation',
+      \ lsc#params#documentPosition(),
+      \ function('<SID>setQuickFixLocations', ['implementations']))
+endfunction
+
+function! s:setQuickFixLocations(label, results) abort
   if empty(a:results)
-    call lsc#message#show('No references found')
+    call lsc#message#show('No '.a:label.' found')
     return
   endif
   call map(a:results, {_, ref -> s:QuickFixItem(ref)})
