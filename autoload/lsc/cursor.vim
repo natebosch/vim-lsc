@@ -11,7 +11,7 @@ function! lsc#cursor#onMove() abort
 endfunction
 
 function! lsc#cursor#onWinLeave() abort
-  call lsc#cursor#clearReferenceHighlights()
+  call lsc#cursor#clean()
 endfunction
 
 function! lsc#cursor#onWinEnter() abort
@@ -19,7 +19,7 @@ function! lsc#cursor#onWinEnter() abort
 endfunction
 
 function! lsc#cursor#insertEnter() abort
-  call lsc#cursor#clearReferenceHighlights()
+  call lsc#cursor#clean()
 endfunction
 
 function! lsc#cursor#enableReferenceHighlights(filetype)
@@ -77,7 +77,7 @@ function! s:HandleHighlights(request_number, old_pos, old_buf_nr, highlights)
   let s:pending[&filetype] = v:false
   if bufnr('%') != a:old_buf_nr | return | endif
   if a:request_number != s:highlights_request | return | endif
-  call lsc#cursor#clearReferenceHighlights()
+  call lsc#cursor#clean()
   if empty(a:highlights) | return | endif
   call map(a:highlights, {_, reference -> s:ConvertReference(reference)})
   call sort(a:highlights, function('<SID>CompareRange'))
@@ -96,7 +96,7 @@ function! s:HandleHighlights(request_number, old_pos, old_buf_nr, highlights)
   endfor
 endfunction
 
-function! lsc#cursor#clearReferenceHighlights() abort
+function! lsc#cursor#clean() abort
   let s:pending[&filetype] = v:false
   if exists('w:lsc_reference_matches')
     for current_match in w:lsc_reference_matches
@@ -105,10 +105,6 @@ function! lsc#cursor#clearReferenceHighlights() abort
     unlet w:lsc_reference_matches
     unlet w:lsc_references
   endif
-endfunction
-
-function! lsc#cursor#clean() abort
-  let s:pending[&filetype] = v:false
 endfunction
 
 " Returns the index of the reference the cursor is positioned in, or -1 if it is

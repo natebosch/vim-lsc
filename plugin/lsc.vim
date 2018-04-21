@@ -115,7 +115,7 @@ function! LSCEnsureCurrentWindowState() abort
       call lsc#diagnostics#clear()
     endif
     if exists('w:lsc_reference_matches')
-      call lsc#cursor#clearReferenceHighlights()
+      call lsc#cursor#clean()
     endif
     return
   endif
