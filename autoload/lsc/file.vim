@@ -120,8 +120,10 @@ function! s:FlushChanges(file_path, filetype) abort
   let buffer_content = getbufline(a:file_path, 1, '$')
   let allow_incremental = s:AllowIncrementalSync(a:filetype)
   if allow_incremental
+    echom "Allowed!"
     let change = lsc#diff#compute(s:file_content[a:file_path], buffer_content)
   else
+    echom "Not allowed"
     let change = {'text': join(buffer_content, "\n")}
   endif
   let params = {'textDocument':
@@ -146,7 +148,7 @@ function! lsc#file#enableIncrementalSync(filetype) abort
 endfunction
 
 function! s:AllowIncrementalSync(filetype) abort
-  return exists('g:lsc_enable_incremental_sync')
-      \ && g:lsc_enable_incremental_sync
+  return (!exists('g:lsc_enable_incremental_sync')
+      \ || g:lsc_enable_incremental_sync)
       \ && get(s:allowed_incremental_sync, a:filetype, v:false)
 endfunction

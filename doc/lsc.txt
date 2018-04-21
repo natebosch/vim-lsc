@@ -231,15 +231,12 @@ set to the vim-lsc completion function.
 
                                                 *lsc-configure-sync*
                                                 *g:lsc_enable_incremental_sync*
-By default the client will only attempt to sync documents by sending the full
-text on every change. If the server indicates support for incremental document
-syncing in the `ServerCapabilities` response during initialization, and the
-`g:lsc_enable_incremental_sync` variable is set to `v:true`, the client will
-send incremental diffs instead. This feature is experimental and when it
-becomes stable the default value for this option will change to `v:true`.
+By default the client will sync documents by sending the incremental diffs to
+the servers which indicate support for this method. Disable incremental sync
+for all servers by setting `g:lsc_enable_incremental_sync` to `v:false`.
 
-This option causes the client to store an extra copy of each synced buffer in
-memory to allow diffing against previous versions.
+Using incremental sync causes the client to store an extra copy of each synced
+buffer in memory to allow diffing against previous versions.
 
 The diff algorithm will match the longest possible prefix and suffix against
 the old content and send a single change for the content in between. Certain

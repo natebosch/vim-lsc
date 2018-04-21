@@ -11,6 +11,7 @@
   matched to the original file.
 - Add `LSClientWorkspaceSymbol`.
 - Add `LSClientFindImplementations`.
+- Enable incremental sync by default.
 
 # 0.2.10
 
