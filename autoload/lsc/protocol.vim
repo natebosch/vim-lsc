@@ -30,8 +30,8 @@ endfunction
 
 function! s:Format(method, params, id) abort
   let message = {'method': a:method}
-  if type(a:params) != v:t_none | let message['params'] = a:params | endif
-  if type(a:id) != v:t_none | let message['id'] = a:id | endif
+  if type(a:params) != type(v:null) | let message['params'] = a:params | endif
+  if type(a:id) != type(v:null) | let message['id'] = a:id | endif
   return message
 endfunction
 

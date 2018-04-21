@@ -6,7 +6,7 @@ function! lsc#reference#goToDefinition() abort
 endfunction
 
 function! s:GoToDefinition(result) abort
-  if type(a:result) == v:t_none ||
+  if type(a:result) == type(v:null) ||
       \ (type(a:result) == v:t_list && len(a:result) == 0)
     call lsc#message#error('No definition found')
     return

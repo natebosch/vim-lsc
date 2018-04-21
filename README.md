@@ -16,7 +16,7 @@ Install with your plugin management method of choice. If you don't have a
 preference check out [vim-plug][]. Install a language server and ensure it is
 executable from your `$PATH`.
 
-vim-lsc should work with vim 8.0, it is not compatible with neovim.
+vim-lsc is compatible with vim 8.0, and neovim.
 
 [vim-plug]:https://github.com/junegunn/vim-plug
 
