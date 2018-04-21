@@ -70,8 +70,8 @@ endfunction
 
 " Applies a workspace edit and returns `v:true` if it was successful.
 function! lsc#edit#apply(workspace_edit) abort
-  if !exists('g:lsc_enable_apply_edit')
-      \ || !g:lsc_enable_apply_edit
+  if (exists('g:lsc_enable_apply_edit')
+      \ && !g:lsc_enable_apply_edit)
       \ || !has_key(a:workspace_edit, 'changes')
     return v:false
   endif

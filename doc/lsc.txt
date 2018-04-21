@@ -102,17 +102,15 @@ bigger than |previewheight|. Override the direction of the split by setting
                                                 *:LSClientFindCodeActions*
 Check for available actions at the cursor's position and display them in a
 menu. Sends a "textDocument/codeAction" request to get the available choices,
-and if one is selected sends a "workspace/executeCommand". Typically actions
-end up triggering workspace edits so this command is likely only useful if
-|g:lsc_enable_apply_edit| is set to `v:true`. With |lsc-default-map| this
-command is bound to "ga".
+and if one is selected sends a "workspace/executeCommand". With
+|lsc-default-map| this command is bound to "ga".
 
                                                 *:LSClientRename*
 Request to rename the symbol under the cursor. Sends a "textDocument/rename"
 request. If an argument is given it must be a String and will be used as the
 replacement name. If no argument is given a prompt will ask for the new name.
-This command only exists if |g:lscEnable_apply_edit| is `v:true`. With
-|lsc-default-map| this command is bount to "gR".
+With |lsc-default-map| this command is bount to "gR". This comand will not
+exist if |g:lsc_enable_apply_edit| is set to `v:false`.
 
                                                 *:LSClientAllDiagnostics*
 Popupate the quickfix list with all diagnostics that have been sent by the
@@ -246,9 +244,8 @@ be smaller than with full syncs.
 
                                                 *lsc-configure-edits*
                                                 *g:lsc_enable_apply_edit*
-By default the client will not modify any buffer in response to
-`workspace/applyEdit` calls. To enable edits set `g:lsc_enable_apply_edit` to
-`v:true`.
+By default the client will modify buffers in response to `workspace/applyEdit`
+messages. To disable edits set `g:lsc_enable_apply_edit` to `v:false`.
 
                                                 *lsc-configure-references*
                                                 *g:lsc_reference_highlights*

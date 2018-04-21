@@ -12,6 +12,7 @@
 - Add `LSClientWorkspaceSymbol`.
 - Add `LSClientFindImplementations`.
 - Enable incremental sync by default.
+- Enable apply edit by default.
 
 # 0.2.10
 

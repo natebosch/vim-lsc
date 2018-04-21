@@ -153,13 +153,8 @@ default mappings) to request hover text and show it in a preview window.
 Override the direction of the split by setting `g:lsc_preview_split_direction`
 to either `'below'` or `'above'`.
 
-### Code Actions (experimental)
+### Code Actions
 
-While this is still experimental it is opt-in. Add
-`let g:lsc_enable_apply_edit = v:true` to allow edits to files (since these are
-the most likely result of code actions). Call `LSClientFindCodeActions` (`ga` if
-using the default mappings) to look for code actions available at the cursor
-location.
-
-Support is very limited for now. Edits can only be applied in the active buffer
-to prevent.
+Call `LSClientFindCodeActions` (`ga` if using the default mappings) to look for
+code actions available at the cursor location and run one by entering the number
+of the chosen action.

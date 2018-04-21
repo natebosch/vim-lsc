@@ -168,7 +168,7 @@ endfunction
 " Missing value means no support
 function! s:ClientCapabilities() abort
   let applyEdit = v:false
-  if exists('g:lsc_enable_apply_edit') && g:lsc_enable_apply_edit
+  if !exists('g:lsc_enable_apply_edit') || g:lsc_enable_apply_edit
     let applyEdit = v:true
   endif
   return {

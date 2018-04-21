@@ -42,7 +42,7 @@ function! lsc#config#mapKeys() abort
       execute 'nnoremap <buffer>'.maps[command].' :LSClient'.command.'<CR>'
     endif
   endfor
-  if exists('g:lsc_enable_apply_edit') && g:lsc_enable_apply_edit
+  if !exists('g:lsc_enable_apply_edit') || g:lsc_enable_apply_edit
     if has_key(maps, 'Rename')
       execute 'nnoremap <buffer>'.maps['Rename'].' :LSClientRename<CR>'
     endif
