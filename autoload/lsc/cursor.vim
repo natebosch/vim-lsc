@@ -68,13 +68,15 @@ function! s:HighlightReferences(force_in_highlight) abort
       \ }
   call lsc#server#call(&filetype, 'textDocument/documentHighlight', params,
       \ funcref('<SID>HandleHighlights',
-      \ [s:highlights_request, getcurpos(), bufnr('%')]))
+      \ [s:highlights_request, getcurpos(), bufnr('%'), &filetype]))
 endfunction
 
-function! s:HandleHighlights(request_number, old_pos, old_buf_nr, highlights)
-    \ abort
-  if !has_key(s:pending, &filetype) || !s:pending[&filetype] | return | endif
-  let s:pending[&filetype] = v:false
+function! s:HandleHighlights(request_number, old_pos, old_buf_nr,
+    \ request_filetype, highlights) abort
+  if !has_key(s:pending, a:request_filetype) || !s:pending[a:request_filetype]
+    return
+  endif
+  let s:pending[a:request_filetype] = v:false
   if bufnr('%') != a:old_buf_nr | return | endif
   if a:request_number != s:highlights_request | return | endif
   call lsc#cursor#clean()
