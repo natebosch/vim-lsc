@@ -297,6 +297,12 @@ are configured with the same name use the same server.
 `'enabled'`: Set to `v:false` so aoid starting the server until
 |:LSClientEnable| is called.
 
+                                                *lsc-server-suppress_stderr*
+`'suppress_stderr'`: Set to `v:true` to suppress stderr output which is
+received after the server has been initialized. Stderr output before
+initialization still is shown in an error message. Use this if the server uses
+stderr for noisy status or logging.
+
                                                 *lsc-server-message_hooks*
 `'message_hooks'`: Set to a dictionary where the keys are LSP method names and
 the values are either |funcref|s which may modify '`params`' for the call, or
