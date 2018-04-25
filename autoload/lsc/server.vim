@@ -256,7 +256,11 @@ function! lsc#server#register(filetype, config) abort
     call lsc#protocol#consumeMessage(self)
   endfunction
   function server.err_callback(message) abort
-    call lsc#message#error('StdErr from '.self.config.name.': '.a:message)
+    if self.status == 'starting'
+        \ || !has_key(self.config, 'suppress_stderr')
+        \ || !self.config.suppress_stderr
+      call lsc#message#error('StdErr from '.self.config.name.': '.a:message)
+    endif
   endfunction
   function server.on_exit() abort
     unlet self.channel
