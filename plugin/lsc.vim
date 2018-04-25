@@ -1,7 +1,7 @@
-"if exists("g:loaded_lsc")
-"  finish
-"endif
-"let g:loaded_lsc = 1
+if exists("g:loaded_lsc")
+  finish
+endif
+let g:loaded_lsc = 1
 
 if !exists('g:lsc_servers_by_filetype')
   " filetype -> server name
