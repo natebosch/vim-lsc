@@ -294,7 +294,7 @@ given name is used. Defaults to the same value as `'command'`. Filetypes which
 are configured with the same name use the same server.
 
                                                 *lsc-server-enabled*
-`'enabled'`: Set to `v:false` so aoid starting the server until
+`'enabled'`: Set to `v:false` to avoid starting the server until
 |:LSClientEnable| is called.
 
                                                 *lsc-server-suppress_stderr*
