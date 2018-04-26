@@ -68,13 +68,30 @@ function! lsc#config#messageHook(server, method, params) abort
   endif
 endfunction
 
-function! s:RunHookFunction(Hook, method, params) abort
+" Wrap `Callback` with a method that first runs a response_hook if necessary.
+function! lsc#config#interceptResult(server, method, Callback) abort
+  if !has_key(a:server.config, 'response_hooks') | return a:Callback | endif
+  let hooks = a:server.config.response_hooks
+  if !has_key(hooks, a:method) | return a:Callback | endif
+  let l:Hook = hooks[a:method]
+  if type(l:Hook) != v:t_func
+    call lsc#message#error('Response hooks must be a function. '.
+        \' Invalid config for '.a:method)
+    return a:Callback
+  endif
+  return {result -> a:Callback(s:RunHookFunction(l:Hook, a:method, result))}
+endfunction
+
+function! s:Intercept(method, inner, outer) abort
+endfunction
+
+function! s:RunHookFunction(Hook, method, value) abort
   try
-    return a:Hook(a:method, a:params)
+    return a:Hook(a:method, a:value)
   catch
-    call lsc#message#error('Failed to run message hook for '.a:method.
-        \': '.v:exception)
-    return a:params
+    call lsc#message#error('Failed to run hook for '.a:method.
+        \': '.v:exception."\n".v:throwpoint)
+    return a:value
   endtry
 endfunction
 
