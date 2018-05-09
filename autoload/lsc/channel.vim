@@ -7,7 +7,7 @@ function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
     endif
     let l:channel_options = {'mode': 'raw',
         \ 'callback': {_, message -> a:Callback(message)},
-        \ 'close_cb': {_ -> a:OnExit)}}
+        \ 'close_cb': {_ -> a:OnExit()}}
     call s:WrapVim(ch_open(a:command, l:channel_options), l:c)
     return l:c
   endif
