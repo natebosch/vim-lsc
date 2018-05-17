@@ -13,6 +13,7 @@
 - Add `LSClientFindImplementations`.
 - Enable incremental sync by default.
 - Enable apply edit by default.
+- Improve the preview height for hover text which has few lines but they wrap.
 
 # 0.2.10
 

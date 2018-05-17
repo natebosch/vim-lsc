@@ -82,7 +82,7 @@ endfunction
 function! lsc#util#displayAsPreview(lines) abort
   let view = winsaveview()
   let alternate=@#
-  call s:createOrJumpToPreview(len(a:lines))
+  call s:createOrJumpToPreview(s:countDisplayLines(a:lines, &previewheight))
   %d
   call setline(1, a:lines)
   wincmd p
@@ -90,15 +90,29 @@ function! lsc#util#displayAsPreview(lines) abort
   let @#=alternate
 endfunction
 
-function! s:createOrJumpToPreview(line_count) abort
-  let want_height = min([a:line_count, &previewheight])
+" Approximates the number of lines it will take to display some text assuming an
+" 80 character line wrap. Only counts up to `max`.
+function! s:countDisplayLines(lines, max) abort
+  let l:count = 0
+  for l:line in a:lines
+    if len(l:line) <= 80
+      let l:count += 1
+    else
+      let l:count += float2nr(ceil(len(l:line) / 80.0))
+    endif
+    if l:count > a:max | return a:max | endif
+  endfor
+  return l:count
+endfunction
+
+function! s:createOrJumpToPreview(want_height) abort
   let windows = range(1, winnr('$'))
   call filter(windows, {_, win -> getwinvar(win, "&previewwindow") == 1})
   if len(windows) > 0
     execute string(windows[0]).' wincmd W'
     edit __lsc_preview__
-    if winheight(windows[0]) < want_height
-      execute 'resize '.want_height
+    if winheight(windows[0]) < a:want_height
+      execute 'resize '.a:want_height
     endif
   else
     if exists('g:lsc_preview_split_direction')
@@ -106,7 +120,7 @@ function! s:createOrJumpToPreview(line_count) abort
     else
       let direction = ''
     endif
-    execute direction.' '.string(want_height).'split __lsc_preview__'
+    execute direction.' '.string(a:want_height).'split __lsc_preview__'
     if exists('#User#LSCShowPreview')
       doautocmd <nomodeline> User LSCShowPreview
     endif
