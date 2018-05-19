@@ -324,7 +324,7 @@ For example:
      \            'initializationOptions': {'foo': 'bar'},
      \            'rootUri': {method, params ->
      \                          lsc#uri#documentUri(FindProjectRoot())},
-     \        }
+     \        },
      \        'textDocument/didOpen': {'metadata': {'extraFlags': ['-Wall']}},
      \    },
      \  },
