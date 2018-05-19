@@ -279,7 +279,7 @@ screen instead of as a horizontal split:
 Fires after LSC sends a `textDocument/didOpen` or `textDocument/didChange`
 request.
 
-SERVER CUSTOMIZATION                            *lsc-server-cusomization*
+SERVER CUSTOMIZATION                            *lsc-server-customization*
 
 When the server configuration is a `dict` (see |lsc-setup|) the following
 advanced behavior can be configured.
@@ -324,7 +324,7 @@ For example:
      \            'initializationOptions': {'foo': 'bar'},
      \            'rootUri': {method, params ->
      \                          lsc#uri#documentUri(FindProjectRoot())},
-     \        }
+     \        },
      \        'textDocument/didOpen': {'metadata': {'extraFlags': ['-Wall']}},
      \    },
      \  },
