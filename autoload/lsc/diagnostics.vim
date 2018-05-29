@@ -22,7 +22,8 @@ function! s:Convert(diagnostic) abort
     let message = message.' ['.a:diagnostic.code.']'
   endif
   return {'group': group, 'message': message, 'type': type,
-      \ 'ranges': lsc#convert#rangeToHighlights(a:diagnostic.range)}
+      \ 'ranges': lsc#convert#rangeToHighlights(a:diagnostic.range),
+      \ 'lsp': a:diagnostic}
 endfunction
 
 function! lsc#diagnostics#clean(filetype) abort
@@ -234,4 +235,16 @@ function! lsc#diagnostics#underCursor() abort
     endif
   endfor
   return closest_diagnostic
+endfunction
+
+" Returns the original LSP representation of diagnostics on a line.
+function! lsc#diagnostics#forLine(file, line) abort
+  let l:result = []
+  let l:file_diagnostics = lsc#diagnostics#forFile(a:file)
+  if has_key(l:file_diagnostics, a:line)
+    for l:diagnostic in l:file_diagnostics[a:line]
+      call add(l:result, l:diagnostic.lsp)
+    endfor
+  endif
+  return l:result
 endfunction
