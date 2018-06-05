@@ -1,4 +1,4 @@
-# 0.3.0-dev
+# 0.3.0
 
 - Add support for neovim.
 - Add highlighting based on references to the symbol under the cursor. Disable
