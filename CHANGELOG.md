@@ -14,6 +14,7 @@
 - Enable incremental sync by default.
 - Enable apply edit by default.
 - Improve the preview height for hover text which has few lines but they wrap.
+- Bug Fix: Include diagnostics for the current line with code actions requests.
 
 # 0.2.10
 

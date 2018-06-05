@@ -31,7 +31,8 @@ function! s:TextDocumentRangeParams() abort
       \ 'range': {
       \   'start': {'line': line('.') - 1, 'character': col('.') - 1},
       \   'end': {'line': line('.') - 1, 'character': col('.')}},
-      \ 'context': {'diagnostics': []}
+      \ 'context': {'diagnostics':
+      \    lsc#diagnostics#forLine(expand('%:p'), line('.'))}
       \}
 endfunction
 
