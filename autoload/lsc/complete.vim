@@ -125,8 +125,9 @@ function! s:SuggestCompletions(completion) abort
     let base = getline('.')[start - 1:col('.') - 2]
     let suggestions = s:FindSuggestions(base, a:completion)
   endif
-  setl completeopt-=longest
-  setl completeopt+=menu,menuone,noinsert,noselect
+  if (g:lsc_auto_completeopt == 1)
+    setl completeopt=menuone,noinsert,noselect
+  endif
   if exists('#User#LSCAutocomplete')
     doautocmd <nomodeline> User LSCAutocomplete
   endif
