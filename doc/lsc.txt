@@ -204,11 +204,20 @@ groups. For example:
 If you want to overload keymaps to operate specifically when vim-lsc is
 enabled for a buffer set the variable "g:lsc_auto_map". Set the value to
 "v:true" to use the defaults |lsc-default-map|, or set to a dict to use
-other keys, or to only map a subset of the commands. The available keys
-correspond to command names - "GoToDefinition", "FindReferences", and
-"ShowHover". Additionally the key "Completion" can choose a completefunc to
-set to the vim-lsc completion function, this will only have effect if
-|g:lsc_enable_autocomplete| is "v:false".
+other keys, or to only map a subset of the commands. Most keys correspond to
+command names, for instance the key "GoToDefinition" creates a mapping for the
+command "LSClientGoToDefinition". Additionally the key "Completion" can choose
+a completefunc to set to the vim-lsc completion function. By default this is
+|completefunc| but it can also be set to |omnifunc| or have no completeion
+function set with an empty value.
+
+To override or unset only a subest of the defaults set the key "defaults" to
+`v:true`. Any keys which have an empty value will not have keys mapped. For
+instance to omit any mapping for |:LSClientFindImplementations| but use the
+other defaults set this to:
+>
+ let g:lsc_auto_map = {'defaults': v:true, 'FindImplementations': ''}
+<
 
                                                 *lsc-default-map*
 The default mapping for keys, if you've opted in to "g:lsc_auto_map" are:
@@ -224,8 +233,9 @@ ga                      |:LSClientFindCodeActions|
 gR                      |:LSClientRename|
 K                       |:LSClientShowHover|
 
-If "g:lsc_enable_autocomplete" is set to "v:false" then |completefunc| will be
-set to the vim-lsc completion function.
+
+By default the |completefunc| is set to the vim-lsc manual completion
+function.
 
                                                 *lsc-configure-sync*
                                                 *g:lsc_enable_incremental_sync*

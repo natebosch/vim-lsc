@@ -1,6 +1,7 @@
 # 0.3.1-dev
 
 - Allow using the default map but overriding or omitting a subset of the keys.
+- Set `completefunc` even when autocomplete is enabled.
 
 # 0.3.0
 
