@@ -12,17 +12,35 @@ let s:default_maps = {
     \ 'Completion': 'completefunc',
     \}
 
+function! s:ApplyDefaults(config) abort
+  if type(a:config) == v:t_bool || type(a:config) == v:t_number
+    return s:default_maps
+  endif
+  if type(a:config) != v:t_dict
+      \ || !has_key(a:config, 'defaults')
+      \ || !a:config.defaults
+    return a:config
+  endif
+  let l:merged = deepcopy(s:default_maps)
+  for l:pair in items(a:config)
+    if l:pair[0] ==# 'defaults' | continue | endif
+    if empty(l:pair[1])
+      unlet l:merged[l:pair[0]]
+    else
+      let l:merged[l:pair[0]] = l:pair[1]
+    endif
+  endfor
+  return l:merged
+endfunction
+
 function! lsc#config#mapKeys() abort
   if !exists('g:lsc_auto_map')
       \ || (type(g:lsc_auto_map) == v:t_bool && !g:lsc_auto_map)
       \ || (type(g:lsc_auto_map) == v:t_number && !g:lsc_auto_map)
     return
   endif
-  let maps = g:lsc_auto_map
-  if type(maps) == v:t_bool || type(maps) == v:t_number
-    let maps = s:default_maps
-  endif
-  if type(maps) != v:t_dict
+  let l:maps = s:ApplyDefaults(g:lsc_auto_map)
+  if type(l:maps) != v:t_dict
     call lsc#message#error('g:lsc_auto_map must be a bool or dict')
     return
   endif
@@ -38,17 +56,17 @@ function! lsc#config#mapKeys() abort
       \ 'ShowHover',
       \ 'FindCodeActions',
       \]
-    if has_key(maps, command)
-      execute 'nnoremap <buffer>'.maps[command].' :LSClient'.command.'<CR>'
+    if has_key(l:maps, command)
+      execute 'nnoremap <buffer>'.l:maps[command].' :LSClient'.command.'<CR>'
     endif
   endfor
   if !exists('g:lsc_enable_apply_edit') || g:lsc_enable_apply_edit
-    if has_key(maps, 'Rename')
-      execute 'nnoremap <buffer>'.maps['Rename'].' :LSClientRename<CR>'
+    if has_key(l:maps, 'Rename')
+      execute 'nnoremap <buffer>'.l:maps['Rename'].' :LSClientRename<CR>'
     endif
   endif
-  if !g:lsc_enable_autocomplete && has_key(maps, 'Completion')
-    execute 'setlocal '.maps['Completion'].'=lsc#complete#complete'
+  if has_key(l:maps, 'Completion')
+    execute 'setlocal '.l:maps['Completion'].'=lsc#complete#complete'
   endif
 endfunction
 

@@ -1,3 +1,7 @@
+# 0.3.1-dev
+
+- Allow using the default map but overriding or omitting a subset of the keys.
+
 # 0.3.0
 
 - Add support for neovim.
