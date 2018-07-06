@@ -2,6 +2,9 @@
 
 - Allow using the default map but overriding or omitting a subset of the keys.
 - Set `completefunc` even when autocomplete is enabled.
+- Don't eagerly attempt to fetch completions when autocomplete is disabled.
+  Allow fetching completions at any time when the manual completion function is
+  triggered.
 
 # 0.3.0
 

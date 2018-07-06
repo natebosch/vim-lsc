@@ -161,15 +161,12 @@ Defaults to "off". Generally this field configures logging in the server.
                                                 *lsc-configure-complete*
                                                 *g:lsc_enable_autocomplete*
 To disable the built-in autocompletion set "g:lsc_enable_autocomplete" to
-"v:false". Requests for completions will still be sent to the server, but the
-response will not open the popupmenu or complete words. Set |completefunc| or
-|omnifunc| to "lsc#complete#complete" to manually trigger completion on demand.
-The function will have no completions if it is not made in a position where
-autocomplete would have shown suggestions, or if the server has not responded
-with results before completion is started.
-
-The completefunc can be automatically set for buffers with files tracked by a
-language server by setting the "Complete" key in |g:lsc_auto_map|.
+"v:false". Requests for completions will only be sent if completion is
+triggered manually with the completion function. Set |completefunc| or
+|omnifunc| to "lsc#complete#complete" or have it set automatically for mapped
+file types with |g:lsc_auto_map|. With manual completion the editor may
+"hang" for up to 5 seconds while it waits for completion results to become
+available.
 
 Note: By default |completeopt| includes "preview" which will open the preview
 window to show more details for selected completion items. Close the window
