@@ -76,6 +76,9 @@ function! s:consumeMessage(server) abort
       call lsc#dispatch#message(a:server, content)
     catch
       call lsc#message#error('Error dispatching message: '.string(v:exception))
+      let g:lsc_last_error = v:exception
+      let g:lsc_last_throwpoint = v:throwpoint
+      let g:lsc_last_error_message = content
     endtry
   endif
   let remaining_message = message[message_end:]

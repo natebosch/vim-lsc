@@ -28,15 +28,7 @@ function! lsc#dispatch#message(server, message) abort
   elseif has_key(a:message, 'result')
     let call_id = a:message['id']
     if has_key(s:callbacks, call_id)
-      try
-        call s:callbacks[call_id][0](a:message['result'])
-      catch
-        call lsc#message#error('Caught '.string(v:exception).
-            \' while handling '.string(call_id))
-        let g:lsc_last_error = v:exception
-        let g:lsc_last_throwpoint = v:throwpoint
-        let g:lsc_last_error_message = a:message
-      endtry
+      call s:callbacks[call_id][0](a:message['result'])
       unlet s:callbacks[call_id]
     endif
   else
