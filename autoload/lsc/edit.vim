@@ -137,6 +137,7 @@ endfunction
 
 " Find the command to apply a `TextEdit`.
 function! s:Apply(edit) abort
+  let l:new_text = substitute(a:edit.newText, '"', '\\"', 'g')
   if s:IsEmptyRange(a:edit.range)
     if a:edit.range.start.character >= len(getline(a:edit.range.start.line + 1))
       let l:insert = 'a'
@@ -147,7 +148,7 @@ function! s:Apply(edit) abort
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
         \ l:insert,
-        \ a:edit.newText
+        \ l:new_text
         \)
   else
     " `back` handles end-exclusive range
@@ -158,7 +159,7 @@ function! s:Apply(edit) abort
         \ a:edit.range.end.line + 1,
         \ a:edit.range.end.character + 1,
         \ l:back,
-        \ a:edit.newText
+        \ l:new_text
         \)
   endif
 endfunction
