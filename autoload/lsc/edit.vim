@@ -16,13 +16,26 @@ function! s:SelectAction(result, action_filter) abort
     call lsc#message#show('No actions available')
     return
   endif
-  let choice = a:action_filter(a:result)
-  if type(choice) == v:t_dict
-    call lsc#server#userCall('workspace/executeCommand',
-        \ {'command': choice['command'],
-        \ 'arguments': choice['arguments']},
-        \ {_->0})
+  let l:choice = a:action_filter(a:result)
+  if type(l:choice) == v:t_dict
+    if has_key(l:choice, 'command') && type(l:choice.command) == v:t_string
+      call s:ExecuteCommand(l:choice)
+    else
+      if has_key(l:choice, 'edit') && type(l:choice.edit) == v:t_dict
+        call lsc#edit#apply(l:choice.edit)
+      endif
+      if has_key(l:choice, 'command') && type(l:choice.command) == v:t_dict
+        call s:ExecuteCommand(l:choice.command)
+      endif
+    endif
   endif
+endfunction
+
+function! s:ExecuteCommand(command) abort
+  call lsc#server#userCall('workspace/executeCommand',
+      \ {'command': a:command.command,
+      \ 'arguments': a:command.arguments},
+      \ {_->0})
 endfunction
 
 " TODO - handle visual selection for range

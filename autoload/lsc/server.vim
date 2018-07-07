@@ -185,6 +185,11 @@ function! s:ClientCapabilities() abort
     \     'snippetSupport': v:false,
     \   },
     \   'definition': {'dynamicRegistration': v:false},
+    \   'codeAction': {
+    \     'codeActionLiteralSupport': {
+    \       'codeActionKind': {'valueSet': ['quickfix', 'refactor', 'source']}
+    \     }
+    \   },
     \ }
     \}
 endfunction

@@ -9,6 +9,7 @@
   one action has a `title` that matches the pattern it will be run
   automatically.
 - Bug fix: Handle workspace edits that have double quotes.
+- Add support for `CodeAction` literals.
 
 # 0.3.0
 
