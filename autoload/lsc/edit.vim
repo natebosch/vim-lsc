@@ -36,7 +36,27 @@ function! s:TextDocumentRangeParams() abort
       \}
 endfunction
 
-function! s:ActionMenu(actions)
+" Returns a function which can filter actions against a patter and select when
+" exactly 1 matches or show a menu for the matching actions.
+function! lsc#edit#filterActions(...) abort
+  if a:0 >= 1
+    return function('<SID>FilteredActionMenu', [a:1])
+  else
+    return function('<SID>ActionMenu')
+  endif
+endfunction
+
+function! s:FilteredActionMenu(filter, actions) abort
+  call filter(a:actions, {idx, val -> val.title =~ a:filter})
+  if empty(a:actions)
+    call lsc#message#show('No actions available matching '.a:filter)
+    return v:false
+  endif
+  if len(a:actions) == 1 | return a:actions[0] | endif
+  return s:ActionMenu(a:actions)
+endfunction
+
+function! s:ActionMenu(actions) abort
   let choices = ['Choose an action:']
   let idx = 0
   while idx < len(a:actions)

@@ -5,6 +5,9 @@
 - Don't eagerly attempt to fetch completions when autocomplete is disabled.
   Allow fetching completions at any time when the manual completion function is
   triggered.
+- Add support for passing a pattern to `:LSClientFindCodeActions`. When exactly
+  one action has a `title` that matches the pattern it will be run
+  automatically.
 
 # 0.3.0
 

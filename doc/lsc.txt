@@ -103,7 +103,14 @@ bigger than |previewheight|. Override the direction of the split by setting
 Check for available actions at the cursor's position and display them in a
 menu. Sends a "textDocument/codeAction" request to get the available choices,
 and if one is selected sends a "workspace/executeCommand". With
-|lsc-default-map| this command is bound to "ga".
+|lsc-default-map| this command is bound to "ga". If no arguments are given a
+menu is displayed with matching actions. If an argument is given it must be a
+pattern, each action's `title` will be compared against this pattern. If
+exactly one action matches the pattern it will be run automatically, if
+multiple actions match the matching actions will be shown in a menu. The
+comparison is done with |=~| which honors the users |ignorecase| and |magic|
+settings, so it is recommended that the pattern start with one of the |\v| and
+|\c| choices to make it resiliant against these settings.
 
                                                 *:LSClientRename*
 Request to rename the symbol under the cursor. Sends a "textDocument/rename"
