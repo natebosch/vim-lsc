@@ -23,7 +23,8 @@ command! LSClientShowHover call lsc#reference#hover()
 command! LSClientDocumentSymbol call lsc#reference#documentSymbols()
 command! -nargs=? LSClientWorkspaceSymbol
     \ call lsc#search#workspaceSymbol(<args>)
-command! LSClientFindCodeActions call lsc#edit#findCodeActions()
+command! -nargs=? LSClientFindCodeActions
+    \ call lsc#edit#findCodeActions(lsc#edit#filterActions(<args>))
 command! LSClientAllDiagnostics call lsc#diagnostics#showInQuickFix()
 command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
 command! LSClientDisable call lsc#server#disable()

@@ -103,7 +103,14 @@ bigger than |previewheight|. Override the direction of the split by setting
 Check for available actions at the cursor's position and display them in a
 menu. Sends a "textDocument/codeAction" request to get the available choices,
 and if one is selected sends a "workspace/executeCommand". With
-|lsc-default-map| this command is bound to "ga".
+|lsc-default-map| this command is bound to "ga". If no arguments are given a
+menu is displayed with matching actions. If an argument is given it must be a
+pattern, each action's `title` will be compared against this pattern. If
+exactly one action matches the pattern it will be run automatically, if
+multiple actions match the matching actions will be shown in a menu. The
+comparison is done with |=~| which honors the users |ignorecase| and |magic|
+settings, so it is recommended that the pattern start with one of the |\v| and
+|\c| choices to make it resiliant against these settings.
 
                                                 *:LSClientRename*
 Request to rename the symbol under the cursor. Sends a "textDocument/rename"
@@ -161,15 +168,12 @@ Defaults to "off". Generally this field configures logging in the server.
                                                 *lsc-configure-complete*
                                                 *g:lsc_enable_autocomplete*
 To disable the built-in autocompletion set "g:lsc_enable_autocomplete" to
-"v:false". Requests for completions will still be sent to the server, but the
-response will not open the popupmenu or complete words. Set |completefunc| or
-|omnifunc| to "lsc#complete#complete" to manually trigger completion on demand.
-The function will have no completions if it is not made in a position where
-autocomplete would have shown suggestions, or if the server has not responded
-with results before completion is started.
-
-The completefunc can be automatically set for buffers with files tracked by a
-language server by setting the "Complete" key in |g:lsc_auto_map|.
+"v:false". Requests for completions will only be sent if completion is
+triggered manually with the completion function. Set |completefunc| or
+|omnifunc| to "lsc#complete#complete" or have it set automatically for mapped
+file types with |g:lsc_auto_map|. With manual completion the editor may
+"hang" for up to 5 seconds while it waits for completion results to become
+available.
 
 Note: By default |completeopt| includes "preview" which will open the preview
 window to show more details for selected completion items. Close the window
@@ -204,11 +208,20 @@ groups. For example:
 If you want to overload keymaps to operate specifically when vim-lsc is
 enabled for a buffer set the variable "g:lsc_auto_map". Set the value to
 "v:true" to use the defaults |lsc-default-map|, or set to a dict to use
-other keys, or to only map a subset of the commands. The available keys
-correspond to command names - "GoToDefinition", "FindReferences", and
-"ShowHover". Additionally the key "Completion" can choose a completefunc to
-set to the vim-lsc completion function, this will only have effect if
-|g:lsc_enable_autocomplete| is "v:false".
+other keys, or to only map a subset of the commands. Most keys correspond to
+command names, for instance the key "GoToDefinition" creates a mapping for the
+command "LSClientGoToDefinition". Additionally the key "Completion" can choose
+a completefunc to set to the vim-lsc completion function. By default this is
+|completefunc| but it can also be set to |omnifunc| or have no completeion
+function set with an empty value.
+
+To override or unset only a subest of the defaults set the key "defaults" to
+`v:true`. Any keys which have an empty value will not have keys mapped. For
+instance to omit any mapping for |:LSClientFindImplementations| but use the
+other defaults set this to:
+>
+ let g:lsc_auto_map = {'defaults': v:true, 'FindImplementations': ''}
+<
 
                                                 *lsc-default-map*
 The default mapping for keys, if you've opted in to "g:lsc_auto_map" are:
@@ -224,8 +237,9 @@ ga                      |:LSClientFindCodeActions|
 gR                      |:LSClientRename|
 K                       |:LSClientShowHover|
 
-If "g:lsc_enable_autocomplete" is set to "v:false" then |completefunc| will be
-set to the vim-lsc completion function.
+
+By default the |completefunc| is set to the vim-lsc manual completion
+function.
 
                                                 *lsc-configure-sync*
                                                 *g:lsc_enable_incremental_sync*

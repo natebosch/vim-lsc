@@ -13,6 +13,7 @@ endfunction
 
 function! lsc#complete#textChanged() abort
   if &paste | return | endif
+  if !g:lsc_enable_autocomplete | return | endif
   " This may be <BS> or similar if not due to a character typed
   if empty(s:next_char) | return | endif
   call s:typedCharacter()
@@ -22,8 +23,7 @@ endfunction
 function! s:typedCharacter() abort
   if s:isTrigger(s:next_char)
       \ || (s:isCompletable() && !has_key(s:completion_waiting, &filetype))
-    let b:lsc_is_completing = v:true
-    call s:startCompletion()
+    call s:startCompletion(v:true)
   else
     let s:completion_canceled = v:true
   endif
@@ -44,11 +44,11 @@ function! lsc#complete#clean(filetype) abort
   call s:MarkNotCompleting(a:filetype)
 endfunction
 
-function s:MarkCompleting(filetype) abort
+function! s:MarkCompleting(filetype) abort
   let s:completion_waiting[a:filetype] = v:true
 endfunction
 
-function s:MarkNotCompleting(filetype) abort
+function! s:MarkNotCompleting(filetype) abort
   if has_key(s:completion_waiting, a:filetype)
     unlet s:completion_waiting[a:filetype]
   endif
@@ -83,7 +83,8 @@ function! s:isCompletable() abort
   return word =~ '^\w*$'
 endfunction
 
-function! s:startCompletion() abort
+function! s:startCompletion(isAuto) abort
+  let b:lsc_is_completing = v:true
   let s:completion_canceled = v:false
   call s:MarkCompleting(&filetype)
   call lsc#file#flushChanges()
@@ -92,16 +93,16 @@ function! s:startCompletion() abort
       \ }
   call lsc#server#call(&filetype, 'textDocument/completion', params,
       \ lsc#util#gateResult('Complete',
-      \     funcref('<SID>OnResult'), funcref('<SID>OnSkip')))
+      \     function('<SID>OnResult', [a:isAuto]), function('<SID>OnSkip')))
 endfunction
 
-function! s:OnResult(completion) abort
+function! s:OnResult(isAuto, completion) abort
   call s:MarkNotCompleting(&filetype)
   if s:completion_canceled
     let b:lsc_is_completing = v:false
   endif
   let completions = s:CompletionItems(a:completion)
-  if (g:lsc_enable_autocomplete)
+  if (a:isAuto)
     call s:SuggestCompletions(completions)
   else
     let b:lsc_completion = completions
@@ -135,7 +136,17 @@ function! s:SuggestCompletions(completion) abort
 endfunction
 
 function! lsc#complete#complete(findstart, base) abort
-  if !exists('b:lsc_completion') | return -1 | endif
+  if !exists('b:lsc_completion')
+    let l:searchStart = reltime()
+    call s:startCompletion(v:false)
+    while !exists('b:lsc_completion')
+        \ && reltimefloat(reltime(l:searchStart)) <= 5.0
+      sleep 100m
+    endwhile
+    if !exists('b:lsc_completion')
+      return -1
+    endif
+  endif
   if a:findstart
     if len(b:lsc_completion.items) == 0 | return -3 | endif
     return  s:FindStart(b:lsc_completion) - 1

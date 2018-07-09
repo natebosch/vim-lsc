@@ -16,13 +16,26 @@ function! s:SelectAction(result, action_filter) abort
     call lsc#message#show('No actions available')
     return
   endif
-  let choice = a:action_filter(a:result)
-  if type(choice) == v:t_dict
-    call lsc#server#userCall('workspace/executeCommand',
-        \ {'command': choice['command'],
-        \ 'arguments': choice['arguments']},
-        \ {_->0})
+  let l:choice = a:action_filter(a:result)
+  if type(l:choice) == v:t_dict
+    if has_key(l:choice, 'command') && type(l:choice.command) == v:t_string
+      call s:ExecuteCommand(l:choice)
+    else
+      if has_key(l:choice, 'edit') && type(l:choice.edit) == v:t_dict
+        call lsc#edit#apply(l:choice.edit)
+      endif
+      if has_key(l:choice, 'command') && type(l:choice.command) == v:t_dict
+        call s:ExecuteCommand(l:choice.command)
+      endif
+    endif
   endif
+endfunction
+
+function! s:ExecuteCommand(command) abort
+  call lsc#server#userCall('workspace/executeCommand',
+      \ {'command': a:command.command,
+      \ 'arguments': a:command.arguments},
+      \ {_->0})
 endfunction
 
 " TODO - handle visual selection for range
@@ -36,7 +49,27 @@ function! s:TextDocumentRangeParams() abort
       \}
 endfunction
 
-function! s:ActionMenu(actions)
+" Returns a function which can filter actions against a patter and select when
+" exactly 1 matches or show a menu for the matching actions.
+function! lsc#edit#filterActions(...) abort
+  if a:0 >= 1
+    return function('<SID>FilteredActionMenu', [a:1])
+  else
+    return function('<SID>ActionMenu')
+  endif
+endfunction
+
+function! s:FilteredActionMenu(filter, actions) abort
+  call filter(a:actions, {idx, val -> val.title =~ a:filter})
+  if empty(a:actions)
+    call lsc#message#show('No actions available matching '.a:filter)
+    return v:false
+  endif
+  if len(a:actions) == 1 | return a:actions[0] | endif
+  return s:ActionMenu(a:actions)
+endfunction
+
+function! s:ActionMenu(actions) abort
   let choices = ['Choose an action:']
   let idx = 0
   while idx < len(a:actions)
@@ -117,6 +150,7 @@ endfunction
 
 " Find the command to apply a `TextEdit`.
 function! s:Apply(edit) abort
+  let l:new_text = substitute(a:edit.newText, '"', '\\"', 'g')
   if s:IsEmptyRange(a:edit.range)
     if a:edit.range.start.character >= len(getline(a:edit.range.start.line + 1))
       let l:insert = 'a'
@@ -127,7 +161,7 @@ function! s:Apply(edit) abort
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
         \ l:insert,
-        \ a:edit.newText
+        \ l:new_text
         \)
   else
     " `back` handles end-exclusive range
@@ -138,7 +172,7 @@ function! s:Apply(edit) abort
         \ a:edit.range.end.line + 1,
         \ a:edit.range.end.character + 1,
         \ l:back,
-        \ a:edit.newText
+        \ l:new_text
         \)
   endif
 endfunction

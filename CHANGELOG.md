@@ -1,3 +1,16 @@
+# 0.3.1-dev
+
+- Allow using the default map but overriding or omitting a subset of the keys.
+- Set `completefunc` even when autocomplete is enabled.
+- Don't eagerly attempt to fetch completions when autocomplete is disabled.
+  Allow fetching completions at any time when the manual completion function is
+  triggered.
+- Add support for passing a pattern to `:LSClientFindCodeActions`. When exactly
+  one action has a `title` that matches the pattern it will be run
+  automatically.
+- Bug fix: Handle workspace edits that have double quotes.
+- Add support for `CodeAction` literals.
+
 # 0.3.0
 
 - Add support for neovim.
