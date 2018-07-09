@@ -183,6 +183,31 @@ automatically close the preview window after completion use the following:
  autocmd CompleteDone * silent! pclose
 <
 
+                                                *lsc-configure-completeopt*
+                                                *g:lsc_auto_completeopt*
+When using autocomplete this plugin will modify the buffer local setting
+|completeopt| which may interfere with other plugins. These modifications are
+recommended for a typical autocomplete experience and help to avoid the plugin
+from making changes without a specific user action. Leave
+`g:lsc_auto_completeopt` set to `v:true` (the default) for the recommended
+values.
+
+It is recommended to avoid other plugins which are attempting to perform
+autocomplete in the same buffer as `vim-lsc`, but if they are used there may
+be cases where they modify completeopt repeatedly and cause the options to get
+repeated values added to it. In this case you may either:
+
+1.  Set `g:lsc_auto_completeopt` to a String representing the options you'd
+    like them set to on each completion occurrence (rather than appending).
+    This may interfere with other plugins if they require different options,
+    which aren't repeatedly set. For example:
+>
+ let g:lsc_auto_completeopt='menu,menuone,noinsert,noselect'
+>
+2.  Set `g:lsc_auto_completeopt` to `v:false` to indicate the `vim-lsc` should
+    never attempt to change it. It is assumed that it will be set manually by
+    the user to a compatible value.
+
                                                 *lsc-configure-hover*
                                                 *g:lsc_preview_split_direction*
 By default the `:LSClientShowHover` command splits the window following

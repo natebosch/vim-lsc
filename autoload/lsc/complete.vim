@@ -126,13 +126,25 @@ function! s:SuggestCompletions(completion) abort
     let base = getline('.')[start - 1:col('.') - 2]
     let suggestions = s:FindSuggestions(base, a:completion)
   endif
-  if (g:lsc_auto_completeopt == 1)
-    setl completeopt=menuone,noinsert,noselect
-  endif
+  call s:SetCompleteOpt()
   if exists('#User#LSCAutocomplete')
     doautocmd <nomodeline> User LSCAutocomplete
   endif
   call complete(start, suggestions)
+endfunction
+
+function! s:SetCompleteOpt() abort
+  if type(g:lsc_auto_completeopt) == v:t_string
+    " Set completeopt locally exactly like the user wants
+    execute 'setl completeopt='.g:lsc_auto_completeopt
+  elseif (type(g:lsc_auto_completeopt) == v:t_bool
+      \ || type(g:lsc_auto_completeopt) == v:t_number)
+      \ && g:lsc_auto_completeopt
+    " Set the options that impact behavior for autocomplete use cases without
+    " touching other like `preview`
+    setl completeopt-=longest
+    setl completeopt+=menu,menuone,noinsert,noselect
+  endif
 endfunction
 
 function! lsc#complete#complete(findstart, base) abort
