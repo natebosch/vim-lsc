@@ -223,7 +223,7 @@ endfunction
 " `label` is always expected to be set and is used as the `abbr` shown in the
 " popupmenu. This may be different from the inserted text.
 function! s:CompletionItem(completion_item) abort
-  let item = {'abbr': a:completion_item.label}
+  let item = {'abbr': a:completion_item.label, 'dup': 1}
   if has_key(a:completion_item, 'textEdit')
     let item.word = a:completion_item.textEdit.newText
     let item.start_col = a:completion_item.textEdit.range.start.character + 1
