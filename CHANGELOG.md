@@ -1,4 +1,4 @@
-# 0.3.1-dev
+# 0.3.1
 
 - Allow using the default map but overriding or omitting a subset of the keys.
 - Set `completefunc` even when autocomplete is enabled.
@@ -10,6 +10,8 @@
   automatically.
 - Bug fix: Handle workspace edits that have double quotes.
 - Add support for `CodeAction` literals.
+- Bug fix: Correctly truncate multi-byte or wide character diagnostics.
+- Bug fix: Allow duplicate words in completions (overloads).
 
 # 0.3.0
 
