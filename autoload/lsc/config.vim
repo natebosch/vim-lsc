@@ -6,7 +6,7 @@ let s:default_maps = {
     \ 'FindImplementations': 'gI',
     \ 'FindCodeActions': 'ga',
     \ 'Rename': 'gR',
-    \ 'ShowHover': 'K',
+    \ 'ShowHover': v:true,
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
     \ 'Completion': 'completefunc',
@@ -53,7 +53,6 @@ function! lsc#config#mapKeys() abort
       \ 'FindImplementations',
       \ 'DocumentSymbol',
       \ 'WorkspaceSymbol',
-      \ 'ShowHover',
       \ 'FindCodeActions',
       \]
     if has_key(l:maps, command)
@@ -67,6 +66,16 @@ function! lsc#config#mapKeys() abort
   endif
   if has_key(l:maps, 'Completion')
     execute 'setlocal '.l:maps['Completion'].'=lsc#complete#complete'
+  endif
+  if has_key(l:maps, 'ShowHover')
+    let l:show_hover = l:maps['ShowHover']
+    if type(l:show_hover) == v:t_bool || type(l:show_hover) == v:t_number
+      if l:show_hover
+        setlocal keywordprg=:LSClientShowHover
+      endif
+    elseif type(l:show_hover) == v:t_string
+      execute 'nnoremap <buffer>'.l:show_hover.' :LSClientShowHover<CR>'
+    endif
   endif
 endfunction
 

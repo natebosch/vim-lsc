@@ -88,8 +88,8 @@ With |lsc-default-map| this command is bound to "gS".
 Open a |preview| window with hover information corresponding to the element
 under the cursor. Sends a "textDocument/hover" request with the location set
 to the cursor's position. If there is no hover information will show a message
-without opening the preview window. With |lsc-default-map| this command is
-bound to "K".
+without opening the preview window. With |lsc-default-map| the |keywordprg| is
+set to invoke this command.
 
 If the preview window is already visible it will reuse it and maintain layout,
 resizing it only if it is smaller than both |previewheight| and the size of
@@ -210,10 +210,15 @@ enabled for a buffer set the variable "g:lsc_auto_map". Set the value to
 "v:true" to use the defaults |lsc-default-map|, or set to a dict to use
 other keys, or to only map a subset of the commands. Most keys correspond to
 command names, for instance the key "GoToDefinition" creates a mapping for the
-command "LSClientGoToDefinition". Additionally the key "Completion" can choose
-a completefunc to set to the vim-lsc completion function. By default this is
-|completefunc| but it can also be set to |omnifunc| or have no completeion
-function set with an empty value.
+command "LSClientGoToDefinition".
+
+The key "Completion" can choose a completefunc to set to the vim-lsc
+completion function. By default this is |completefunc| but it can also be set
+to |omnifunc| or have no completeion function set with an empty value.
+
+The key "ShowHover" may have a string with a keymap like most other commands,
+or it may be set to `v:true` to set `keywordprg` instead. The default is to
+set `keywordprg`.
 
 To override or unset only a subest of the defaults set the key "defaults" to
 `v:true`. Any keys which have an empty value will not have keys mapped. For
@@ -235,7 +240,7 @@ go                      |:LSClientDocumentSymbol|
 gS                      |:LSClientWorkspaceSymbol|
 ga                      |:LSClientFindCodeActions|
 gR                      |:LSClientRename|
-K                       |:LSClientShowHover|
+|K| (via |keywordprg|)      |:LSClientShowHover|
 
 
 By default the |completefunc| is set to the vim-lsc manual completion
