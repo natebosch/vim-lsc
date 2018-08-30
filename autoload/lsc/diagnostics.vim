@@ -74,6 +74,9 @@ function! s:DiagnosticsVersion(file_path) abort
 endfunction
 
 function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
+  if exists('g:lsc_enable_diagnostics') && !g:lsc_enable_diagnostics
+    return
+  endif
   if empty(a:diagnostics) && !has_key(s:file_diagnostics, a:file_path)
     return
   endif

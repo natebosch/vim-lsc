@@ -7,6 +7,8 @@
   usual, if it is mapped to `0` or `v:false` no mapping will occur, if it is set
   to `1` or `v:true` then `keywordprg` will be set. `:LSClientShowHover` also
   now allows an argument but it will always be ignored.
+- Added `g:lsc_enable_dagnostics`. Set to `v:false` to ignore all diagnostics
+  sent by the server.
 
 # 0.3.1
 
