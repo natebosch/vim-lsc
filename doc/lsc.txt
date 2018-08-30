@@ -183,6 +183,15 @@ automatically close the preview window after completion use the following:
  autocmd CompleteDone * silent! pclose
 <
 
+                                                *lsc-configure-diagnostics*
+                                                *g:lsc_enable_diagnostics*
+Diagnostics highlighting and location list updating is enabled by default. To
+disable diagnostic tracking set `g:lsc_enable_daignostics` to `v:false`. With
+diagnostics disabled |:LSClientAllDiagnostics| will never surface any results.
+The server may communicate diagnostics but they will be ignored. Changing this
+configuration while a server is running may have unexpected results, if it is
+changed use |:LSClientRestartServer|.
+
                                                 *lsc-configure-hover*
                                                 *g:lsc_preview_split_direction*
 By default the `:LSClientShowHover` command splits the window following
