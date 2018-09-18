@@ -9,6 +9,8 @@
   now allows an argument but it will always be ignored.
 - Added `g:lsc_enable_dagnostics`. Set to `v:false` to ignore all diagnostics
   sent by the server.
+- Notifications with a method starting with `$/` will be silently dropped
+  instead of showing a message.
 
 # 0.3.1
 
