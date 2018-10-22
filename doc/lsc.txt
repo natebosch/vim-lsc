@@ -242,8 +242,8 @@ The default mapping for keys, if you've opted in to "g:lsc_auto_map" are:
 
 <C-]>                   |:LSClientGoToDefinition|
 gr                      |:LSClientFindReferences|
-<C-n>                   |:LSClientNextReferences|
-<C-p>                   |:LSClientPreviousReferences|
+<C-n>                   |:LSClientNextReference|
+<C-p>                   |:LSClientPreviousReference|
 gI                      |:LSClientFindImplementations|
 go                      |:LSClientDocumentSymbol|
 gS                      |:LSClientWorkspaceSymbol|
