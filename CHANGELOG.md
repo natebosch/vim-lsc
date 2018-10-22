@@ -11,6 +11,7 @@
   sent by the server.
 - Notifications with a method starting with `$/` will be silently dropped
   instead of showing a message.
+- Fix a bug where `au_group_id` was not initialized correctly.
 
 # 0.3.1
 
