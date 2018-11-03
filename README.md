@@ -111,7 +111,7 @@ requested before the server responds with suggestions.
 
 ### Reference Highlights
 
-If the server supports the `textDocument/documentHighlights` call references to
+If the server supports the `textDocument/documentHighlight` call references to
 the element under the cursor throughout the document will be highlighted.
 Disable with `let g:lsc_reference_highlights = v:false` or customize the
 highlighting with the group `lscReference`. Use `<c-n>`

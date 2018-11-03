@@ -135,7 +135,7 @@ function! s:setQuickFixSymbols(results) abort
 endfunction
 
 
-" If the server supports `textDocument/documentHighlights` and they are enabled,
+" If the server supports `textDocument/documentHighlight` and they are enabled,
 " use the active highlights to move the cursor to the next or previous referene
 " in the same document to the symbol under the cursor.
 function! lsc#reference#findNext(direction) abort
