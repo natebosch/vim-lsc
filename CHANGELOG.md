@@ -14,6 +14,12 @@
 - Fix a bug where `au_group_id` was not initialized correctly.
 - Ignore a `null` or empty `insertText` during completion.
 - Add support for `window/showMessageRequest`.
+- Add support for `:LSClientSignatureHelp` which calls
+  `textDocument/signatureHelp`.
+- Add highlighting group `lscCurrentParameter` which is used to highlight the
+  active parameter in the signature help.
+- Add autocommand `LSCEditPreview` which is triggered when the content of the
+  preview window is changed.
 
 # 0.3.1
 

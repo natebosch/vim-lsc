@@ -81,6 +81,9 @@ function! lsc#util#displayAsPreview(lines) abort
   call s:createOrJumpToPreview(s:countDisplayLines(a:lines, &previewheight))
   %d
   call setline(1, a:lines)
+  if exists('#User#LSCEditPreview')
+    doautocmd <nomodeline> User LSCEditPreview
+  endif
   wincmd p
   call winrestview(view)
   let @#=alternate

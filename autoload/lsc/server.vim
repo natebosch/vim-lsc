@@ -141,6 +141,9 @@ function! s:CheckCapabilities(init_results, server) abort
         endfor
       endif
     endif
+    if has_key(capabilities, 'signatureHelpProvider')
+      let signature_provider = capabilities['signatureHelpProvider']
+    endif
     if has_key(capabilities, 'textDocumentSync')
       let text_document_sync = capabilities['textDocumentSync']
       let supports_incremental = v:false
@@ -190,6 +193,7 @@ function! s:ClientCapabilities() abort
     \       'codeActionKind': {'valueSet': ['quickfix', 'refactor', 'source']}
     \     }
     \   },
+    \   'signatureHelp': {'dynamicRegistration': v:false},
     \ }
     \}
 endfunction

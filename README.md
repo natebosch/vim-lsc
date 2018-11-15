@@ -55,6 +55,7 @@ let g:lsc_auto_map = {
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
     \ 'ShowHover': 'v:true',
+    \ 'SignatureHelp', '<C-h>',
     \ 'Completion': 'completefunc',
     \}
 ```
@@ -160,3 +161,9 @@ buffers with `<c-w><c-z>`. See `:help preview-window`.
 Call `LSClientFindCodeActions` (`ga` if using the default mappings) to look for
 code actions available at the cursor location and run one by entering the number
 of the chosen action.
+
+### Signature help
+
+Call `LSCLientSignatureHelp` (`<C-h>` if using the default mappings) to get help while writing
+a function call. The currently active parameter is highlighted with the group
+`lscCurrentParameter`.
