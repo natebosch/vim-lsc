@@ -13,6 +13,7 @@
   instead of showing a message.
 - Fix a bug where `au_group_id` was not initialized correctly.
 - Ignore a `null` or empty `insertText` during completion.
+- Add support for `window/showMessageRequest`.
 
 # 0.3.1
 
