@@ -1,5 +1,20 @@
-function! lsc#message#show(message, ...) abort
+function! lsc#message#show(message) abort
   call s:Echo('echo', a:message, get(a:, 1, 'Log'))
+endfunction
+
+function! lsc#message#showRequest(message, actions) abort
+  let options = [a:message]
+  let index = 0
+  while index < len(a:actions)
+    call add(options, (index + 1) . ' - ' . get(a:actions, index)['title'])
+    let index += 1
+  endwhile
+  let result = inputlist(options)
+  if result <= 0 || result - 1 > len(a:actions)
+    return v:null
+  else
+    return get(a:actions, result - 1)
+  endif
 endfunction
 
 function! lsc#message#log(message, ...) abort

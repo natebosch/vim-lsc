@@ -8,6 +8,13 @@ function! lsc#dispatch#message(server, message) abort
     elseif a:message['method'] ==? 'window/showMessage'
       let params = a:message['params']
       call lsc#message#show(params['message'], params['type'])
+    elseif a:message['method'] ==? 'window/showMessageRequest'
+      let params = a:message['params']
+      let response = lsc#message#showRequest(params['message'], params['actions'])
+      if has_key(a:message, 'id')
+        let id = a:message['id']
+        call a:server.send(lsc#protocol#formatResponse(id, response))
+      endif
     elseif a:message['method'] ==? 'window/logMessage'
       let params = a:message['params']
       call lsc#message#log(params['message'], params['type'])
