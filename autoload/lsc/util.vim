@@ -75,15 +75,15 @@ endfunction
 "
 " If the __lsc_preview__ buffer was already showing, reuse it's window,
 " otherwise split a window with a max height of `&previewheight`.
-function! lsc#util#displayAsPreview(lines) abort
+" After the content of the content of the preview window is set,
+" `function` is called (the buffer is still the preview).
+function! lsc#util#displayAsPreview(lines, function) abort
   let view = winsaveview()
   let alternate=@#
   call s:createOrJumpToPreview(s:countDisplayLines(a:lines, &previewheight))
   %d
   call setline(1, a:lines)
-  if exists('#User#LSCEditPreview')
-    doautocmd <nomodeline> User LSCEditPreview
-  endif
+  call a:function()
   wincmd p
   call winrestview(view)
   let @#=alternate
@@ -175,4 +175,7 @@ function! s:Gated(name, gate, old_pos, on_call, on_skip, extra_args, ...) abort
   else
     call call(a:on_call, args)
   endif
+endfunction
+
+function! lsc#util#noop()
 endfunction

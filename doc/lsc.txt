@@ -332,10 +332,6 @@ wide, at the left of the screen instead of as a horizontal split:
 >
  autocmd User LSCShowPreview wincmd H | vertical resize 80
 <
-                                                *autocmd-LSCEditPreview*
-Fires after LSC changes the content of a preview window during
-`LSClientShowHover` or `LSClientSignatureHelp`.
-
                                                 *autocmd-LSCOnChangesFlushed*
 Fires after LSC sends a `textDocument/didOpen` or `textDocument/didChange`
 request.

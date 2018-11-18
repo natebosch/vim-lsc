@@ -3,11 +3,6 @@ if !exists('s:initialized')
   let s:initialized = v:true
 endif
 
-augroup LscSignatureHelp
-  autocmd!
-  autocmd User LSCEditPreview execute 'match lscCurrentParameter /\V' . s:current_parameter . '/'
-augroup END
-
 function! lsc#signaturehelp#getSignatureHelp() abort
   call lsc#file#flushChanges()
   let params = { 'textDocument': {'uri': lsc#uri#documentUri()},
@@ -15,6 +10,10 @@ function! lsc#signaturehelp#getSignatureHelp() abort
       \ }
   call lsc#server#call(&filetype, 'textDocument/signatureHelp', params,
       \ lsc#util#gateResult('SignatureHelp', function('<SID>ShowSignatureHelp')))
+endfunction
+
+function! s:HighlightCurrentParameter() abort
+  execute 'match lscCurrentParameter /\V' . s:current_parameter . '/'
 endfunction
 
 function! s:ShowSignatureHelp(signatureHelp)
@@ -52,6 +51,6 @@ function! s:ShowSignatureHelp(signatureHelp)
     endif
   endif
 
-  call lsc#util#displayAsPreview([signature.label])
+  call lsc#util#displayAsPreview([signature.label], function('<SID>HighlightCurrentParameter'))
 
 endfunction

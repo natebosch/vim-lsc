@@ -18,8 +18,6 @@
   `textDocument/signatureHelp`.
 - Add highlighting group `lscCurrentParameter` which is used to highlight the
   active parameter in the signature help.
-- Add autocommand `LSCEditPreview` which is triggered when the content of the
-  preview window is changed.
 
 # 0.3.1
 
