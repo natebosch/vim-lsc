@@ -19,7 +19,7 @@ command! LSClientFindReferences call lsc#reference#findReferences()
 command! LSClientNextReference call lsc#reference#findNext(1)
 command! LSClientPreviousReference call lsc#reference#findNext(-1)
 command! LSClientFindImplementations call lsc#reference#findImplementations()
-command! LSClientShowHover call lsc#reference#hover()
+command! -nargs=? LSClientShowHover call lsc#reference#hover()
 command! LSClientDocumentSymbol call lsc#reference#documentSymbols()
 command! -nargs=? LSClientWorkspaceSymbol
     \ call lsc#search#workspaceSymbol(<args>)

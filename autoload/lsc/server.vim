@@ -157,8 +157,8 @@ function! s:CheckCapabilities(init_results, server) abort
         endfor
       endif
     endif
-    if has_key(capabilities, 'documentHighlightsProvider')
-      if capabilities['documentHighlightsProvider']
+    if has_key(capabilities, 'documentHighlightProvider')
+      if capabilities['documentHighlightProvider']
         call lsc#cursor#enableReferenceHighlights(filetype)
       endif
     endif

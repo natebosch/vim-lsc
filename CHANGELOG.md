@@ -1,4 +1,19 @@
-# 0.3.1-dev
+# 0.3.2-dev
+
+- `:LSClientShowHover` is now bound with `keywordprg` instead of by mapping `K`.
+  If the `g:lsc_auto_map` manually specifies a binding of `'K'` it should be
+  dropped to pick up the default, or switched to `v:true` to use `keywordprg`
+  instead. If the mapping is set to a string it will continue to be mapped as
+  usual, if it is mapped to `0` or `v:false` no mapping will occur, if it is set
+  to `1` or `v:true` then `keywordprg` will be set. `:LSClientShowHover` also
+  now allows an argument but it will always be ignored.
+- Added `g:lsc_enable_dagnostics`. Set to `v:false` to ignore all diagnostics
+  sent by the server.
+- Notifications with a method starting with `$/` will be silently dropped
+  instead of showing a message.
+- Fix a bug where `au_group_id` was not initialized correctly.
+
+# 0.3.1
 
 - Allow using the default map but overriding or omitting a subset of the keys.
 - Set `completefunc` even when autocomplete is enabled.
@@ -10,6 +25,8 @@
   automatically.
 - Bug fix: Handle workspace edits that have double quotes.
 - Add support for `CodeAction` literals.
+- Bug fix: Correctly truncate multi-byte or wide character diagnostics.
+- Bug fix: Allow duplicate words in completions (overloads).
 
 # 0.3.0
 

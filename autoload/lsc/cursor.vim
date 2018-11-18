@@ -27,14 +27,19 @@ function! lsc#cursor#enableReferenceHighlights(filetype)
 endfunction
 
 function! lsc#cursor#showDiagnostic() abort
-  let diagnostic = lsc#diagnostics#underCursor()
-  if has_key(diagnostic, 'message')
-    let max_width = &columns - 18
-    let message = substitute(diagnostic.message, '\n', '\\n', 'g')
-    if len(message) > max_width
-      echo message[:max_width].'...'
+  let l:diagnostic = lsc#diagnostics#underCursor()
+  if has_key(l:diagnostic, 'message')
+    let l:max_width = &columns - 18
+    let l:message = strtrans(l:diagnostic.message)
+    if strdisplaywidth(l:message) > l:max_width
+      let l:truncated = strcharpart(l:message, 0, l:max_width)
+      " Trim by character until a satisfactory display width.
+      while strdisplaywidth(l:truncated) > l:max_width
+        let l:truncated = strcharpart(l:truncated, 0, strchars(l:truncated) - 1)
+      endwhile
+      echo l:truncated.'...'
     else
-      echo message
+      echo l:message
     endif
   else
     echo ''

@@ -111,7 +111,7 @@ requested before the server responds with suggestions.
 
 ### Reference Highlights
 
-If the server supports the `textDocument/documentHighlights` call references to
+If the server supports the `textDocument/documentHighlight` call references to
 the element under the cursor throughout the document will be highlighted.
 Disable with `let g:lsc_reference_highlights = v:false` or customize the
 highlighting with the group `lscReference`. Use `<c-n>`
@@ -149,7 +149,8 @@ matching a search string. Results will populate the quickfix list.
 ### Hover
 
 While the cursor is on any identifier call `LSClientShowHover` (`K` if using the
-default mappings) to request hover text and show it in a preview window.
+default mappings, bound through `keywordprg`) to request hover text and show it
+in a preview window.
 Override the direction of the split by setting `g:lsc_preview_split_direction`
 to either `'below'` or `'above'`.
 

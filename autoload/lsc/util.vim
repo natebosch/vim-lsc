@@ -1,5 +1,7 @@
 if !exists('s:initialized')
   let s:callback_gates = {}
+  let s:au_group_id = 0
+  let s:callbacks = {}
   let s:initialized = v:true
 endif
 
@@ -9,12 +11,6 @@ function! lsc#util#winDo(command) abort
   execute 'keepjumps noautocmd windo '.a:command
   execute 'keepjumps noautocmd '.current_window.'wincmd w'
 endfunction
-
-if !exists('s:initialized')
-  let s:au_group_id = 0
-  let s:callbacks = {}
-  let s:initialized = v:true
-endif
 
 " Schedule [function] to be called once for [event]. The function will only be
 " called if [event] fires for the current buffer. Callbacks cannot be canceled.

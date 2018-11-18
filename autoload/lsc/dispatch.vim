@@ -19,6 +19,8 @@ function! lsc#dispatch#message(server, message) abort
         let response = {'applied': applied}
         call a:server.send(lsc#protocol#formatResponse(id, response))
       endif
+    elseif a:message['method'] =~? '\v^\$/'
+      " Unhandled extension to the protocol, drop the message
     else
       echom 'Got notification: '.a:message['method'].
           \ ' params: '.string(a:message['params'])
