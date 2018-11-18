@@ -99,6 +99,9 @@ If the preview window is not visible it will |split| the window and size it no
 bigger than |previewheight|. Override the direction of the split by setting
 |g:lsc_preview_split_direction| to either |above| or |below|.
 
+See the help for the |preview-window| for more information. It can be quickly
+closed with `<c-w><c-z>` without switching to that buffer.
+
                                                 *:LSClientFindCodeActions*
 Check for available actions at the cursor's position and display them in a
 menu. Sends a "textDocument/codeAction" request to get the available choices,

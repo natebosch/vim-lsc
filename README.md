@@ -54,7 +54,7 @@ let g:lsc_auto_map = {
     \ 'FindCodeActions': 'ga',
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
-    \ 'ShowHover': 'K',
+    \ 'ShowHover': 'v:true',
     \ 'Completion': 'completefunc',
     \}
 ```
@@ -152,7 +152,8 @@ While the cursor is on any identifier call `LSClientShowHover` (`K` if using the
 default mappings, bound through `keywordprg`) to request hover text and show it
 in a preview window.
 Override the direction of the split by setting `g:lsc_preview_split_direction`
-to either `'below'` or `'above'`.
+to either `'below'` or `'above'`. Quickly close the preview without switching
+buffers with `<c-w><c-z>`. See `:help preview-window`.
 
 ### Code Actions
 
