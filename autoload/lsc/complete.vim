@@ -243,6 +243,7 @@ function! s:CompletionItem(completion_item) abort
     let item.word = a:completion_item.textEdit.newText
     let item.start_col = a:completion_item.textEdit.range.start.character + 1
   elseif has_key(a:completion_item, 'insertText')
+      \ && !empty(a:completion_item.insertText)
     let item.word = a:completion_item.insertText
   else
     let item.word = a:completion_item.label
