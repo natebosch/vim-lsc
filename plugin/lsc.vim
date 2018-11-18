@@ -10,6 +10,9 @@ endif
 if !exists('g:lsc_enable_autocomplete')
   let g:lsc_enable_autocomplete = v:true
 endif
+if !exists('g:lsc_auto_completeopt')
+  let g:lsc_auto_completeopt = v:true
+endif
 
 command! LSClientGoToDefinition call lsc#reference#goToDefinition()
 command! LSClientFindReferences call lsc#reference#findReferences()
