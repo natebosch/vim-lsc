@@ -55,7 +55,7 @@ let g:lsc_auto_map = {
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
     \ 'ShowHover': 'v:true',
-    \ 'SignatureHelp', '<C-h>',
+    \ 'SignatureHelp', '<C-m>',
     \ 'Completion': 'completefunc',
     \}
 ```
@@ -164,6 +164,6 @@ of the chosen action.
 
 ### Signature help
 
-Call `LSCLientSignatureHelp` (`<C-h>` if using the default mappings) to get help while writing
+Call `LSCLientSignatureHelp` (`<C-m>` if using the default mappings) to get help while writing
 a function call. The currently active parameter is highlighted with the group
 `lscCurrentParameter`.
