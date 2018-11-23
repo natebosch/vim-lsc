@@ -9,6 +9,7 @@ let s:default_maps = {
     \ 'ShowHover': v:true,
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
+    \ 'SignatureHelp': '<C-m>',
     \ 'Completion': 'completefunc',
     \}
 
@@ -54,6 +55,7 @@ function! lsc#config#mapKeys() abort
       \ 'DocumentSymbol',
       \ 'WorkspaceSymbol',
       \ 'FindCodeActions',
+      \ 'SignatureHelp',
       \]
     if has_key(l:maps, command)
       execute 'nnoremap <buffer>'.l:maps[command].' :LSClient'.command.'<CR>'

@@ -110,7 +110,7 @@ function! s:showHover(result) abort
     let contents = contents.value
   endif
   let lines = split(contents, "\n")
-  call lsc#util#displayAsPreview(lines)
+  call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
 endfunction
 
 " Request a list of symbols in the current document and populate the quickfix
