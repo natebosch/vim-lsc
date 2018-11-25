@@ -257,11 +257,14 @@ function! s:CompletionItem(completion_item) abort
       let item.menu = detail_lines[0]
     endif
   endif
+  let item.info = ' '
   if has_key(a:completion_item, 'documentation')
-      \ && a:completion_item.documentation != v:null
-    let item.info = a:completion_item.documentation
-  else
-    let item.info = ' '
+    let documentation = a:completion_item.documentation
+    if type(documentation) == v:t_string
+      let item.info = documentation
+    elseif type(documentation) == v:t_dict && has_key(documentation, 'value')
+      let item.info = documentation.value
+    endif
   endif
   return item
 endfunction
