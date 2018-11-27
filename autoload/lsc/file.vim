@@ -39,6 +39,13 @@ function! lsc#file#onClose(file_path) abort
   endif
 endfunction
 
+" Unconditionally send a `textDocument/didSave` notification.
+function! lsc#file#onWrite(file_path) abort
+  let full_path = fnamemodify(a:file_path, ':p')
+  let params = {'textDocument': {'uri': lsc#uri#documentUri(full_path)}}
+  call lsc#server#call(&filetype, 'textDocument/didSave', params)
+endfunction
+
 " Flushes changes for the current buffer.
 function! lsc#file#flushChanges() abort
   call s:FlushIfChanged(expand('%:p'), &filetype)

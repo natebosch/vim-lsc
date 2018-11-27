@@ -81,6 +81,8 @@ augroup LSC
       \ call <SID>IfEnabled('lsc#file#onChange')
   autocmd BufLeave * call <SID>IfEnabled('lsc#file#flushChanges')
   autocmd BufUnload * call <SID>IfEnabled('lsc#file#onClose', expand("<afile>"))
+  autocmd BufWritePost *
+      \ call <SID>IfEnabled('lsc#file#onWrite', expand("<afile>"))
 
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
   autocmd WinLeave * call <SID>IfEnabled('lsc#cursor#onWinLeave')

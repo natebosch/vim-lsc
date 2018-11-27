@@ -18,6 +18,7 @@
   `textDocument/signatureHelp`.
 - Add highlighting group `lscCurrentParameter` which is used to highlight the
   active parameter in the signature help.
+- Send `textDocument/didSave` notifications on `BufWritePost`.
 
 # 0.3.1
 
