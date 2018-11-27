@@ -7,7 +7,7 @@ function! lsc#dispatch#message(server, message) abort
       call lsc#diagnostics#setForFile(file_path, params['diagnostics'])
     elseif a:message['method'] ==? 'window/showMessage'
       let params = a:message['params']
-      call lsc#message#show(params['message'], params['type'])
+      call lsc#message#log(params['message'], params['type'])
     elseif a:message['method'] ==? 'window/showMessageRequest'
       let params = a:message['params']
       let response = lsc#message#showRequest(params['message'], params['actions'])
