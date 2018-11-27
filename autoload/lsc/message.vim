@@ -1,4 +1,4 @@
-function! lsc#message#show(message) abort
+function! lsc#message#show(message, ...) abort
   call s:Echo('echo', a:message, get(a:, 1, 'Log'))
 endfunction
 

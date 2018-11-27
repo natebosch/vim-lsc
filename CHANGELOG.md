@@ -20,6 +20,7 @@
   active parameter in the signature help.
 - Send `textDocument/didSave` notifications on `BufWritePost`.
 - Call `initialized` in response to the `initialize` result.
+- Fix a bug with responding to `window/showMessage` notifications.
 
 # 0.3.1
 
