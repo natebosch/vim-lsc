@@ -79,10 +79,14 @@ endfunction
 function! lsc#server#call(filetype, method, params, ...) abort
   if !has_key(g:lsc_servers_by_filetype, a:filetype) | return v:false | endif
   let server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
-  if server.status != 'running' && !(a:0 >= 2 && a:2)
+  return call('<SID>Call', [l:server, a:method, a:params] + a:000)
+endfunction
+
+function! s:Call(server, method, params, ...) abort
+  if a:server.status != 'running' && !(a:0 >= 2 && a:2)
       return v:false
   endif
-  let params = lsc#config#messageHook(server, a:method, a:params)
+  let params = lsc#config#messageHook(a:server, a:method, a:params)
   " If there is a callback this is a request
   if a:0 >= 1
     let [call_id, message] = lsc#protocol#formatRequest(a:method, l:params)
@@ -90,7 +94,7 @@ function! lsc#server#call(filetype, method, params, ...) abort
   else
     let message = lsc#protocol#formatNotification(a:method, l:params)
   endif
-  return server.send(message)
+  return a:server.send(message)
 endfunction
 
 " Start `server` if it isn't already running.
@@ -112,6 +116,7 @@ function! s:Start(server) abort
     for filetype in a:server.filetypes
       call lsc#file#trackAll(filetype)
     endfor
+    call s:Call(a:server, 'initalized', {})
   endfunction
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
@@ -124,7 +129,7 @@ function! s:Start(server) abort
       \ 'capabilities': s:ClientCapabilities(),
       \ 'trace': trace_level
       \}
-  call lsc#server#call(&filetype, 'initialize',
+  call s:Call(a:server, 'initialize',
       \ params, function('OnInitialize'), v:true)
 endfunction
 

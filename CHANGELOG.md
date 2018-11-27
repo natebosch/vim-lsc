@@ -19,6 +19,7 @@
 - Add highlighting group `lscCurrentParameter` which is used to highlight the
   active parameter in the signature help.
 - Send `textDocument/didSave` notifications on `BufWritePost`.
+- Call `initialized` in response to the `initialize` result.
 
 # 0.3.1
 
