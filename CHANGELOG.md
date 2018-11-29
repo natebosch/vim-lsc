@@ -21,6 +21,7 @@
 - Send `textDocument/didSave` notifications on `BufWritePost`.
 - Call `initialized` in response to the `initialize` result.
 - Fix a bug with responding to `window/showMessage` notifications.
+- Wait to call 'exit' until the 'shutdown' response comes back.
 
 # 0.3.1
 

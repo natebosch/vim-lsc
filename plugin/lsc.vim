@@ -94,7 +94,7 @@ augroup LSC
   autocmd TextChangedI * call <SID>IfEnabled('lsc#complete#textChanged')
   autocmd InsertCharPre * call <SID>IfEnabled('lsc#complete#insertCharPre')
 
-  autocmd VimLeave * call <SID>OnVimQuit()
+  autocmd VimLeave * call lsc#server#exit()
 augroup END
 
 " Set window local state only if this is a brand new window which has not
@@ -136,13 +136,6 @@ function! s:IfEnabled(function, ...) abort
   if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
   if !lsc#server#filetypeActive(&filetype) | return | endif
   call call(a:function, a:000)
-endfunction
-
-" Exit all open language servers.
-function! s:OnVimQuit() abort
-  for file_type in keys(g:lsc_servers_by_filetype)
-    call lsc#server#kill(file_type)
-  endfor
 endfunction
 
 function! s:OnOpen() abort

@@ -38,20 +38,43 @@ function! lsc#server#servers() abort
   return s:servers
 endfunction
 
-function! lsc#server#kill(filetype) abort
-  if !has_key(g:lsc_servers_by_filetype, a:filetype) | return | endif
-  call lsc#server#call(a:filetype, 'shutdown', v:null)
-  call lsc#server#call(a:filetype, 'exit', v:null)
-  let s:servers[g:lsc_servers_by_filetype[a:filetype]].status = 'exiting'
+" Wait for all running servers to shut down with a 5 second timeout.
+function! lsc#server#exit() abort
+  let l:exit_start = reltime()
+  let l:pending = 0
+  function! OnExit() closure abort
+    let l:pending -= 1
+  endfunction
+  for l:server in values(s:servers)
+    if s:Kill(l:server, 'exiting', function('OnExit'))
+      let l:pending += 1
+    endif
+  endfor
+  while l:pending > 0 && reltimefloat(reltime(l:exit_start)) <= 5.0
+    sleep 100m
+  endwhile
+  return l:pending <= 0
+endfunction
+
+" Request a 'shutdown' then 'exit'.
+"
+" Calls `OnExit` after the exit is requested. Returns `v:false` if no request
+" was made because the server is not currently running.
+function! s:Kill(server, status, OnExit) abort
+  function! Exit(result) closure abort
+    call s:Call(a:server, 'exit', v:null)
+    let a:server.status = a:status
+    if type(a:OnExit) != v:t_none | call a:OnExit() | endif
+  endfunction
+  return s:Call(a:server, 'shutdown', v:null, function('Exit'))
 endfunction
 
 function! lsc#server#restart() abort
-  let server_name = g:lsc_servers_by_filetype[&filetype]
-  let server = s:servers[server_name]
-  let old_status = server.status
-  if old_status == 'starting' || old_status == 'running'
-    call lsc#server#kill(&filetype)
-    let server.status = 'restarting'
+  let l:server_name = g:lsc_servers_by_filetype[&filetype]
+  let l:server = s:servers[l:server_name]
+  let l:old_status = l:server.status
+  if l:old_status == 'starting' || l:old_status == 'running'
+    call s:Kill(l:server, 'restarting', v:null)
   else
     call s:Start(server)
   endif
@@ -212,10 +235,9 @@ function! lsc#server#disable()
   if !has_key(g:lsc_servers_by_filetype, &filetype)
     return v:false
   endif
-  let server = s:servers[g:lsc_servers_by_filetype[&filetype]]
-  let server.config.enabled = v:false
-  call lsc#server#kill(&filetype)
-  let server.status = 'disabled'
+  let l:server = s:servers[g:lsc_servers_by_filetype[&filetype]]
+  let l:server.config.enabled = v:false
+  call s:Kill(l:server, 'disabled', v:null)
 endfunction
 
 function! lsc#server#enable()
