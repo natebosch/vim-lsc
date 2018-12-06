@@ -139,7 +139,7 @@ function! s:Start(server) abort
     for filetype in a:server.filetypes
       call lsc#file#trackAll(filetype)
     endfor
-    call s:Call(a:server, 'initialized', v:null)
+    call s:Call(a:server, 'initialized', {})
   endfunction
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
