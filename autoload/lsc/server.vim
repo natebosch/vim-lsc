@@ -64,7 +64,7 @@ function! s:Kill(server, status, OnExit) abort
   function! Exit(result) closure abort
     call s:Call(a:server, 'exit', v:null)
     let a:server.status = a:status
-    if type(a:OnExit) != v:t_none | call a:OnExit() | endif
+    if a:OnExit != v:null | call a:OnExit() | endif
   endfunction
   return s:Call(a:server, 'shutdown', v:null, function('Exit'))
 endfunction
