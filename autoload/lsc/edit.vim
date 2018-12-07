@@ -110,17 +110,24 @@ function! lsc#edit#apply(workspace_edit) abort
     return v:false
   endif
   let view = winsaveview()
-  let old_paste = &paste
-  set paste
   let alternate=@#
   let old_buffer = bufnr('%')
-
-  call s:ApplyAll(a:workspace_edit.changes)
-
-  if old_buffer != bufnr('%') | execute 'buffer' old_buffer | endif
-  if len(alternate) > 0 | let @#=alternate | endif
-  let &paste = old_paste
-  call winrestview(view)
+  let old_paste = &paste
+  let old_selection = &selection
+  let old_virtualedit = &virtualedit
+  set paste
+  set selection=exclusive
+  set virtualedit=onemore
+  try
+    call s:ApplyAll(a:workspace_edit.changes)
+  finally
+    if len(alternate) > 0 | let @#=alternate | endif
+    if old_buffer != bufnr('%') | execute 'buffer' old_buffer | endif
+    let &paste = old_paste
+    let &selection = old_selection
+    let &virtualedit = old_virtualedit
+    call winrestview(view)
+  endtry
   return v:true
 endfunction
 
@@ -137,13 +144,7 @@ function! s:ApplyAll(changes) abort
     for edit in sort(edits, '<SID>CompareEdits')
       let l:cmd .= ' | execute "keepjumps normal! '.s:Apply(edit).'"'
     endfor
-    try
-      let l:was_paste = &paste
-      set paste
-      execute l:cmd
-    finally
-      let &paste = l:was_paste
-    endtry
+    execute l:cmd
     call lsc#file#onChange(l:file_path)
   endfor
 endfunction
@@ -164,14 +165,11 @@ function! s:Apply(edit) abort
         \ l:new_text
         \)
   else
-    " `back` handles end-exclusive range
-    let l:back = a:edit.range.end.character == 0 ? 'k$' : 'h'
-    return printf('%dG%d|v%dG%d|%sc%s',
+    return printf('%dG%d|v%dG%d|c%s',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
         \ a:edit.range.end.line + 1,
         \ a:edit.range.end.character + 1,
-        \ l:back,
         \ l:new_text
         \)
   endif
