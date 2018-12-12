@@ -251,3 +251,16 @@ function! lsc#diagnostics#forLine(file, line) abort
   endif
   return l:result
 endfunction
+
+function! lsc#diagnostics#printForLine() abort
+  let l:file_diagnostics = lsc#diagnostics#forFile(expand('%:p'))
+  let l:line = line('.')
+  if !has_key(l:file_diagnostics, l:line)
+    echo 'No diagnostics'
+    return
+  endif
+  let l:diagnostics = l:file_diagnostics[l:line]
+  for l:diagnostic in l:diagnostics
+    echo l:diagnostic.message
+  endfor
+endfunction
