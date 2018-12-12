@@ -55,7 +55,7 @@ let g:lsc_auto_map = {
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
     \ 'ShowHover': 'v:true',
-    \ 'SignatureHelp', '<C-m>',
+    \ 'SignatureHelp': '<C-m>',
     \ 'Completion': 'completefunc',
     \}
 ```
