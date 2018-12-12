@@ -19,6 +19,13 @@ function! s:GoToDefinition(result) abort
   let file = lsc#uri#documentPath(location.uri)
   let line = location.range.start.line + 1
   let character = location.range.start.character + 1
+  if exists('*gettagstack') && exists('*settagstack')
+    let from = [bufnr('%'), line('.'), col('.'), 0]
+    let tagname = expand('<cword>')
+    let winid = win_getid()
+    call settagstack(winid, {'items': [{'from': from, 'tagname': tagname}]}, 'a')
+    call settagstack(winid, {'curidx': len(gettagstack(winid)['items']) + 1})
+  endif
   call s:goTo(file, line, character)
 endfunction
 
