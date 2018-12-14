@@ -30,7 +30,14 @@ function! lsc#cursor#showDiagnostic() abort
   let l:diagnostic = lsc#diagnostics#underCursor()
   if has_key(l:diagnostic, 'message')
     let l:max_width = &columns - 18
-    let l:message = strtrans(l:diagnostic.message)
+    " Count lines of message
+    let l:msg_height = strlen(substitute(l:diagnostic.message, "[^\n]", "","g")) + 1
+    " If the message has more lines than the current cmdheight, escape newlines
+    if l:msg_height > &cmdheight
+        let l:message = strtrans(l:diagnostic.message)
+    else
+        let l:message = l:diagnostic.message
+    end
     if strdisplaywidth(l:message) > l:max_width
       let l:truncated = strcharpart(l:message, 0, l:max_width)
       " Trim by character until a satisfactory display width.
