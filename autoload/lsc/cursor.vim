@@ -26,29 +26,76 @@ function! lsc#cursor#enableReferenceHighlights(filetype)
   let s:highlight_support[a:filetype] = v:true
 endfunction
 
+" Given a single-line string, returns a potentially multi-line string that
+" fits within the given maximum width.
+" Adapted from https://vi.stackexchange.com/a/4930
+function! WrapText(text, width)
+  let l:height = 1
+  let l:line = ''
+  let l:ret  = ''
+  for word in split(a:text)
+    if len(l:line) + len(word) + 1 > a:width
+      if len(l:ret)
+        let l:ret .= "\n"
+        let l:height += 1
+      endif
+      let l:ret .=  l:line
+      let l:line = ''
+    endif
+    if len (l:line)
+      let l:line .= ' '
+    endif
+    let l:line .= strtrans(word)
+  endfor
+  let l:ret .= "\n" . l:line
+  return {"message": l:ret, "height": l:height}
+endfunction
+
+" Given a message substring and a base {message:string,height:number}
+" dictionary, returns a new dictionary with the line wrapped to the maximum
+" editor column width.
+function! AddLine(message, fromIdx, toIdx, base) abort
+  let l:max_width = &columns - 5
+  let l:length = a:toIdx - a:fromIdx
+  let l:line = strcharpart(a:message, a:fromIdx, l:length)
+  if strdisplaywidth(l:line) > l:max_width
+    " Line doesn't fit within the editor column width so we wrap it.
+    let l:wrapped = WrapText(l:line, l:max_width)
+    let l:transformed = TransformMessage(l:wrapped["message"], 0)
+    let l:newMessage = l:transformed["message"] . a:base["message"]
+    let l:newHeight = l:transformed["height"] + a:base["height"]
+    return { "message": l:newMessage, "height": l:newHeight }
+  else
+    let l:newMessage = strtrans(l:line) . "\n" . a:base["message"]
+    let l:newHeight = 1 + a:base["height"]
+    return { "message": l:newMessage, "height": l:newHeight }
+  endif
+endfunction
+
+" Given a multi-line string where lines exceed the editor width,
+" returns a new dictionary {message:string,height:number} with
+" a new message that has been line wrapped to display within the
+" editor width and the new length of the message.
+function! TransformMessage(message, fromIdx) abort
+  let l:newlineIdx = stridx(a:message, "\n", a:fromIdx)
+  if l:newlineIdx < 0
+    let l:toIdx = strchars(a:message)
+    let l:base = {"message": "", "height": 1}
+    return AddLine(a:message, a:fromIdx, l:toIdx, l:base)
+  else
+    let l:base = TransformMessage(a:message, l:newlineIdx + 1)
+    return AddLine(a:message, a:fromIdx, l:newlineIdx, l:base)
+  endif
+endfunction
+
 function! lsc#cursor#showDiagnostic() abort
   let l:diagnostic = lsc#diagnostics#underCursor()
   if has_key(l:diagnostic, 'message')
-    let l:max_width = &columns - 18
-    " Count lines of message
-    let l:msg_height = strlen(substitute(l:diagnostic.message, "[^\n]", "","g")) + 1
-    " If the message has more lines than the current cmdheight, escape newlines
-    if l:msg_height > &cmdheight
-        let l:message = strtrans(l:diagnostic.message)
-    else
-        let l:message = l:diagnostic.message
-    end
-    if strdisplaywidth(l:message) > l:max_width
-      let l:truncated = strcharpart(l:message, 0, l:max_width)
-      " Trim by character until a satisfactory display width.
-      while strdisplaywidth(l:truncated) > l:max_width
-        let l:truncated = strcharpart(l:truncated, 0, strchars(l:truncated) - 1)
-      endwhile
-      echo l:truncated.'...'
-    else
-      echo l:message
-    endif
+    let l:result = TransformMessage(l:diagnostic.message, 0)
+    let &cmdheight = l:result["height"]
+    echo l:result["message"]
   else
+    let &cmdheight = 1
     echo ''
   endif
 endfunction
