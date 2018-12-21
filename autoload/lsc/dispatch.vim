@@ -18,6 +18,15 @@ function! lsc#dispatch#message(server, message) abort
     elseif a:message['method'] ==? 'window/logMessage'
       let params = a:message['params']
       call lsc#message#log(params['message'], params['type'])
+    elseif a:message['method'] ==? 'window/progress'
+      let params = a:message['params']
+      if has_key(params, 'message')
+        call lsc#message#log('Progress ' . params['title'] . params['message'])
+      elseif has_key(params, 'done')
+        call lsc#message#log('Finished ' . params['title'])
+      else
+        call lsc#message#log('Starting ' . params['title'])
+      endif
     elseif a:message['method'] ==? 'workspace/applyEdit'
       let params = a:message['params']
       let applied = lsc#edit#apply(params.edit)
