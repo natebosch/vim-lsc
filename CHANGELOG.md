@@ -23,6 +23,7 @@
 - Fix a bug with responding to `window/showMessage` notifications.
 - Wait to call 'exit' until the 'shutdown' response comes back.
 - Update tag stack when jumping to definition.
+- Add special handling for window/progress messages
 
 # 0.3.1
 
