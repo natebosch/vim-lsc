@@ -26,7 +26,7 @@ command! -nargs=? LSClientWorkspaceSymbol
 command! -nargs=? LSClientFindCodeActions
     \ call lsc#edit#findCodeActions(lsc#edit#filterActions(<args>))
 command! LSClientAllDiagnostics call lsc#diagnostics#showInQuickFix()
-command! LSClientLineDiagnostics call lsc#diagnostics#printForLine()
+command! LSClientLineDiagnostics call lsc#diagnostics#echoForLine()
 command! LSClientSignatureHelp call lsc#signaturehelp#getSignatureHelp()
 command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
 command! LSClientDisable call lsc#server#disable()

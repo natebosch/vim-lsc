@@ -266,7 +266,7 @@ function! lsc#diagnostics#forLine(file, line) abort
   return l:result
 endfunction
 
-function! lsc#diagnostics#printForLine() abort
+function! lsc#diagnostics#echoForLine() abort
   let l:file_diagnostics = lsc#diagnostics#forFile(expand('%:p'))
   let l:line = line('.')
   if !has_key(l:file_diagnostics, l:line)
