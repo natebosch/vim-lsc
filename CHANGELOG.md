@@ -23,6 +23,7 @@
 - Fix a bug with responding to `window/showMessage` notifications.
 - Wait to call 'exit' until the 'shutdown' response comes back.
 - Update tag stack when jumping to definition.
+- Add `:LSClientLineDiagnostics` to print diagnostics for the current line.
 
 # 0.3.1
 
