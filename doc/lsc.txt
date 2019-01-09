@@ -134,6 +134,11 @@ server, spanning all files. Depending on the server implementation this may
 show all diagnostics for open files, or also diagnostics for files that have
 not yet been opened.
 
+                                                *:LSClientLineDiagnostics*
+Echo the full text of all diagnostics on the current line. Useful when a
+diagnostic has been truncated or there are multiple diagnostics on a line and
+otherwise only the diagnostic closest to the cursor is shown.
+
                                                 *:LSClientRestartServer*
 Sends requests to the server for the current filetype to "shutdown" and
 "exit", and after the process exits, restarts it. If the server is

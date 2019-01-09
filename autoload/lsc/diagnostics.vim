@@ -35,14 +35,19 @@ endfunction
 
 " Finds the highlight group given a diagnostic severity level
 function! s:SeverityGroup(severity) abort
+  return 'lscDiagnostic'.s:SeverityLabel(a:severity)
+endfunction
+
+" Finds the human readable label for a diagnsotic severity level
+function! s:SeverityLabel(severity) abort
     if a:severity == 1
-      return 'lscDiagnosticError'
+      return 'Error'
     elseif a:severity == 2
-      return 'lscDiagnosticWarning'
+      return 'Warning'
     elseif a:severity == 3
-      return 'lscDiagnosticInfo'
+      return 'Info'
     elseif a:severity == 4
-      return 'lscDiagnosticHint'
+      return 'Hint'
     endif
 endfunction
 
@@ -96,7 +101,7 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
       else
         let line = diagnostics_by_line[line_number]
       endif
-      call add(line, diagnostic)
+      call sort(add(line, diagnostic), function('<SID>CompareDiagnostics'))
     endfor
     let s:file_diagnostics[a:file_path] = diagnostics_by_line
   else
@@ -107,6 +112,15 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   if(a:file_path ==# expand('%:p'))
     call lsc#cursor#showDiagnostic()
   endif
+endfunction
+
+function! s:CompareDiagnostics(d1, d2) abort
+  let l:range_1 = a:d1.ranges[0]
+  let l:range_2 = a:d2.ranges[0]
+  if l:range_1[1] != l:range_2[1]
+    return l:range_1[1] - l:range_2[1]
+  endif
+  return l:range_1[2] - l:range_2[2]
 endfunction
 
 " Updates location list for all windows showing [file_path].
@@ -250,4 +264,23 @@ function! lsc#diagnostics#forLine(file, line) abort
     endfor
   endif
   return l:result
+endfunction
+
+function! lsc#diagnostics#echoForLine() abort
+  let l:file_diagnostics = lsc#diagnostics#forFile(expand('%:p'))
+  let l:line = line('.')
+  if !has_key(l:file_diagnostics, l:line)
+    echo 'No diagnostics'
+    return
+  endif
+  let l:diagnostics = l:file_diagnostics[l:line]
+  for l:diagnostic in l:diagnostics
+    let l:label = '['.s:SeverityLabel(l:diagnostic.lsp.severity).']'
+    if stridx(l:diagnostic.message, "\n") >= 0
+      echo l:label
+      echo l:diagnostic.message
+    else
+      echo l:label.': '.l:diagnostic.message
+    endif
+  endfor
 endfunction
