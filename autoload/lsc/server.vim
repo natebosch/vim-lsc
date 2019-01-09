@@ -133,13 +133,13 @@ function! s:Start(server) abort
   function! OnInitialize(init_result) closure abort
     let a:server.init_result = a:init_result
     let a:server.status = 'running'
+    call s:Call(a:server, 'initialized', {})
     if type(a:init_result) == v:t_dict
       call s:CheckCapabilities(a:init_result, a:server)
     endif
     for filetype in a:server.filetypes
       call lsc#file#trackAll(filetype)
     endfor
-    call s:Call(a:server, 'initialized', {})
   endfunction
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
