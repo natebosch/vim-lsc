@@ -252,9 +252,11 @@ endfunction
 function! lsc#server#register(filetype, config) abort
   if type(a:config) == v:t_string
     let config = {'command': a:config, 'name': a:config}
+  elseif type(a:config) == v:t_list
+    let config = {'command': a:config, 'name': string(a:config)}
   else
     if type(a:config) != v:t_dict
-      throw 'Server configuration msut be an executable or a dict'
+      throw 'Server configuration must be an executable or a dict'
     endif
     let config = a:config
     if !has_key(config, 'command')

@@ -25,6 +25,7 @@
 - Update tag stack when jumping to definition.
 - Add special handling for window/progress messages
 - Add `:LSClientLineDiagnostics` to print diagnostics for the current line.
+- Allow server commands to be specified as lists.
 
 # 0.3.1
 
