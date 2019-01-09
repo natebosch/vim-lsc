@@ -141,3 +141,28 @@ function! s:HasFunction(hook) abort
   endfor
   return v:false
 endfunction
+
+" Whether a message of type [type] should be echoed
+"
+" By default messages are shown at "Warning" or "Error", this can be overrided
+" per server.
+function! lsc#config#shouldLog(server, type) abort
+  let l:threshold = 2
+  if has_key(a:server.config, 'log_level')
+    if type(a:server.config.log_level) == v:t_number
+      let l:threshold = a:server.config.log_level
+    else
+      let l:config = a:server.config.log_level
+      if l:config == 'Error'
+        let l:threshold = 1
+      elseif l:config == 'Warning'
+        let l:threshold = 2
+      elseif l:config == 'Info'
+        let l:threshold = 3
+      elseif l:config == 'Log'
+        let l:threshold = 4
+      endif
+    endif
+  endif
+  return a:type <= l:threshold
+endfunction
