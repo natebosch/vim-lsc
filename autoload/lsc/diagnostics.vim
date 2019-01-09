@@ -277,10 +277,10 @@ function! lsc#diagnostics#echoForLine() abort
   for l:diagnostic in l:diagnostics
     let l:label = '['.s:SeverityLabel(l:diagnostic.lsp.severity).']'
     if stridx(l:diagnostic.message, "\n") >= 0
-      echom l:label
-      echom l:diagnostic.message
+      echo l:label
+      echo l:diagnostic.message
     else
-      echom l:label.': '.l:diagnostic.message
+      echo l:label.': '.l:diagnostic.message
     endif
   endfor
 endfunction
