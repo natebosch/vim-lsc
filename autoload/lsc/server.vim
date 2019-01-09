@@ -296,7 +296,7 @@ function! lsc#server#register(filetype, config) abort
     call lsc#protocol#consumeMessage(self)
   endfunction
   function server.log(message, type) abort
-    if lsc#config#shouldLog(self, a:type)
+    if lsc#config#shouldEcho(self, a:type)
       call lsc#message#log(a:message, a:type)
     endif
     call lsc#util#shift(self.logs, 100, {'message': a:message, 'type': a:type})
