@@ -1,6 +1,6 @@
 function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
   let l:c = s:Channel()
-  if a:command =~# '[^:]\+:\d\+'
+  if type(a:command) == v:t_string && a:command =~# '[^:]\+:\d\+'
     if !exists('*ch_open')
       call lsc#message#error('No support for sockets for '.a:command)
       return v:null
