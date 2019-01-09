@@ -146,7 +146,7 @@ endfunction
 "
 " By default messages are shown at "Warning" or "Error", this can be overrided
 " per server.
-function! lsc#config#shouldLog(server, type) abort
+function! lsc#config#shouldEcho(server, type) abort
   let l:threshold = 2
   if has_key(a:server.config, 'log_level')
     if type(a:server.config.log_level) == v:t_number
