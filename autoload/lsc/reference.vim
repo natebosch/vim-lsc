@@ -1,11 +1,12 @@
-function! lsc#reference#goToDefinition() abort
+function! lsc#reference#goToDefinition(mods, issplit) abort
   call lsc#file#flushChanges()
   call lsc#server#userCall('textDocument/definition',
       \ lsc#params#documentPosition(),
-      \ lsc#util#gateResult('GoToDefinition', function('<SID>GoToDefinition')))
+      \ lsc#util#gateResult('GoToDefinition',
+      \   function('<SID>GoToDefinition', [a:mods, a:issplit])))
 endfunction
 
-function! s:GoToDefinition(result) abort
+function! s:GoToDefinition(mods, issplit, result) abort
   if type(a:result) == type(v:null) ||
       \ (type(a:result) == v:t_list && len(a:result) == 0)
     call lsc#message#error('No definition found')
@@ -19,14 +20,25 @@ function! s:GoToDefinition(result) abort
   let file = lsc#uri#documentPath(location.uri)
   let line = location.range.start.line + 1
   let character = location.range.start.character + 1
-  if exists('*gettagstack') && exists('*settagstack')
+  let dotag = &tagstack && exists('*gettagstack') && exists('*settagstack')
+  if dotag
     let from = [bufnr('%'), line('.'), col('.'), 0]
     let tagname = expand('<cword>')
-    let winid = win_getid()
-    call settagstack(winid, {'items': [{'from': from, 'tagname': tagname}]}, 'a')
-    call settagstack(winid, {'curidx': len(gettagstack(winid)['items']) + 1})
+    let stack = gettagstack()
+    if stack.curidx > 1
+      let stack.items = stack.items[0:stack.curidx-2]
+    else
+      let stack.items = []
+    endif
+    let stack.items += [{'from': from, 'tagname': tagname}]
+    let stack.curidx = len(stack.items)
+    call settagstack(win_getid(), stack)
   endif
-  call s:goTo(file, line, character)
+  call s:goTo(file, line, character, a:mods, a:issplit)
+  if dotag
+    let curidx = gettagstack().curidx + 1
+    call settagstack(win_getid(), {'curidx': curidx})
+  endif
 endfunction
 
 function! lsc#reference#findReferences() abort
@@ -84,16 +96,26 @@ function! s:QuickFixItem(location) abort
   return item
 endfunction
 
-function! s:goTo(file, line, character) abort
-  if a:file != lsc#file#fullPath()
+function! s:goTo(file, line, character, mods, issplit) abort
+  let prev_buf = bufnr('%')
+  if a:issplit || a:file !=# lsc#file#fullPath()
+    let cmd = 'edit'
+    if a:issplit
+      let cmd = lsc#file#bufnr(a:file) == -1 ? 'split' : 'sbuffer'
+    endif
     let relative_path = fnamemodify(a:file, ':~:.')
-    exec 'edit '.relative_path
-    " 'edit' already left a jump
+    exec a:mods cmd fnameescape(relative_path)
+  endif
+  if prev_buf != bufnr('%')
+    " switching buffers already left a jump
     call cursor(a:line, a:character)
+    call getcurpos()  " updates curswant properly
     redraw
   else
     " Move with 'G' to ensure a jump is left
-    exec 'normal! '.a:line.'G'.a:character.'|'
+    exec 'normal! '.a:line.'G'
+    call cursor(0, a:character)
+    call getcurpos()  " updates curswant properly
   endif
 endfunction
 

@@ -1,5 +1,6 @@
 let s:default_maps = {
     \ 'GoToDefinition': '<C-]>',
+    \ 'GoToDefinitionSplit': ['<C-W>]', '<C-W><C-]>'],
     \ 'FindReferences': 'gr',
     \ 'NextReference': '<C-n>',
     \ 'PreviousReference': '<C-p>',
@@ -48,24 +49,25 @@ function! lsc#config#mapKeys() abort
 
   for command in [
       \ 'GoToDefinition',
+      \ 'GoToDefinitionSplit',
       \ 'FindReferences',
       \ 'NextReference',
       \ 'PreviousReference',
       \ 'FindImplementations',
+      \ 'FindCodeActions',
+      \ 'ShowHover',
       \ 'DocumentSymbol',
       \ 'WorkspaceSymbol',
-      \ 'FindCodeActions',
       \ 'SignatureHelp',
-      \]
-    if has_key(l:maps, command)
-      execute 'nnoremap <buffer>'.l:maps[command].' :LSClient'.command.'<CR>'
+      \] + (get(g:, 'lsc_enable_apply_edit', 1) ? ['Rename'] : [])
+    let lhs = get(l:maps, command, v:none)
+    if type(lhs) != v:t_string && type(lhs) != v:t_list
+      continue
     endif
+    for m in type(lhs) == v:t_list ? lhs : [lhs]
+      execute 'nnoremap <buffer>'.m.' :LSClient'.command.'<CR>'
+    endfor
   endfor
-  if !exists('g:lsc_enable_apply_edit') || g:lsc_enable_apply_edit
-    if has_key(l:maps, 'Rename')
-      execute 'nnoremap <buffer>'.l:maps['Rename'].' :LSClientRename<CR>'
-    endif
-  endif
   if has_key(l:maps, 'Completion')
     execute 'setlocal '.l:maps['Completion'].'=lsc#complete#complete'
   endif
@@ -75,8 +77,6 @@ function! lsc#config#mapKeys() abort
       if l:show_hover
         setlocal keywordprg=:LSClientShowHover
       endif
-    elseif type(l:show_hover) == v:t_string
-      execute 'nnoremap <buffer>'.l:show_hover.' :LSClientShowHover<CR>'
     endif
   endif
 endfunction

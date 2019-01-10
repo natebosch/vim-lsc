@@ -14,7 +14,10 @@ if !exists('g:lsc_auto_completeopt')
   let g:lsc_auto_completeopt = v:true
 endif
 
-command! LSClientGoToDefinition call lsc#reference#goToDefinition()
+command! LSClientGoToDefinitionSplit
+    \ call lsc#reference#goToDefinition(<q-mods>, 1)
+command! LSClientGoToDefinition
+    \ call lsc#reference#goToDefinition(<q-mods>, 0)
 command! LSClientFindReferences call lsc#reference#findReferences()
 command! LSClientNextReference call lsc#reference#findNext(1)
 command! LSClientPreviousReference call lsc#reference#findNext(-1)
