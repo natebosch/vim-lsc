@@ -366,10 +366,11 @@ are configured with the same name use the same server.
 |:LSClientEnable| is called.
 
                                                 *lsc-server-log_level*
-`'log_level'`: May be one of `'Error'`, `'Warning'`, `Info`, or `'Log'`.
-Default `'Warning'`. Messages through `window/logMessage` will only be echoed
-if they are at this level or "above". With the default value of `'Warning'`
-only `'Error'` and `'Warning'` messages are shown.
+`'log_level'`: May be one of `'Error'`, `'Warning'`, `'Info'`, or `'Log'`.
+Default `'Info'`. Messages through `window/logMessage` will only be echoed
+if they are at this level or above. With the default value of `'Info'`
+only `'Log'` messages are suppressed. Set to `-1` to disable echo for any
+message.
 
                                                 *lsc-server-suppress_stderr*
 `'suppress_stderr'`: Set to `v:true` to suppress stderr output which is

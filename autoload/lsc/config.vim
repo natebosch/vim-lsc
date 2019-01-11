@@ -144,10 +144,10 @@ endfunction
 
 " Whether a message of type [type] should be echoed
 "
-" By default messages are shown at "Warning" or "Error", this can be overrided
-" per server.
+" By default messages are shown at "Info" or higher, this can be overrided per
+" server.
 function! lsc#config#shouldEcho(server, type) abort
-  let l:threshold = 2
+  let l:threshold = 3
   if has_key(a:server.config, 'log_level')
     if type(a:server.config.log_level) == v:t_number
       let l:threshold = a:server.config.log_level
