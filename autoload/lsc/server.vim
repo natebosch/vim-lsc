@@ -14,6 +14,7 @@ if !exists('s:initialized')
   " - messages. The last 10 messages from the server
   " - init_result. The response to the initialization call
   " - filetypes. List of filetypes handled by this server.
+  " - logs. The last 100 logs from `window/logMessage`.
   " - config. Config dict. Contains:
   "   - name: Same as the key into `s:servers`
   "   - command: Executable
@@ -279,6 +280,7 @@ function! lsc#server#register(filetype, config) abort
       \ 'status': initial_status,
       \ 'calls': [],
       \ 'messages': [],
+      \ 'logs': [],
       \ 'filetypes': [a:filetype],
       \ 'config': config,
       \ 'send_buffer': '',
@@ -292,6 +294,12 @@ function! lsc#server#register(filetype, config) abort
   function server.callback(message) abort
     let self.buffer .= a:message
     call lsc#protocol#consumeMessage(self)
+  endfunction
+  function server.log(message, type) abort
+    if lsc#config#shouldEcho(self, a:type)
+      call lsc#message#log(a:message, a:type)
+    endif
+    call lsc#util#shift(self.logs, 100, {'message': a:message, 'type': a:type})
   endfunction
   function server.err_callback(message) abort
     if self.status == 'starting'
@@ -325,7 +333,6 @@ function! lsc#server#register(filetype, config) abort
     if l:old_status == 'restarting'
       call s:Start(self)
     endif
-
   endfunction
   let s:servers[config.name] = server
 endfunction

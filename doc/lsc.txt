@@ -365,6 +365,13 @@ are configured with the same name use the same server.
 `'enabled'`: Set to `v:false` to avoid starting the server until
 |:LSClientEnable| is called.
 
+                                                *lsc-server-log_level*
+`'log_level'`: May be one of `'Error'`, `'Warning'`, `'Info'`, or `'Log'`.
+Default `'Info'`. Messages through `window/logMessage` will only be echoed
+if they are at this level or above. With the default value of `'Info'`
+only `'Log'` messages are suppressed. Set to `-1` to disable echo for any
+message.
+
                                                 *lsc-server-suppress_stderr*
 `'suppress_stderr'`: Set to `v:true` to suppress stderr output which is
 received after the server has been initialized. Stderr output before

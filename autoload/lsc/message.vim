@@ -17,12 +17,12 @@ function! lsc#message#showRequest(message, actions) abort
   endif
 endfunction
 
-function! lsc#message#log(message, ...) abort
-  call s:Echo('echom', a:message, get(a:, 1, 'Log'))
+function! lsc#message#log(message, type) abort
+  call s:Echo('echom', a:message, a:type)
 endfunction
 
 function! lsc#message#error(message) abort
-  call lsc#message#log(a:message, 'Error')
+  call s:Echo('echom', a:message, 'Error')
 endfunction
 
 function! s:Echo(echo_cmd, message, level) abort
