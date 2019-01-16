@@ -119,7 +119,7 @@ endfunction
 function! s:ApplyAll(changes) abort
   for [uri, edits] in items(a:changes)
     let l:file_path = lsc#uri#documentPath(uri)
-    let l:bufnr = bufnr(l:file_path)
+    let l:bufnr = lsc#file#bufnr(l:file_path)
     let l:cmd = 'keepjumps keepalt'
     if l:bufnr !=# -1
       let l:cmd .= ' b '.l:bufnr
