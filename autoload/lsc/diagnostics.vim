@@ -109,7 +109,7 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   endif
   call lsc#diagnostics#updateLocationList(a:file_path)
   call lsc#highlights#updateDisplayed()
-  if(a:file_path ==# expand('%:p'))
+  if(a:file_path ==# lsc#file#fullPath())
     call lsc#cursor#showDiagnostic()
   endif
 endfunction
@@ -232,7 +232,7 @@ endfunction
 " no diagnostic is directly under the cursor returns the last seen diagnostic
 " on this line.
 function! lsc#diagnostics#underCursor() abort
-  let file_diagnostics = lsc#diagnostics#forFile(expand('%:p'))
+  let file_diagnostics = lsc#diagnostics#forFile(lsc#file#fullPath())
   let line = line('.')
   if !has_key(file_diagnostics, line)
     return {}
@@ -267,7 +267,7 @@ function! lsc#diagnostics#forLine(file, line) abort
 endfunction
 
 function! lsc#diagnostics#echoForLine() abort
-  let l:file_diagnostics = lsc#diagnostics#forFile(expand('%:p'))
+  let l:file_diagnostics = lsc#diagnostics#forFile(lsc#file#fullPath())
   let l:line = line('.')
   if !has_key(l:file_diagnostics, l:line)
     echo 'No diagnostics'

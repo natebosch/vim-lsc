@@ -85,7 +85,7 @@ function! s:QuickFixItem(location) abort
 endfunction
 
 function! s:goTo(file, line, character) abort
-  if a:file != expand('%:p')
+  if a:file != lsc#file#fullPath()
     let relative_path = fnamemodify(a:file, ':~:.')
     exec 'edit '.relative_path
     " 'edit' already left a jump

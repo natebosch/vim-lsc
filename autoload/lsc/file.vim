@@ -24,7 +24,7 @@ endfunction
 function! lsc#file#onOpen() abort
   call lsc#server#start(&filetype)
   call lsc#config#mapKeys()
-  call s:FlushChanges(expand('%:p'), &filetype)
+  call s:FlushChanges(lsc#file#fullPath(), &filetype)
 endfunction
 
 function! lsc#file#onClose(file_path) abort
@@ -48,7 +48,7 @@ endfunction
 
 " Flushes changes for the current buffer.
 function! lsc#file#flushChanges() abort
-  call s:FlushIfChanged(expand('%:p'), &filetype)
+  call s:FlushIfChanged(lsc#file#fullPath(), &filetype)
 endfunction
 
 " Send the 'didOpen' message for a file.
@@ -92,7 +92,7 @@ function! lsc#file#onChange(...) abort
     let file_path = a:1
     let filetype = getbufvar(file_path, '&filetype')
   else
-    let file_path = expand('%:p')
+    let file_path = lsc#file#fullPath()
     let filetype = &filetype
   endif
   if has_key(s:flush_timers, file_path)
@@ -145,7 +145,7 @@ function! s:FlushChanges(file_path, filetype) abort
 endfunction
 
 function! lsc#file#version() abort
-  return get(s:file_versions, expand('%:p'), '')
+  return get(s:file_versions, lsc#file#fullPath(), '')
 endfunction
 
 function! lsc#file#enableIncrementalSync(filetype) abort
@@ -156,4 +156,18 @@ function! s:AllowIncrementalSync(filetype) abort
   return (!exists('g:lsc_enable_incremental_sync')
       \ || g:lsc_enable_incremental_sync)
       \ && get(s:allowed_incremental_sync, a:filetype, v:false)
+endfunction
+
+" The full path to the current buffer.
+"
+" The association between a buffer and full path may change if the file has not
+" been written yet - this makes a best-effort attempt to get a full path anyway.
+" In most cases if the working directory doesn't change this isn't harmful.
+function! lsc#file#fullPath() abort
+  let l:file_path = expand('%:p')
+  if l:file_path ==# expand('%')
+    " Path could not be expanded due to pointing to a non-existent directory
+    let l:file_path = getcwd().'/'.l:file_path
+  endif
+  return l:file_path
 endfunction
