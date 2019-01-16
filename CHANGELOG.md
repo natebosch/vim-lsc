@@ -27,6 +27,8 @@
 - Add `:LSClientLineDiagnostics` to print diagnostics for the current line.
 - Allow server commands to be specified as lists.
 - Allow filtering what level of logs are echoed.
+- Fix a bug with incremental text change syncing when there are multi-byte
+  characters in the buffer.
 
 # 0.3.1
 

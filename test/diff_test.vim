@@ -1,85 +1,85 @@
 function! TestDiff() abort
   " First and last lines swapped
   call s:TestDiff(
-      \ [0,0,2,3], 11, "baz\nbar\nfoo",
-      \ "foo\nbar\nbaz",
-      \ "baz\nbar\nfoo"
+      \ [0,0,2,3], 11, "baz\nb╵r\nfoo",
+      \ "foo\nb╵r\nbaz",
+      \ "baz\nb╵r\nfoo"
       \ )
 
   " Middle line changed
   call s:TestDiff(
       \ [1,0,1,3], 3, 'new',
-      \ "foo\nbar\nbaz",
+      \ "foo\nb╵r\nbaz",
       \ "foo\nnew\nbaz"
       \ )
 
   " Middle characters changed
   call s:TestDiff(
       \ [1,1,1,2], 1, 'x',
-      \ "foo\nbar\nbaz",
+      \ "foo\nb╵r\nbaz",
       \ "foo\nbxr\nbaz"
       \ )
 
   " End of line changed
   call s:TestDiff(
       \ [1,1,1,3], 2, 'y',
-      \ "foo\nbar\nbaz",
+      \ "foo\nb╵r\nbaz",
       \ "foo\nby\nbaz"
       \ )
 
   " End of file changed
   call s:TestDiff(
       \ [2,1,2,3], 2, 'y',
-      \ "foo\nbar\nbaz",
-      \ "foo\nbar\nby")
+      \ "foo\nb╵r\nbaz",
+      \ "foo\nb╵r\nby")
 
   " Characters inserted
   call s:TestDiff(
       \ [1,1,1,1], 0, 'e',
-      \ "foo\nbar\nbaz",
-      \ "foo\nbear\nbaz"
+      \ "foo\nb╵r\nbaz",
+      \ "foo\nbe╵r\nbaz"
       \ )
 
   " Characters inserted at beginning
   call s:TestDiff(
       \ [0,0,0,0], 0, 'a',
-      \ "foo\nbar\nbaz",
-      \ "afoo\nbar\nbaz"
+      \ "foo\nb╵r\nbaz",
+      \ "afoo\nb╵r\nbaz"
       \ )
 
   " Line inserted
   call s:TestDiff(
       \ [1,0,1,0], 0, "more\n",
-      \ "foo\nbar\nbaz",
-      \ "foo\nmore\nbar\nbaz"
+      \ "foo\nb╵r\nbaz",
+      \ "foo\nmore\nb╵r\nbaz"
       \ )
 
   " Line inserted at end
   " It's important this appears to *prefix* the newline
   call s:TestDiff(
       \ [2,3,2,3], 0, "\nanother",
-      \ "foo\nbar\nbaz",
-      \ "foo\nbar\nbaz\nanother"
+      \ "foo\nb╵r\nbaz",
+      \ "foo\nb╵r\nbaz\nanother"
       \ )
 
   " Line inserted at beginning
   call s:TestDiff(
       \ [0,0,0,0], 0, "line\n",
-      \ "foo\nbar\nbaz",
-      \ "line\nfoo\nbar\nbaz"
+      \ "foo\nb╵r\nbaz",
+      \ "line\nfoo\nb╵r\nbaz"
       \ )
 
   " Line inserted at beginning with same leading characters
   call s:TestDiff(
       \ [0,3,0,3], 0, "line\n// ",
-      \ "// foo\n// bar\n// baz",
-      \ "// line\n// foo\n// bar\n// baz"
+      \ "// foo\n// b╵r\n// baz",
+      \ "// line\n// foo\n// b╵r\n// baz"
       \ )
 
   " Change spanning lines
   call s:TestDiff(
       \ [0,2,2,1], 7, "r\nmany\nlines\nsp",
-      \ "foo\nbar\nbaz",
+      \ "foo\nb╵r\nbaz",
       \ "for\nmany\nlines\nspaz"
       \ )
 
@@ -93,21 +93,21 @@ function! TestDiff() abort
   " Delete across a line
   call s:TestDiff(
       \ [1,1,2,1], 4, '',
-      \ "foo\nbar\nqux",
+      \ "foo\nb╵r\nqux",
       \ "foo\nbux",
       \ )
 
   " Delete entire line
   call s:TestDiff(
       \ [1,0,2,0], 4, '',
-      \ "foo\nbar\nqux",
+      \ "foo\nb╵r\nqux",
       \ "foo\nqux",
       \ )
 
   " Delete multiple lines
   call s:TestDiff(
       \ [1,0,3,0], 8, '',
-      \ "foo\nbar\nbaz\nqux",
+      \ "foo\nb╵r\nbaz\nqux",
       \ "foo\nqux",
       \ )
 
@@ -120,43 +120,43 @@ function! TestDiff() abort
   " Delete at beginning
   call s:TestDiff(
       \ [0, 0, 0, 1], 1, '',
-      \ "foo\nbar\nbaz",
-      \ "oo\nbar\nbaz")
+      \ "foo\nb╵r\nbaz",
+      \ "oo\nb╵r\nbaz")
 
   " Delete line at beginning
   call s:TestDiff(
       \ [0, 0, 1, 0], 4, '',
-      \ "foo\nbar\nbaz",
-      \ "bar\nbaz")
+      \ "foo\nb╵r\nbaz",
+      \ "b╵r\nbaz")
 
   " Delete line at beginning with same leading characters
   call s:TestDiff(
       \ [0, 3, 1, 3], 7, '',
-      \ "// foo\n// bar\n// baz",
-      \ "// bar\n// baz")
+      \ "// foo\n// b╵r\n// baz",
+      \ "// b╵r\n// baz")
 
   " Delete lines at beginning with same leading characters
   call s:TestDiff(
       \ [0, 3, 2, 3], 14, '',
-      \ "// foo\n// bar\n// baz",
+      \ "// foo\n// b╵r\n// baz",
       \ "// baz")
 
   " Delete at end
   call s:TestDiff(
       \ [2, 2, 2, 3], 1, '',
-      \ "foo\nbar\nbaz",
-      \ "foo\nbar\nba")
+      \ "foo\nb╵r\nbaz",
+      \ "foo\nb╵r\nba")
 
   " Delete lines at end
   call s:TestDiff(
       \ [0, 3, 2, 3], 8, '',
-      \ "foo\nbar\nbaz",
+      \ "foo\nb╵r\nbaz",
       \ "foo")
 
   " Handles multiple blank lines
   call s:TestDiff(
       \ [5,1,5,2], 1, 'x',
-      \ "\n\n\n\nfoo\nbar\nbaz",
+      \ "\n\n\n\nfoo\nb╵r\nbaz",
       \ "\n\n\n\nfoo\nbxr\nbaz"
       \ )
 endfunction
