@@ -168,7 +168,7 @@ function! lsc#file#fullPath() abort
   let l:file_path = expand('%:p')
   if l:file_path ==# expand('%')
     " Path could not be expanded due to pointing to a non-existent directory
-    let l:file_path = getcwd().'/'.l:file_path
+    let l:file_path = lsc#file#normalize(getbufinfo('%')[0].name)
   endif
   return l:file_path
 endfunction
