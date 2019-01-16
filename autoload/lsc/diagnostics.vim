@@ -29,7 +29,7 @@ endfunction
 function! lsc#diagnostics#clean(filetype) abort
   for buffer in getbufinfo({'loaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    call lsc#diagnostics#setForFile(buffer.name, [])
+    call lsc#diagnostics#setForFile(lsc#file#normalize(buffer.name), [])
   endfor
 endfunction
 
@@ -125,7 +125,7 @@ endfunction
 
 " Updates location list for all windows showing [file_path].
 function! lsc#diagnostics#updateLocationList(file_path) abort
-  let bufnr = bufnr(a:file_path)
+  let bufnr = lsc#file#bufnr(a:file_path)
   if bufnr == -1 | return | endif
   let file_ref = {'bufnr': bufnr}
   let diagnostics_version = s:DiagnosticsVersion(a:file_path)
@@ -194,7 +194,7 @@ endfunction
 function! lsc#diagnostics#showInQuickFix() abort
   let all_diagnostics = []
   for file_path in keys(s:file_diagnostics)
-    let bufnr = bufnr(file_path)
+    let bufnr = lsc#file#bufnr(file_path)
     if bufnr == -1
       let file_ref = {'filename': fnamemodify(file_path, ':.')}
     else

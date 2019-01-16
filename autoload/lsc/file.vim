@@ -17,15 +17,8 @@ endif
 function! lsc#file#trackAll(filetype) abort
   for buffer in getbufinfo({'loaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    call s:FlushChanges(s:NormalizePath(buffer.name), a:filetype)
+    call s:FlushChanges(lsc#file#normalize(buffer.name), a:filetype)
   endfor
-endfunction
-
-function! s:NormalizePath(buffer_name) abort
-  if a:buffer_name[0] ==# '/' | return a:buffer_name | endif
-  let l:full_path = getcwd().'/'.a:buffer_name
-  let s:normalized_paths[l:full_path] = a:buffer_name
-  return l:full_path
 endfunction
 
 " Run language servers for this filetype if they aren't already running and
@@ -62,7 +55,7 @@ endfunction
 
 " Send the 'didOpen' message for a file.
 function! s:DidOpen(file_path) abort
-  let l:bufnr = s:FindBufNr(a:file_path)
+  let l:bufnr = lsc#file#bufnr(a:file_path)
   if !bufloaded(l:bufnr) | return | endif
   if !getbufvar(l:bufnr, '&modifiable') | return | endif
   let buffer_content = getbufline(l:bufnr, 1, '$')
@@ -99,7 +92,7 @@ endfunction
 function! lsc#file#onChange(...) abort
   if a:0 >= 1
     let file_path = a:1
-    let filetype = getbufvar(s:FindBufNr(file_path), '&filetype')
+    let filetype = getbufvar(lsc#file#bufnr(file_path), '&filetype')
   else
     let file_path = lsc#file#fullPath()
     let filetype = &filetype
@@ -132,7 +125,7 @@ function! s:FlushChanges(file_path, filetype) abort
     call timer_stop(s:flush_timers[a:file_path])
     unlet s:flush_timers[a:file_path]
   endif
-  let buffer_content = getbufline(s:FindBufNr(a:file_path), 1, '$')
+  let buffer_content = getbufline(lsc#file#bufnr(a:file_path), 1, '$')
   let allow_incremental = s:AllowIncrementalSync(a:filetype)
   if allow_incremental
     let change = lsc#diff#compute(s:file_content[a:file_path], buffer_content)
@@ -180,10 +173,17 @@ function! lsc#file#fullPath() abort
   return l:file_path
 endfunction
 
-function! s:FindBufNr(file_path) abort
+function! lsc#file#bufnr(file_path) abort
   let l:bufnr = bufnr(a:file_path)
   if l:bufnr == -1 && has_key(s:normalized_paths, a:file_path)
     let l:bufnr = bufnr(s:normalized_paths[a:file_path])
   endif
   return l:bufnr
+endfunction
+
+function! lsc#file#normalize(buffer_name) abort
+  if a:buffer_name[0] ==# '/' | return a:buffer_name | endif
+  let l:full_path = getcwd().'/'.a:buffer_name
+  let s:normalized_paths[l:full_path] = a:buffer_name
+  return l:full_path
 endfunction
