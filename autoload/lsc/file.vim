@@ -62,10 +62,7 @@ endfunction
 
 " Send the 'didOpen' message for a file.
 function! s:DidOpen(file_path) abort
-  let l:bufnr = bufnr(a:file_path)
-  if l:bufnr == -1 && has_key(s:normalized_paths, a:file_path)
-    let l:bufnr = bufnr(s:normalized_paths[a:file_path])
-  endif
+  let l:bufnr = s:FindBufNr(a:file_path)
   if !bufloaded(l:bufnr) | return | endif
   if !getbufvar(l:bufnr, '&modifiable') | return | endif
   let buffer_content = getbufline(l:bufnr, 1, '$')
@@ -102,7 +99,7 @@ endfunction
 function! lsc#file#onChange(...) abort
   if a:0 >= 1
     let file_path = a:1
-    let filetype = getbufvar(file_path, '&filetype')
+    let filetype = getbufvar(s:FindBufNr(file_path), '&filetype')
   else
     let file_path = lsc#file#fullPath()
     let filetype = &filetype
@@ -131,12 +128,11 @@ function! s:FlushChanges(file_path, filetype) abort
     return
   endif
   let s:file_versions[a:file_path] += 1
-  let buffer_vars = getbufvar(a:file_path, '')
   if has_key(s:flush_timers, a:file_path)
     call timer_stop(s:flush_timers[a:file_path])
     unlet s:flush_timers[a:file_path]
   endif
-  let buffer_content = getbufline(a:file_path, 1, '$')
+  let buffer_content = getbufline(s:FindBufNr(a:file_path), 1, '$')
   let allow_incremental = s:AllowIncrementalSync(a:filetype)
   if allow_incremental
     let change = lsc#diff#compute(s:file_content[a:file_path], buffer_content)
@@ -182,4 +178,12 @@ function! lsc#file#fullPath() abort
     let l:file_path = getcwd().'/'.l:file_path
   endif
   return l:file_path
+endfunction
+
+function! s:FindBufNr(file_path) abort
+  let l:bufnr = bufnr(a:file_path)
+  if l:bufnr == -1 && has_key(s:normalized_paths, a:file_path)
+    let l:bufnr = bufnr(s:normalized_paths[a:file_path])
+  endif
+  return l:bufnr
 endfunction
