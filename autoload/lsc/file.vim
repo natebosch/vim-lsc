@@ -8,6 +8,8 @@ if !exists('s:initialized')
   let s:flush_timers = {}
   " filetype -> boolean
   let s:allowed_incremental_sync = {}
+  " full file path -> buffer name
+  let s:normalized_paths = {}
 endif
 
 " Send a 'didOpen' message for all open files of type `filetype` if they aren't
@@ -15,8 +17,15 @@ endif
 function! lsc#file#trackAll(filetype) abort
   for buffer in getbufinfo({'loaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    call s:FlushChanges(buffer.name, a:filetype)
+    call s:FlushChanges(s:NormalizePath(buffer.name), a:filetype)
   endfor
+endfunction
+
+function! s:NormalizePath(buffer_name) abort
+  if a:buffer_name[0] ==# '/' | return a:buffer_name | endif
+  let l:full_path = getcwd().'/'.a:buffer_name
+  let s:normalized_paths[l:full_path] = a:buffer_name
+  return l:full_path
 endfunction
 
 " Run language servers for this filetype if they aren't already running and
@@ -53,11 +62,14 @@ endfunction
 
 " Send the 'didOpen' message for a file.
 function! s:DidOpen(file_path) abort
-  let bufnr = bufnr(a:file_path)
-  if !bufloaded(bufnr) | return | endif
-  if !getbufvar(bufnr, '&modifiable') | return | endif
-  let buffer_content = getbufline(bufnr, 1, '$')
-  let filetype = getbufvar(bufnr, '&filetype')
+  let l:bufnr = bufnr(a:file_path)
+  if l:bufnr == -1 && has_key(s:normalized_paths, a:file_path)
+    let l:bufnr = bufnr(s:normalized_paths[a:file_path])
+  endif
+  if !bufloaded(l:bufnr) | return | endif
+  if !getbufvar(l:bufnr, '&modifiable') | return | endif
+  let buffer_content = getbufline(l:bufnr, 1, '$')
+  let filetype = getbufvar(l:bufnr, '&filetype')
   let params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'languageId': filetype,
