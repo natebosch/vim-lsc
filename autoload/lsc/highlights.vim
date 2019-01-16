@@ -11,10 +11,9 @@ endfunction
 
 " Refresh highlight matches in the current window.
 function! lsc#highlights#update() abort
-  if s:CurrentWindowIsFresh() | echom 'Fresh!' | return | endif
+  if s:CurrentWindowIsFresh() | return | endif
   call lsc#highlights#clear()
   if &diff | return | endif
-  echom 'Querying for diagnostics for: '.lsc#file#fullPath()
   for line in values(lsc#diagnostics#forFile(lsc#file#fullPath()))
     for diagnostic in line
       let match = matchaddpos(diagnostic.group, diagnostic.ranges, -1)
