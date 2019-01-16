@@ -88,9 +88,7 @@ function! s:startCompletion(isAuto) abort
   let s:completion_canceled = v:false
   call s:MarkCompleting(&filetype)
   call lsc#file#flushChanges()
-  let params = { 'textDocument': {'uri': lsc#uri#documentUri()},
-      \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
-      \ }
+  let params = lsc#params#documentPosition()
   call lsc#server#call(&filetype, 'textDocument/completion', params,
       \ lsc#util#gateResult('Complete',
       \     function('<SID>OnResult', [a:isAuto]), function('<SID>OnSkip')))

@@ -5,8 +5,10 @@ function! lsc#edit#findCodeActions(...) abort
     let ActionFilter = function("<SID>ActionMenu")
   endif
   call lsc#file#flushChanges()
-  call lsc#server#userCall('textDocument/codeAction',
-      \ s:TextDocumentRangeParams(),
+  let params = lsc#params#documentRange()
+  let params.context = {'diagnostics':
+      \ lsc#diagnostics#forLine(expand('%:p'), line('.'))}
+  call lsc#server#userCall('textDocument/codeAction', params,
       \ lsc#util#gateResult('CodeActions', function('<SID>SelectAction'),
       \     v:null, [ActionFilter]))
 endfunction
@@ -36,17 +38,6 @@ function! s:ExecuteCommand(command) abort
       \ {'command': a:command.command,
       \ 'arguments': a:command.arguments},
       \ {_->0})
-endfunction
-
-" TODO - handle visual selection for range
-function! s:TextDocumentRangeParams() abort
-  return { 'textDocument': {'uri': lsc#uri#documentUri()},
-      \ 'range': {
-      \   'start': {'line': line('.') - 1, 'character': col('.') - 1},
-      \   'end': {'line': line('.') - 1, 'character': col('.')}},
-      \ 'context': {'diagnostics':
-      \    lsc#diagnostics#forLine(expand('%:p'), line('.'))}
-      \}
 endfunction
 
 " Returns a function which can filter actions against a patter and select when
@@ -90,16 +81,10 @@ function! lsc#edit#rename(...) abort
   else
     let new_name = input('Enter a new name: ')
   endif
-  let params = s:TextDocumentPositionParams()
+  let params = lsc#params#documentPosition()
   let params.newName = new_name
   call lsc#server#userCall('textDocument/rename', params,
       \ lsc#util#gateResult('Rename', function('lsc#edit#apply')))
-endfunction
-
-function! s:TextDocumentPositionParams() abort
-  return { 'textDocument': {'uri': lsc#uri#documentUri()},
-      \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
-      \ }
 endfunction
 
 " Applies a workspace edit and returns `v:true` if it was successful.

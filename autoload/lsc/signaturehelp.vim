@@ -5,9 +5,7 @@ endif
 
 function! lsc#signaturehelp#getSignatureHelp() abort
   call lsc#file#flushChanges()
-  let params = { 'textDocument': {'uri': lsc#uri#documentUri()},
-      \ 'position': {'line': line('.') - 1, 'character': col('.') - 1}
-      \ }
+  let params = lsc#params#documentPosition()
   call lsc#server#call(&filetype, 'textDocument/signatureHelp', params,
       \ lsc#util#gateResult('SignatureHelp', function('<SID>ShowSignatureHelp')))
 endfunction
