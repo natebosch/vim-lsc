@@ -164,6 +164,9 @@ endfunction
 " The association between a buffer and full path may change if the file has not
 " been written yet - this makes a best-effort attempt to get a full path anyway.
 " In most cases if the working directory doesn't change this isn't harmful.
+"
+" Paths which do need to be manually normalized are stored so that the full path
+" can be associated back to a buffer with `lsc#file#bufnr()`.
 function! lsc#file#fullPath() abort
   let l:file_path = expand('%:p')
   if l:file_path ==# expand('%')
@@ -173,6 +176,8 @@ function! lsc#file#fullPath() abort
   return l:file_path
 endfunction
 
+" Like `bufnr()` but handles the case where a relative path was normalized
+" against cwd.
 function! lsc#file#bufnr(file_path) abort
   let l:bufnr = bufnr(a:file_path)
   if l:bufnr == -1 && has_key(s:normalized_paths, a:file_path)
@@ -181,6 +186,7 @@ function! lsc#file#bufnr(file_path) abort
   return l:bufnr
 endfunction
 
+" If `buffer_name` is relative, normalize it against `cwd`.
 function! lsc#file#normalize(buffer_name) abort
   if a:buffer_name[0] ==# '/' | return a:buffer_name | endif
   let l:full_path = getcwd().'/'.a:buffer_name
