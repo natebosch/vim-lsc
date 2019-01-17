@@ -29,7 +29,7 @@ endfunction
 function! lsc#diagnostics#clean(filetype) abort
   for buffer in getbufinfo({'loaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    call lsc#diagnostics#setForFile(buffer.name, [])
+    call lsc#diagnostics#setForFile(lsc#file#normalize(buffer.name), [])
   endfor
 endfunction
 
@@ -109,7 +109,7 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   endif
   call lsc#diagnostics#updateLocationList(a:file_path)
   call lsc#highlights#updateDisplayed()
-  if(a:file_path ==# expand('%:p'))
+  if(a:file_path ==# lsc#file#fullPath())
     call lsc#cursor#showDiagnostic()
   endif
 endfunction
@@ -125,7 +125,7 @@ endfunction
 
 " Updates location list for all windows showing [file_path].
 function! lsc#diagnostics#updateLocationList(file_path) abort
-  let bufnr = bufnr(a:file_path)
+  let bufnr = lsc#file#bufnr(a:file_path)
   if bufnr == -1 | return | endif
   let file_ref = {'bufnr': bufnr}
   let diagnostics_version = s:DiagnosticsVersion(a:file_path)
@@ -194,7 +194,7 @@ endfunction
 function! lsc#diagnostics#showInQuickFix() abort
   let all_diagnostics = []
   for file_path in keys(s:file_diagnostics)
-    let bufnr = bufnr(file_path)
+    let bufnr = lsc#file#bufnr(file_path)
     if bufnr == -1
       let file_ref = {'filename': fnamemodify(file_path, ':.')}
     else
@@ -232,7 +232,7 @@ endfunction
 " no diagnostic is directly under the cursor returns the last seen diagnostic
 " on this line.
 function! lsc#diagnostics#underCursor() abort
-  let file_diagnostics = lsc#diagnostics#forFile(expand('%:p'))
+  let file_diagnostics = lsc#diagnostics#forFile(lsc#file#fullPath())
   let line = line('.')
   if !has_key(file_diagnostics, line)
     return {}
@@ -267,7 +267,7 @@ function! lsc#diagnostics#forLine(file, line) abort
 endfunction
 
 function! lsc#diagnostics#echoForLine() abort
-  let l:file_diagnostics = lsc#diagnostics#forFile(expand('%:p'))
+  let l:file_diagnostics = lsc#diagnostics#forFile(lsc#file#fullPath())
   let l:line = line('.')
   if !has_key(l:file_diagnostics, l:line)
     echo 'No diagnostics'

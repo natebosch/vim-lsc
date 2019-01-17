@@ -7,7 +7,7 @@ function! lsc#edit#findCodeActions(...) abort
   call lsc#file#flushChanges()
   let params = lsc#params#documentRange()
   let params.context = {'diagnostics':
-      \ lsc#diagnostics#forLine(expand('%:p'), line('.'))}
+      \ lsc#diagnostics#forLine(lsc#file#fullPath(), line('.'))}
   call lsc#server#userCall('textDocument/codeAction', params,
       \ lsc#util#gateResult('CodeActions', function('<SID>SelectAction'),
       \     v:null, [ActionFilter]))
@@ -119,7 +119,7 @@ endfunction
 function! s:ApplyAll(changes) abort
   for [uri, edits] in items(a:changes)
     let l:file_path = lsc#uri#documentPath(uri)
-    let l:bufnr = bufnr(l:file_path)
+    let l:bufnr = lsc#file#bufnr(l:file_path)
     let l:cmd = 'keepjumps keepalt'
     if l:bufnr !=# -1
       let l:cmd .= ' b '.l:bufnr

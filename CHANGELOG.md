@@ -29,6 +29,8 @@
 - Allow filtering what level of logs are echoed.
 - Fix a bug with incremental text change syncing when there are multi-byte
   characters in the buffer.
+- Fix some bugs with editing in a buffer for a file which has not been written,
+  and would be written to a directory that does not exist.
 
 # 0.3.1
 

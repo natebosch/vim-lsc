@@ -1,10 +1,10 @@
 function! lsc#uri#documentUri(...) abort
   if a:0 >= 1
-    let file_path = a:1
+    let l:file_path = a:1
   else
-    let file_path = expand('%:p')
+    let l:file_path = lsc#file#fullPath()
   endif
-  return s:filePrefix().s:EncodePath(file_path)
+  return s:filePrefix().s:EncodePath(l:file_path)
 endfunction
 
 function! lsc#uri#documentPath(uri) abort

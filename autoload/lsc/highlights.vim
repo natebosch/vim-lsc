@@ -14,7 +14,7 @@ function! lsc#highlights#update() abort
   if s:CurrentWindowIsFresh() | return | endif
   call lsc#highlights#clear()
   if &diff | return | endif
-  for line in values(lsc#diagnostics#forFile(expand('%:p')))
+  for line in values(lsc#diagnostics#forFile(lsc#file#fullPath()))
     for diagnostic in line
       let match = matchaddpos(diagnostic.group, diagnostic.ranges, -1)
       call add(w:lsc_diagnostic_matches, match)

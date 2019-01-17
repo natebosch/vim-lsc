@@ -127,7 +127,7 @@ function! LSCEnsureCurrentWindowState() abort
     endif
     return
   endif
-  call lsc#diagnostics#updateLocationList(expand('%:p'))
+  call lsc#diagnostics#updateLocationList(lsc#file#fullPath())
   call lsc#highlights#update()
   call lsc#cursor#onWinEnter()
 endfunction

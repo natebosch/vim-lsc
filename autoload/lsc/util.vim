@@ -33,10 +33,9 @@ endfunction
 " Returns the window IDs of the windows showing the buffer opened for
 " [file_path].
 function! lsc#util#windowsForFile(file_path) abort
-  let bufinfo = getbufinfo(a:file_path)
-  if len(bufinfo) < 1
-    return []
-  endif
+  let l:bufnr = lsc#file#bufnr(a:file_path)
+  if l:bufnr == -1 | return [] | endif
+  let bufinfo = getbufinfo(l:bufnr)
   return copy(bufinfo[0].windows)
 endfunction
 
