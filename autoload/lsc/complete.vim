@@ -246,6 +246,12 @@ function! s:CompletionItem(completion_item) abort
   else
     let item.word = a:completion_item.label
   endif
+  if has_key(a:completion_item, 'insertTextFormat') && a:completion_item.insertTextFormat == 2
+    let item.user_data = json_encode({
+          \ 'snippet': item.word,
+          \ 'snippet_trigger': item.word
+          \ })
+  endif
   if has_key(a:completion_item, 'kind')
     let item.kind = s:CompletionItemKind(a:completion_item.kind)
   endif
