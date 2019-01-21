@@ -13,6 +13,9 @@ endif
 if !exists('g:lsc_auto_completeopt')
   let g:lsc_auto_completeopt = v:true
 endif
+if !exists('g:lsc_enable_snippet_support')
+  let g:lsc_enable_snippet_support = v:false
+endif
 
 command! LSClientGoToDefinition call lsc#reference#goToDefinition()
 command! LSClientFindReferences call lsc#reference#findReferences()
