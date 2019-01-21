@@ -52,9 +52,10 @@ let g:lsc_auto_map = {
     \ 'PreviousReference': '<C-p>',
     \ 'FindImplementations': 'gI',
     \ 'FindCodeActions': 'ga',
+    \ 'Rename': 'gR',
+    \ 'ShowHover': v:true,
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
-    \ 'ShowHover': 'v:true',
     \ 'SignatureHelp': '<C-m>',
     \ 'Completion': 'completefunc',
     \}
