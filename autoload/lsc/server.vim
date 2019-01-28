@@ -214,7 +214,9 @@ function! s:ClientCapabilities() abort
     \     'didSave': v:false,
     \   },
     \   'completion': {
-    \     'snippetSupport': v:false,
+    \     'completionItem': {
+    \       'snippetSupport': g:lsc_enable_snippet_support,
+    \      },
     \   },
     \   'definition': {'dynamicRegistration': v:false},
     \   'codeAction': {

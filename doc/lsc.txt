@@ -315,6 +315,14 @@ be smaller than with full syncs.
 By default the client will modify buffers in response to `workspace/applyEdit`
 messages. To disable edits set `g:lsc_enable_apply_edit` to `v:false`.
 
+                                                *lsc-snippet-support*
+                                                *g:lsc_enable_snippet_support*
+By default the client disables support for snippets as insert text. If set to
+`v:true` and supported by the server, insert text may contain snippets.
+
+Autocompletion of snippets requires a plugin that can complete using
+`user_data` on `CompleteDone`, such as neosnippet.vim
+
                                                 *lsc-configure-references*
                                                 *g:lsc_reference_highlights*
 By default the client will highlight references to the element under the
