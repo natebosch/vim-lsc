@@ -17,7 +17,10 @@ if !exists('g:lsc_enable_snippet_support')
   let g:lsc_enable_snippet_support = v:false
 endif
 
-command! LSClientGoToDefinition call lsc#reference#goToDefinition()
+command! LSClientGoToDefinitionSplit
+    \ call lsc#reference#goToDefinition(<q-mods>, 1)
+command! LSClientGoToDefinition
+    \ call lsc#reference#goToDefinition(<q-mods>, 0)
 command! LSClientFindReferences call lsc#reference#findReferences()
 command! LSClientNextReference call lsc#reference#findNext(1)
 command! LSClientPreviousReference call lsc#reference#findNext(-1)

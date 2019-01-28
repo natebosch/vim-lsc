@@ -47,6 +47,7 @@ let g:lsc_auto_map = v:true " Use defaults
 " ... or set only the keys you want mapped, defaults are:
 let g:lsc_auto_map = {
     \ 'GoToDefinition': '<C-]>',
+    \ 'GoToDefinitionSplit': ['<C-W>]', '<C-W><C-]>'],
     \ 'FindReferences': 'gr',
     \ 'NextReference': '<C-n>',
     \ 'PreviousReference': '<C-p>',

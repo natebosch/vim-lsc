@@ -52,13 +52,28 @@ Jump to the location defining the element under the cursor. Sends a
 "textDocument/definition" request with the location set to the cursor's
 position. If the cursor is not in the same position when the server responds
 the jump will be canceled. With |lsc-default-map| this command is bound to
-<c-]>.
+`<c-]>`.
 
 If this version of vim supports |settagstack| the tag stack will also be
 updated to include this jump. Jump back with `<c-t>` or |:pop|, it is not
 possible to jump forward in the taglist when navigating with this client. The
 jump will always be present in the |jumplist|, jump back with `<c-o>` or
 forward with `<c-i>`.
+
+                                                *:LSClientGoToDefinitionSplit*
+Like |LSClientGoToDefinition|, except go to the location in a split,
+respecting the 'switchbuf' option. With |lsc-default-map| this command is
+bound to `<c-w>]` and `<c-w><c-]>`.
+
+You can use this command with |mods|, for example, >
+
+    :vertical LSClientGoToDefinitionSplit
+<
+will default to opening a vertical split, while >
+
+    :tab LSClientGoToDefinitionSplit
+<
+will prefer a new tab.
 
                                                 *:LSClientFindReferences*
 Populate the |quickfix| with a list of location which reference the element
@@ -281,6 +296,7 @@ other defaults set this to:
 The default mapping for keys, if you've opted in to "g:lsc_auto_map" are:
 
 <C-]>                   |:LSClientGoToDefinition|
+<C-W>], <C-W><C-]>      |:LSClientGoToDefinitionSplit|
 gr                      |:LSClientFindReferences|
 <C-n>                   |:LSClientNextReference|
 <C-p>                   |:LSClientPreviousReference|
