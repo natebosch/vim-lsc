@@ -18,10 +18,10 @@ SETUP                                           *lsc-setup*
 There is no install step for vim-lsc. Configure the filetypes that are tracked
 by installed language servers in the variable "g:lsc_server_commands". Each
 value in this dict should be a string which corresponds to either an
-executable in your "$PATH", and absolute path to an executable, or a
+executable in your "$PATH", an absolute path to an executable, or a
 "host:port" pair. If multiple filetypes are tracked by the same server they
 should be entered as separate keys with the same value. The value may also be
-a `dict` to allow for additional configuration. Set |lsc-server-customization|
+a `dict` to allow for additional configuration. See |lsc-server-customization|
 for allowed keys. `'command'` is required and matches the command above when a
 dict is not used.
 
