@@ -130,6 +130,7 @@ function! s:ApplyAll(changes) abort
       let l:cmd .= ' | execute "keepjumps normal! '.s:Apply(edit).'"'
     endfor
     execute l:cmd
+    execute 'update'
     call lsc#file#onChange(l:file_path)
   endfor
 endfunction
