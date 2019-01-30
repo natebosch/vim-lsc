@@ -46,8 +46,9 @@ function! lsc#dispatch#message(server, message) abort
   elseif has_key(a:message, 'result')
     let call_id = a:message['id']
     if has_key(s:callbacks, call_id)
-      call s:callbacks[call_id][0](a:message['result'])
+      let Callback = s:callbacks[call_id][0]
       unlet s:callbacks[call_id]
+      call Callback(a:message['result'])
     endif
   else
     echom 'Unknown message type: '.string(a:message)
