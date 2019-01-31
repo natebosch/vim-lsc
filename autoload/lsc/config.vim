@@ -60,7 +60,7 @@ function! lsc#config#mapKeys() abort
       \ 'WorkspaceSymbol',
       \ 'SignatureHelp',
       \] + (get(g:, 'lsc_enable_apply_edit', 1) ? ['Rename'] : [])
-    let lhs = get(l:maps, command, v:none)
+    let lhs = get(l:maps, command, v:null)
     if type(lhs) != v:t_string && type(lhs) != v:t_list
       continue
     endif
