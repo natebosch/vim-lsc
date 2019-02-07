@@ -33,6 +33,8 @@
   and would be written to a directory that does not exist.
 - Add `:LSClientGoToDefinitionSplit` to go to definitions in a split window
   (depending on `switchbuf`).
+- Fix a bug where some uses of the quick fix list would modify paths under the
+  home directory and make it impossible to jump to them.
 - Fix a race condition where the same message from the server may be handled
   twice.
 
