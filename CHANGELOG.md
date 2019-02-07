@@ -33,6 +33,8 @@
   and would be written to a directory that does not exist.
 - Add `:LSClientGoToDefinitionSplit` to go to definitions in a split window
   (depending on `switchbuf`).
+- Fix a race condition where the same message from the server may be handled
+  twice.
 
 # 0.3.1
 
