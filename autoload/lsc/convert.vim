@@ -47,8 +47,9 @@ function! lsc#convert#quickFixSymbol(symbol) abort
   if !empty(a:symbol.kind)
     let text .= ' ['.lsc#convert#symbolKind(a:symbol.kind).']'
   endif
-  if !empty(a:symbol.containerName)
-    let text .= ' in '.a:symbol.containerName
+  let containerName = get(a:symbol, 'containerName', '')
+  if !empty(containerName)
+    let text .= ' in '.containerName
   endif
   let item.text = text
   return item
