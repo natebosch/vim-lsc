@@ -64,6 +64,8 @@ function! s:consumeMessage(server) abort
     return v:false
   endif
   let payload = message[message_start:message_end-1]
+  let remaining_message = message[message_end:]
+  let a:server.buffer = remaining_message
   try
     let content = json_decode(payload)
     if type(content) != v:t_dict | throw 1 | endif
@@ -81,8 +83,6 @@ function! s:consumeMessage(server) abort
       let g:lsc_last_error_message = content
     endtry
   endif
-  let remaining_message = message[message_end:]
-  let a:server.buffer = remaining_message
   return remaining_message != ''
 endfunction
 
