@@ -35,16 +35,29 @@ To disable autocomplete in favor of manual completion also add
 let g:lsc_enable_autocomplete = v:false
 ```
 
-Most interactive features are triggered by commands, you can map keys to these
-commands, or use `g:lsc_auto_map` to have them automatically mapped for the
-buffers which have a language server enabled. You can use the default mappings
-by setting it to `v:true`, or specify your own mappings in a dict. The
-`'Complete'` key will set a completion function only if
-`g:lsc_enable_autocomplete` is false.
+Most interactive features are triggered by commands. You can use
+`g:lsc_auto_map` to have them automatically mapped for the buffers which have a
+language server enabled. You can use the default mappings by setting it to
+`v:true`, or specify your own mappings in a dict.
+
+Most keys take strings or lists of strings which are the keys bound to that
+command in normal mode. The `'ShowHover'` key can also be `v:true` in which case
+it sets `keywordprg` instead of a keybind (`keywordprg` maps `K`). The
+'Completion' key sets a completion function for manual invocation, and should be
+either `'completefunc'` or `'omnifunc'` (see `:help complete-functions`).
 
 ```viml
-let g:lsc_auto_map = v:true " Use defaults
-" ... or set only the keys you want mapped, defaults are:
+" Use all the defaults (recommended):
+let g:lsc_auto_map = v:true
+
+" Apply the defaults with a few overrides:
+let g:lsc_auto_map = {'defaults': v:true, 'FindReferences': '<leader>r'}
+
+" Setting a value to a blank string leaves that command unmapped:
+let g:lsc_auto_map = {'defaults': v:true, 'FindImplementations': ''}
+
+" ... or set only the commands you want mapped without defaults.
+" Complete default mappings are:
 let g:lsc_auto_map = {
     \ 'GoToDefinition': '<C-]>',
     \ 'GoToDefinitionSplit': ['<C-W>]', '<C-W><C-]>'],
