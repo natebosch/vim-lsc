@@ -132,13 +132,17 @@ function! s:showHover(result) abort
     return
   endif
   let contents = a:result.contents
-  if type(contents) == v:t_list
-    let contents = contents[0]
+  if type(contents) != v:t_list
+    contents = [contents]
   endif
-  if type(contents) == v:t_dict
-    let contents = contents.value
-  endif
-  let lines = split(contents, "\n")
+  let lines = []
+  for item in contents
+    if type(item) == v:t_dict
+      let l:lines += split(item.value, "\n")
+    else
+      let l:lines += split(item, "\n")
+    endif
+  endfor
   call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
 endfunction
 
