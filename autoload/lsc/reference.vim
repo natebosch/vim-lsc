@@ -133,7 +133,7 @@ function! s:showHover(result) abort
   endif
   let contents = a:result.contents
   if type(contents) != v:t_list
-    contents = [contents]
+    let contents = [contents]
   endif
   let lines = []
   for item in contents
