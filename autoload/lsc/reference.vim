@@ -108,14 +108,14 @@ function! s:goTo(file, line, character, mods, issplit) abort
   endif
   if prev_buf != bufnr('%')
     " switching buffers already left a jump
-    call cursor(a:line, a:character)
-    call getcurpos()  " updates curswant properly
+    " Set curswant manually to work around vim bug
+    call cursor([a:line, a:character, 0, virtcol([a:line, a:character])])
     redraw
   else
     " Move with 'G' to ensure a jump is left
     exec 'normal! '.a:line.'G'
-    call cursor(0, a:character)
-    call getcurpos()  " updates curswant properly
+    " Set curswant manually to work around vim bug
+    call cursor([0, a:character, 0, virtcol([a:line, a:character])])
   endif
 endfunction
 
