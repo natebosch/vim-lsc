@@ -18,7 +18,8 @@
   `textDocument/signatureHelp`.
 - Add highlighting group `lscCurrentParameter` which is used to highlight the
   active parameter in the signature help.
-- Send `textDocument/didSave` notifications on `BufWritePost`.
+- Send `textDocument/didSave` notifications on `BufWritePost` if the server does
+  not indicate they should be skipped.
 - Call `initialized` in response to the `initialize` result.
 - Fix a bug with responding to `window/showMessage` notifications.
 - Wait to call 'exit' until the 'shutdown' response comes back.
