@@ -1,7 +1,6 @@
 if !exists('s:initialized')
   let s:initialized = v:true
   let s:highlights_request = 0
-  let s:highlight_support = {}
   let s:pending = {}
 endif
 
@@ -20,10 +19,6 @@ endfunction
 
 function! lsc#cursor#insertEnter() abort
   call lsc#cursor#clean()
-endfunction
-
-function! lsc#cursor#enableReferenceHighlights(filetype)
-  let s:highlight_support[a:filetype] = v:true
 endfunction
 
 function! lsc#cursor#showDiagnostic() abort
@@ -57,7 +52,7 @@ function! s:HighlightReferences(force_in_highlight) abort
   if exists('g:lsc_reference_highlights') && !g:lsc_reference_highlights
     return
   endif
-  if !has_key(s:highlight_support, &filetype) | return | endif
+  if !s:CanHighlightReferences() | return | endif
   if !a:force_in_highlight &&
       \ exists('w:lsc_references') &&
       \ lsc#cursor#isInReference(w:lsc_references) >= 0
@@ -72,6 +67,15 @@ function! s:HighlightReferences(force_in_highlight) abort
   call lsc#server#call(&filetype, 'textDocument/documentHighlight', params,
       \ funcref('<SID>HandleHighlights',
       \ [s:highlights_request, getcurpos(), bufnr('%'), &filetype]))
+endfunction
+
+function! s:CanHighlightReferences() abort
+  for l:server in lsc#server#current()
+    if l:server.capabilities.referenceHighlights
+      return v:true
+    endif
+  endfor
+  return v:false
 endfunction
 
 function! s:HandleHighlights(request_number, old_pos, old_buf_nr,

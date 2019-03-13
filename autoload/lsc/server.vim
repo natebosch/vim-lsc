@@ -39,6 +39,21 @@ function! lsc#server#servers() abort
   return s:servers
 endfunction
 
+" Returns a list of the servers for the current filetype.
+"
+" For now there will only ever be 1 or no values in this list.
+function! lsc#server#current() abort
+  return lsc#server#forFileType(&filetype)
+endfunction
+
+" Returns a list of the servers for [filetype].
+"
+" For now there will only ever be 1 or no values in this list.
+function! lsc#server#forFileType(filetype) abort
+  if !has_key(g:lsc_servers_by_filetype, a:filetype) | return [] | endif
+  return [s:servers[g:lsc_servers_by_filetype[a:filetype]]]
+endfunction
+
 " Wait for all running servers to shut down with a 5 second timeout.
 function! lsc#server#exit() abort
   let l:exit_start = reltime()
@@ -135,8 +150,9 @@ function! s:Start(server) abort
     let a:server.init_result = a:init_result
     let a:server.status = 'running'
     call s:Call(a:server, 'initialized', {})
-    if type(a:init_result) == v:t_dict
-      call s:CheckCapabilities(a:init_result, a:server)
+    if type(a:init_result) == v:t_dict && has_key(a:init_result, 'capabilities')
+      let a:server.capabilities =
+          \ lsc#capabilities#normalize(a:init_result.capabilities)
     endif
     for filetype in a:server.filetypes
       call lsc#file#trackAll(filetype)
@@ -155,46 +171,6 @@ function! s:Start(server) abort
       \}
   call s:Call(a:server, 'initialize',
       \ params, function('OnInitialize'), v:true)
-endfunction
-
-function! s:CheckCapabilities(init_results, server) abort
-  " TODO: Check with more depth IE whether go to definition works
-  if has_key(a:init_results, 'capabilities')
-    let capabilities = a:init_results['capabilities']
-    if has_key(capabilities, 'completionProvider')
-      let completion_provider = capabilities['completionProvider']
-      if has_key(completion_provider, 'triggerCharacters')
-        let trigger_characters = completion_provider['triggerCharacters']
-        for filetype in a:server.filetypes
-          call lsc#complete#setTriggers(filetype, trigger_characters)
-        endfor
-      endif
-    endif
-    if has_key(capabilities, 'signatureHelpProvider')
-      let signature_provider = capabilities['signatureHelpProvider']
-    endif
-    if has_key(capabilities, 'textDocumentSync')
-      let text_document_sync = capabilities['textDocumentSync']
-      let supports_incremental = v:false
-      if type(text_document_sync) == v:t_dict
-        if has_key(text_document_sync, 'change')
-          let supports_incremental = text_document_sync['change'] == 2
-        endif
-      else
-        let supports_incremental = text_document_sync == 2
-      endif
-      if supports_incremental
-        for filetype in a:server.filetypes
-          call lsc#file#enableIncrementalSync(filetype)
-        endfor
-      endif
-    endif
-    if has_key(capabilities, 'documentHighlightProvider')
-      if capabilities['documentHighlightProvider']
-        call lsc#cursor#enableReferenceHighlights(filetype)
-      endif
-    endif
-  endif
 endfunction
 
 " Missing value means no support
@@ -286,6 +262,7 @@ function! lsc#server#register(filetype, config) abort
       \ 'filetypes': [a:filetype],
       \ 'config': config,
       \ 'send_buffer': '',
+      \ 'capabilities': lsc#capabilities#defaults()
       \}
   function server.send(message) abort
     if !has_key(self, 'channel') | return v:false | endif

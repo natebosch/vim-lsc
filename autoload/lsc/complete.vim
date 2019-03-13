@@ -35,8 +35,6 @@ if !exists('s:initialized')
   let s:completion_waiting = {}
   let s:completion_canceled = v:false
   let s:initialized = v:true
-  " filetype -> [trigger characters]
-  let s:trigger_characters = {}
 endif
 
 " Clean state associated with a server.
@@ -54,13 +52,13 @@ function! s:MarkNotCompleting(filetype) abort
   endif
 endfunction
 
-function! lsc#complete#setTriggers(filetype, triggers) abort
-  let s:trigger_characters[a:filetype] = a:triggers
-endfunction
-
 function! s:isTrigger(char) abort
-  if !has_key(s:trigger_characters, &filetype) | return v:false | endif
-  return index(s:trigger_characters[&filetype], a:char) >= 0
+  for l:server in lsc#server#current()
+    if index(l:server.capabilities.completion.triggerCharacters, a:char) >= 0
+      return v:true
+    endif
+  endfor
+  return v:false
 endfunction
 
 augroup LscCompletion

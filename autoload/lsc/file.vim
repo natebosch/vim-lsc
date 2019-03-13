@@ -6,8 +6,6 @@ if !exists('s:initialized')
   let s:file_content = {}
   " file path -> flush timer
   let s:flush_timers = {}
-  " filetype -> boolean
-  let s:allowed_incremental_sync = {}
   " full file path -> buffer name
   let s:normalized_paths = {}
 endif
@@ -149,14 +147,17 @@ function! lsc#file#version() abort
   return get(s:file_versions, lsc#file#fullPath(), '')
 endfunction
 
-function! lsc#file#enableIncrementalSync(filetype) abort
-  let s:allowed_incremental_sync[a:filetype] = v:true
-endfunction
-
 function! s:AllowIncrementalSync(filetype) abort
-  return (!exists('g:lsc_enable_incremental_sync')
-      \ || g:lsc_enable_incremental_sync)
-      \ && get(s:allowed_incremental_sync, a:filetype, v:false)
+  if (exists('g:lsc_enable_incremental_sync')
+      \ && !g:lsc_enable_incremental_sync)
+    return v:false
+  endif
+  for l:server in lsc#server#forFileType(a:filetype)
+    if !l:server.capabilities.textDocumentSync.incremental
+      return v:false
+    endif
+  endfor
+  return v:true
 endfunction
 
 " The full path to the current buffer.
