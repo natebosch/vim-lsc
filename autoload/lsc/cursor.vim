@@ -63,8 +63,10 @@ function! s:HighlightReferences(force_in_highlight) abort
   endif
   let s:pending[&filetype] = v:true
   let s:highlights_request += 1
-  let params = lsc#params#documentPosition()
-  call lsc#server#call(&filetype, 'textDocument/documentHighlight', params,
+  let l:params = lsc#params#documentPosition()
+  " TODO handle multiple servers
+  let l:server = lsc#server#forFileType(&filetype)[0]
+  call l:server.request('textDocument/documentHighlight', l:params,
       \ funcref('<SID>HandleHighlights',
       \ [s:highlights_request, getcurpos(), bufnr('%'), &filetype]))
 endfunction

@@ -5,17 +5,18 @@ endif
 
 function! lsc#signaturehelp#getSignatureHelp() abort
   call lsc#file#flushChanges()
-  let params = lsc#params#documentPosition()
-  call lsc#server#call(&filetype, 'textDocument/signatureHelp', params,
-      \ lsc#util#gateResult('SignatureHelp', function('<SID>ShowSignatureHelp')))
+  let l:params = lsc#params#documentPosition()
+  " TODO handle multiple servers
+  let l:server = lsc#server#forFileType(&filetype)[0]
+  call l:server.request('textDocument/signatureHelp', l:params,
+      \ lsc#util#gateResult('SignatureHelp', function('<SID>ShowHelp')))
 endfunction
 
 function! s:HighlightCurrentParameter() abort
   execute 'match lscCurrentParameter /\V' . s:current_parameter . '/'
 endfunction
 
-function! s:ShowSignatureHelp(signatureHelp)
-
+function! s:ShowHelp(signatureHelp) abort
   let signatures = []
   if has_key(a:signatureHelp, 'signatures')
     if type(a:signatureHelp.signatures) == v:t_list

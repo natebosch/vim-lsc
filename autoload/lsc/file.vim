@@ -27,28 +27,30 @@ function! lsc#file#onOpen() abort
   call s:FlushChanges(lsc#file#fullPath(), &filetype)
 endfunction
 
-function! lsc#file#onClose(file_path) abort
-  let full_path = fnamemodify(a:file_path, ':p')
-  let params = {'textDocument': {'uri': lsc#uri#documentUri(full_path)}}
-  call lsc#server#call(&filetype, 'textDocument/didClose', params)
-  if has_key(s:file_versions, full_path)
-    unlet s:file_versions[full_path]
+function! lsc#file#onClose() abort
+  let l:full_path = expand('<afile>:p')
+  let l:filetype = getbufvar(expand('<afile'), '&filetype')
+  let l:params = {'textDocument': {'uri': lsc#uri#documentUri(l:full_path)}}
+  for l:server in lsc#server#forFileType(l:filetype)
+    call l:server.notify('textDocument/didClose', l:params)
+  endfor
+  if has_key(s:file_versions, l:full_path)
+    unlet s:file_versions[l:full_path]
   endif
-  if has_key(s:file_content, full_path)
-    unlet s:file_content[full_path]
+  if has_key(s:file_content, l:full_path)
+    unlet s:file_content[l:full_path]
   endif
 endfunction
 
 " Send a `textDocument/didSave` notification if the server may be interested.
-function! lsc#file#onWrite(file_path) abort
-  let l:full_path = fnamemodify(a:file_path, ':p')
-  let l:bufnr = lsc#file#bufnr(a:file_path)
-  let l:filetype = getbufvar(l:bufnr, '&filetype')
-  " TODO: honor multiple servers
-  let l:server = lsc#server#forFileType(l:filetype)[0]
-  if !l:server.capabilities.textDocumentSync.sendDidSave | return | endif
-  let params = {'textDocument': {'uri': lsc#uri#documentUri(l:full_path)}}
-  call lsc#server#call(l:filetype, 'textDocument/didSave', params)
+function! lsc#file#onWrite() abort
+  let l:full_path = expand('<afile>:p')
+  let l:filetype = getbufvar(expand('<afile'), '&filetype')
+  let l:params = {'textDocument': {'uri': lsc#uri#documentUri(l:full_path)}}
+  for l:server in lsc#server#forFileType(l:filetype)
+    if !l:server.capabilities.textDocumentSync.sendDidSave | continue | endif
+    call l:server.notify('textDocument/didSave', l:params)
+  endfor
 endfunction
 
 " Flushes changes for the current buffer.
@@ -63,14 +65,19 @@ function! s:DidOpen(file_path) abort
   if !getbufvar(l:bufnr, '&modifiable') | return | endif
   let buffer_content = getbufline(l:bufnr, 1, '$')
   let filetype = getbufvar(l:bufnr, '&filetype')
-  let params = {'textDocument':
+  let l:params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'languageId': filetype,
       \    'version': 1,
       \    'text': join(buffer_content, "\n")
       \   }
       \ }
-  if lsc#server#call(filetype, 'textDocument/didOpen', params)
+  " TODO handle multiple servers
+  let l:success = v:false
+  for l:server in lsc#server#forFileType(l:filetype)
+    let l:success = l:server.notify('textDocument/didOpen', l:params)
+  endfor
+  if l:success
     let s:file_versions[a:file_path] = 1
     if s:AllowIncrementalSync(filetype)
       let s:file_content[a:file_path] = buffer_content
@@ -135,13 +142,16 @@ function! s:FlushChanges(file_path, filetype) abort
   else
     let change = {'text': join(buffer_content, "\n")}
   endif
-  let params = {'textDocument':
+  let l:params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'version': s:file_versions[a:file_path],
       \   },
       \ 'contentChanges': [change],
       \ }
-  call lsc#server#call(a:filetype, 'textDocument/didChange', params)
+  " TODO handle multiple servers
+  for l:server in lsc#server#forFileType(a:filetype)
+    call l:server.notify('textDocument/didChange', l:params)
+  endfor
   if allow_incremental
     let s:file_content[a:file_path] = buffer_content
   endif
@@ -165,7 +175,9 @@ function! s:AllowIncrementalSync(filetype) abort
   return v:true
 endfunction
 
-" The full path to the current buffer.
+" The full path to a buffer.
+"
+" By default uses the current buffer, as if '%' was passed.
 "
 " The association between a buffer and full path may change if the file has not
 " been written yet - this makes a best-effort attempt to get a full path anyway.
@@ -173,7 +185,7 @@ endfunction
 "
 " Paths which do need to be manually normalized are stored so that the full path
 " can be associated back to a buffer with `lsc#file#bufnr()`.
-function! lsc#file#fullPath() abort
+function! lsc#file#fullPath(...) abort
   let l:file_path = expand('%:p')
   if l:file_path ==# expand('%')
     " Path could not be expanded due to pointing to a non-existent directory

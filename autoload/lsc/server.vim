@@ -8,10 +8,6 @@ if !exists('s:initialized')
   "   [disabled, not started,
   "    starting, running, restarting,
   "    exiting,  exited, unexpected exit, failed]
-  " - buffer. String received from the server but not processed yet.
-  " - channel. The communication channel. See `channel.vim`
-  " - calls. The last 10 calls made to the server
-  " - messages. The last 10 messages from the server
   " - capabilities. Configuration for client/server interaction.
   " - filetypes. List of filetypes handled by this server.
   " - logs. The last 100 logs from `window/logMessage`.
@@ -79,10 +75,10 @@ endfunction
 function! s:Kill(server, status, OnExit) abort
   function! Exit(result) closure abort
     let a:server.status = a:status
-    call s:Call(a:server, 'exit', v:null, v:true)
+    call a:server._channel.notify('exit', v:null) " Don't block on server status
     if a:OnExit != v:null | call a:OnExit() | endif
   endfunction
-  return s:Call(a:server, 'shutdown', v:null, function('Exit'))
+  call a:server.request('shutdown', v:null, function('Exit'))
 endfunction
 
 function! lsc#server#restart() abort
@@ -100,55 +96,28 @@ endfunction
 "
 " Expects the call to succeed and shows an error if it does not.
 function! lsc#server#userCall(method, params, callback) abort
-  let result = lsc#server#call(&filetype, a:method, a:params, a:callback)
+  " TODO handle multiple servers
+  let l:server = lsc#server#forFileType(&filetype)[0]
+  let result = l:server.request(a:method, a:params, a:callback)
   if !result
     call lsc#message#error('Failed to call '.a:method)
     call lsc#message#error('Server status: '.lsc#server#status(&filetype))
   endif
 endfunction
 
-" Call a method on the language server for `filetype`.
-"
-" Formats a message calling `method` with parameters `params`. If called with 4
-" arguments the fourth should be a funcref which will be called when the server
-" returns a result for this call.
-"
-" If the server has a configured `message_hook` for `method` it will be run to
-" adjust `params`.
-function! lsc#server#call(filetype, method, params, ...) abort
-  if !has_key(g:lsc_servers_by_filetype, a:filetype) | return v:false | endif
-  let server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
-  return call('<SID>Call', [l:server, a:method, a:params] + a:000)
-endfunction
-
-function! s:Call(server, method, params, ...) abort
-  if a:server.status != 'running' && !(a:0 >= 2 && a:2)
-      return v:false
-  endif
-  let params = lsc#config#messageHook(a:server, a:method, a:params)
-  " If there is a callback this is a request
-  if a:0 >= 1
-    let [call_id, message] = lsc#protocol#formatRequest(a:method, l:params)
-    call lsc#dispatch#registerCallback(call_id, a:1)
-  else
-    let message = lsc#protocol#formatNotification(a:method, l:params)
-  endif
-  return a:server.send(message)
-endfunction
-
 " Start `server` if it isn't already running.
 function! s:Start(server) abort
-  if has_key(a:server, 'channel')
+  if has_key(a:server, '_channel')
     " Server is already running
     return
   endif
   let l:command = a:server.config.command
-  let a:server.buffer = ''
-  let a:server.channel = lsc#channel#open(l:command, a:server.callback,
-      \ a:server.err_callback, a:server.on_exit)
+  let a:server._channel = lsc#protocol#open(l:command,
+      \ function('<SID>Dispatch', [a:server]),
+      \ a:server.on_err, a:server.on_exit)
   function! OnInitialize(init_result) closure abort
     let a:server.status = 'running'
-    call s:Call(a:server, 'initialized', {})
+    call a:server.notify('initialized', {})
     if type(a:init_result) == v:t_dict && has_key(a:init_result, 'capabilities')
       let a:server.capabilities =
           \ lsc#capabilities#normalize(a:init_result.capabilities)
@@ -163,13 +132,12 @@ function! s:Start(server) abort
   else
     let trace_level = 'off'
   endif
-  let params = {'processId': getpid(),
+  let l:params = {'processId': getpid(),
       \ 'rootUri': lsc#uri#documentUri(getcwd()),
       \ 'capabilities': s:ClientCapabilities(),
       \ 'trace': trace_level
       \}
-  call s:Call(a:server, 'initialize',
-      \ params, function('OnInitialize'), v:true)
+  call a:server._initialize(l:params, function('OnInitialize'))
 endfunction
 
 " Missing value means no support
@@ -255,31 +223,31 @@ function! lsc#server#register(filetype, config) abort
   endif
   let server = {
       \ 'status': initial_status,
-      \ 'calls': [],
-      \ 'messages': [],
       \ 'logs': [],
       \ 'filetypes': [a:filetype],
       \ 'config': config,
-      \ 'send_buffer': '',
       \ 'capabilities': lsc#capabilities#defaults()
       \}
-  function server.send(message) abort
-    if !has_key(self, 'channel') | return v:false | endif
-    call lsc#util#shift(self.calls, 10, a:message)
-    call self.channel.send(lsc#protocol#encode(a:message))
+  function server.request(method, params, callback) abort
+    if self.status != 'running' | return v:false | endif
+    let l:params = lsc#config#messageHook(self, a:method, a:params)
+    call self._channel.request(a:method, l:params, a:callback)
     return v:true
   endfunction
-  function server.callback(message) abort
-    let self.buffer .= a:message
-    call lsc#protocol#consumeMessage(self)
+  function server.notify(method, params) abort
+    if self.status != 'running' | return v:false | endif
+    let l:params = lsc#config#messageHook(self, a:method, a:params)
+    call self._channel.notify(a:method, l:params)
+    return v:true
   endfunction
-  function server.log(message, type) abort
-    if lsc#config#shouldEcho(self, a:type)
-      call lsc#message#log(a:message, a:type)
-    endif
-    call lsc#util#shift(self.logs, 100, {'message': a:message, 'type': a:type})
+  function server.respond(method, params) abort
+    call self._channel.respond(a:method, a:params)
   endfunction
-  function server.err_callback(message) abort
+  function server._initialize(params, callback) abort
+    let l:params = lsc#config#messageHook(self, 'initialize', a:params)
+    call self._channel.request('initialize', l:params, a:callback)
+  endfunction
+  function server.on_err(message) abort
     if self.status == 'starting'
         \ || !has_key(self.config, 'suppress_stderr')
         \ || !self.config.suppress_stderr
@@ -287,21 +255,17 @@ function! lsc#server#register(filetype, config) abort
     endif
   endfunction
   function server.on_exit() abort
-    unlet self.channel
+    unlet self._channel
     let l:old_status = self.status
     if l:old_status == 'starting'
       let self.status= 'failed'
       call lsc#message#error('Failed to initialize server: '.self.config.name)
-      if self.buffer !=# ''
-        call lsc#message#error('Last received: '.self.buffer)
-      endif
     elseif l:old_status == 'exiting'
       let self.status= 'exited'
     elseif l:old_status == 'running'
       let self.status = 'unexpected exit'
       call lsc#message#error('Command exited unexpectedly: '.self.config.name)
     endif
-    unlet self.buffer
     for filetype in self.filetypes
       call lsc#complete#clean(filetype)
       call lsc#diagnostics#clean(filetype)
@@ -313,4 +277,47 @@ function! lsc#server#register(filetype, config) abort
     endif
   endfunction
   let s:servers[config.name] = server
+endfunction
+
+function! s:Dispatch(server, method, params) abort
+  if a:method ==? 'textDocument/publishDiagnostics'
+    let file_path = lsc#uri#documentPath(a:params['uri'])
+    call lsc#diagnostics#setForFile(file_path, a:params['diagnostics'])
+  elseif a:method ==? 'window/showMessage'
+    call lsc#message#show(a:params['message'], a:params['type'])
+  elseif a:method ==? 'window/showMessageRequest'
+    let l:response =
+        \ lsc#message#showRequest(a:params['message'], a:params['actions'])
+    if has_key(a:message, 'id')
+      let l:id = a:message['id']
+      call a:server.reply(id, response)
+    endif
+  elseif a:method ==? 'window/logMessage'
+    if lsc#config#shouldEcho(a:server, a:params.type)
+      call lsc#message#log(a:params.message, a:params.type)
+    endif
+    call lsc#util#shift(a:server.logs, 100,
+        \ {'message': a:params.message, 'type': a:params.type})
+  elseif a:method ==? 'window/progress'
+    if has_key(a:params, 'message')
+      let l:full = a:params['title'] . a:params['message']
+      call lsc#message#show('Progress ' . l:full)
+    elseif has_key(params, 'done')
+      call lsc#message#show('Finished ' . a:params['title'])
+    else
+      call lsc#message#show('Starting ' . a:params['title'])
+    endif
+  elseif a:method ==? 'workspace/applyEdit'
+    let applied = lsc#edit#apply(a:params.edit)
+    if has_key(a:message, 'id')
+      let l:id = a:message['id']
+      let l:response = {'applied': applied}
+      call a:server.reply(l:id, l:response)
+    endif
+  elseif a:method =~? '\v^\$'
+    " Unhandled extension to the protocol, drop the message
+  else
+    echom 'Got notification: ' . a:method .
+        \ ' params: ' . string(a:params)
+  endif
 endfunction

@@ -31,6 +31,7 @@ function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
     return l:c
   else
     call lsc#message#error('No support for starting jobs')
+    return v:null
   endif
 endfunction
 
