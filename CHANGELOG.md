@@ -1,4 +1,4 @@
-# 0.3.2-dev
+# 0.3.2
 
 - `:LSClientShowHover` is now bound with `keywordprg` instead of by mapping `K`.
   If the `g:lsc_auto_map` manually specifies a binding of `'K'` it should be
