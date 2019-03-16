@@ -12,7 +12,7 @@ if !exists('s:initialized')
   " - channel. The communication channel. See `channel.vim`
   " - calls. The last 10 calls made to the server
   " - messages. The last 10 messages from the server
-  " - init_result. The response to the initialization call
+  " - capabilities. Configuration for client/server interaction.
   " - filetypes. List of filetypes handled by this server.
   " - logs. The last 100 logs from `window/logMessage`.
   " - config. Config dict. Contains:
@@ -147,7 +147,6 @@ function! s:Start(server) abort
   let a:server.channel = lsc#channel#open(l:command, a:server.callback,
       \ a:server.err_callback, a:server.on_exit)
   function! OnInitialize(init_result) closure abort
-    let a:server.init_result = a:init_result
     let a:server.status = 'running'
     call s:Call(a:server, 'initialized', {})
     if type(a:init_result) == v:t_dict && has_key(a:init_result, 'capabilities')
