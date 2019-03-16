@@ -81,6 +81,11 @@ function! lsc#edit#rename(...) abort
   else
     let new_name = input('Enter a new name: ')
   endif
+  if (empty(trim(new_name)))
+    echo "\n"
+    call lsc#message#error('Name can not be blank')
+    return
+  endif
   let params = lsc#params#documentPosition()
   let params.newName = new_name
   call lsc#server#userCall('textDocument/rename', params,
