@@ -1,5 +1,8 @@
 # 0.4.0
 
+**Bug fixes**
+- Allow use with version that don't have the `trim()` function.
+
 **Minor breaking changes**
 - Server dictionaries no longer expose their full `init_results`.
 
