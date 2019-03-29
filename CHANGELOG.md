@@ -6,6 +6,10 @@
 **Minor breaking changes**
 - Server dictionaries no longer expose their full `init_results`.
 
+**Enhancements**
+- More tolerant towards buggy language servers that omit the `result` field on
+  response message.
+
 # 0.3.2
 
 - `:LSClientShowHover` is now bound with `keywordprg` instead of by mapping `K`.
