@@ -52,7 +52,7 @@ function! lsc#dispatch#message(server, message) abort
     endif
   elseif has_key(a:message, 'id') && has_key(s:callbacks, a:message.id)
     let l:call_id = a:message.id
-    let Callback = s:callbacks['id']
+    let Callback = s:callbacks[l:call_id]
     unlet s:callbacks[l:call_id]
     call Callback(v:null)
   else
