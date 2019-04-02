@@ -14,13 +14,32 @@ function! lsc#highlights#update() abort
   if s:CurrentWindowIsFresh() | return | endif
   call lsc#highlights#clear()
   if &diff | return | endif
-  for line in values(lsc#diagnostics#forFile(lsc#file#fullPath()))
-    for diagnostic in line
-      let match = matchaddpos(diagnostic.group, diagnostic.ranges, -1)
-      call add(w:lsc_diagnostic_matches, match)
-    endfor
+  let l:is_insert = mode() == 'i'
+  if exists('w:lsc_diagnostic_deferred')
+    unlet w:lsc_diagnostic_deferred
+  endif
+  for [line, diagnostics] in items(lsc#diagnostics#forFile(lsc#file#fullPath()))
+    if l:is_insert && l:line == line('.')
+      let w:lsc_diagnostic_deferred = l:diagnostics
+      call lsc#util#once('CursorHold,CursorMoved',
+          \ function('<SID>UpdateDeferred'))
+    else
+      for diagnostic in l:diagnostics
+        let match = matchaddpos(diagnostic.group, diagnostic.ranges, -1)
+        call add(w:lsc_diagnostic_matches, match)
+      endfor
+    endif
   endfor
   call s:MarkCurrentWindowFresh()
+endfunction
+
+function! s:UpdateDeferred() abort
+  if !exists('w:lsc_diagnostic_deferred') | return | endif
+  for l:diagnostic in w:lsc_diagnostic_deferred
+    let match = matchaddpos(diagnostic.group, diagnostic.ranges, -1)
+    call add(w:lsc_diagnostic_matches, match)
+  endfor
+  unlet w:lsc_diagnostic_deferred
 endfunction
 
 " Remove all highlighted matches in the current window.
