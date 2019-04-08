@@ -29,9 +29,10 @@ function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
     let l:job = jobstart(a:command, l:job_options)
     call s:WrapNeovim(l:job, l:c)
     return l:c
-  else
-    call lsc#message#error('No support for starting jobs')
   endif
+
+  call lsc#message#error('Cannot start '.a:command)
+  return v:null
 endfunction
 
 function! s:Channel() abort
