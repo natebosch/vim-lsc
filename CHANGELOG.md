@@ -12,6 +12,10 @@
 **Enhancements**
 - More tolerant towards buggy language servers that omit the `result` field on
   response message.
+- Add `g:lsc_autocomplete_length` to configure how many word characters to wait
+  for before starting autocomplete. Set to `0` or `v:false` to disable
+  autocomplete on anything other than trigger characters, or to a number to vary
+  the length before autocomplete from the default of `3`.
 
 # 0.3.2
 

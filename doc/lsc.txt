@@ -238,6 +238,15 @@ repeated values added to it. In this case you may either:
     the user to a compatible value and that it won't be changed by other
     plugins.
 
+                                                *lsc-configure-complete-length*
+                                                *g:lsc_autocomplete_length*
+By default autocomplete attempts are started after typing any character the
+server indicates is a "trigger" character, or after 3 word characters in a
+row. Set `g:lsc_autocomplete_length` to start autocompelte attempts after a
+different number of word characters. Set to `0` or `v:false` to disable
+autocomplete following word characters and to use exclusively trigger
+characters instead.
+
                                                 *lsc-configure-diagnostics*
                                                 *g:lsc_enable_diagnostics*
 Diagnostics highlighting and location list updating is enabled by default. To
