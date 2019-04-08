@@ -28,8 +28,10 @@ function! lsc#file#onOpen() abort
 endfunction
 
 function! lsc#file#onClose(full_path, filetype) abort
-  let params = {'textDocument': {'uri': lsc#uri#documentUri(a:full_path)}}
-  call lsc#server#call(a:filetype, 'textDocument/didClose', params)
+  let l:params = {'textDocument': {'uri': lsc#uri#documentUri(a:full_path)}}
+  for l:server in lsc#server#forFileType(a:filetype)
+    call l:server.notify('textDocument/didClose', l:params)
+  endfor
   if has_key(s:file_versions, a:full_path)
     unlet s:file_versions[a:full_path]
   endif
@@ -40,11 +42,11 @@ endfunction
 
 " Send a `textDocument/didSave` notification if the server may be interested.
 function! lsc#file#onWrite(full_path, filetype) abort
-  " TODO: honor multiple servers
-  let l:server = lsc#server#forFileType(a:filetype)[0]
-  if !l:server.capabilities.textDocumentSync.sendDidSave | return | endif
-  let params = {'textDocument': {'uri': lsc#uri#documentUri(a:full_path)}}
-  call lsc#server#call(a:filetype, 'textDocument/didSave', params)
+  let l:params = {'textDocument': {'uri': lsc#uri#documentUri(a:full_path)}}
+  for l:server in lsc#server#forFileType(a:filetype)
+    if !l:server.capabilities.textDocumentSync.sendDidSave | continue | endif
+    call l:server.notify('textDocument/didSave', l:params)
+  endfor
 endfunction
 
 " Flushes changes for the current buffer.
@@ -59,14 +61,19 @@ function! s:DidOpen(file_path) abort
   if !getbufvar(l:bufnr, '&modifiable') | return | endif
   let buffer_content = getbufline(l:bufnr, 1, '$')
   let filetype = getbufvar(l:bufnr, '&filetype')
-  let params = {'textDocument':
+  let l:params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'languageId': filetype,
       \    'version': 1,
       \    'text': join(buffer_content, "\n")
       \   }
       \ }
-  if lsc#server#call(filetype, 'textDocument/didOpen', params)
+  " TODO handle multiple servers
+  let l:success = v:false
+  for l:server in lsc#server#forFileType(l:filetype)
+    let l:success = l:server.notify('textDocument/didOpen', l:params)
+  endfor
+  if l:success
     let s:file_versions[a:file_path] = 1
     if s:AllowIncrementalSync(filetype)
       let s:file_content[a:file_path] = buffer_content
@@ -131,13 +138,16 @@ function! s:FlushChanges(file_path, filetype) abort
   else
     let change = {'text': join(buffer_content, "\n")}
   endif
-  let params = {'textDocument':
+  let l:params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'version': s:file_versions[a:file_path],
       \   },
       \ 'contentChanges': [change],
       \ }
-  call lsc#server#call(a:filetype, 'textDocument/didChange', params)
+  " TODO handle multiple servers
+  for l:server in lsc#server#forFileType(a:filetype)
+    call l:server.notify('textDocument/didChange', l:params)
+  endfor
   if allow_incremental
     let s:file_content[a:file_path] = buffer_content
   endif

@@ -86,8 +86,10 @@ function! s:startCompletion(isAuto) abort
   let s:completion_canceled = v:false
   call s:MarkCompleting(&filetype)
   call lsc#file#flushChanges()
-  let params = lsc#params#documentPosition()
-  call lsc#server#call(&filetype, 'textDocument/completion', params,
+  let l:params = lsc#params#documentPosition()
+  " TODO handle multiple servers
+  let l:server = lsc#server#forFileType(&filetype)[0]
+  call l:server.request('textDocument/completion', l:params,
       \ lsc#util#gateResult('Complete',
       \     function('<SID>OnResult', [a:isAuto]), function('<SID>OnSkip')))
 endfunction
