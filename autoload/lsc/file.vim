@@ -171,7 +171,7 @@ function! s:AllowIncrementalSync(filetype) abort
   return v:true
 endfunction
 
-" The full path to the current  buffer.
+" The full path to the current buffer.
 "
 " The association between a buffer and full path may change if the file has not
 " been written yet - this makes a best-effort attempt to get a full path anyway.
