@@ -27,18 +27,16 @@ function! lsc#file#onOpen() abort
   call s:FlushChanges(lsc#file#fullPath(), &filetype)
 endfunction
 
-function! lsc#file#onClose() abort
-  let l:full_path = expand('<afile>:p')
-  let l:filetype = getbufvar(expand('<afile'), '&filetype')
-  let l:params = {'textDocument': {'uri': lsc#uri#documentUri(l:full_path)}}
-  for l:server in lsc#server#forFileType(l:filetype)
+function! lsc#file#onClose(full_path, filetype) abort
+  let l:params = {'textDocument': {'uri': lsc#uri#documentUri(a:full_path)}}
+  for l:server in lsc#server#forFileType(a:filetype)
     call l:server.notify('textDocument/didClose', l:params)
   endfor
-  if has_key(s:file_versions, l:full_path)
-    unlet s:file_versions[l:full_path]
+  if has_key(s:file_versions, a:full_path)
+    unlet s:file_versions[a:full_path]
   endif
-  if has_key(s:file_content, l:full_path)
-    unlet s:file_content[l:full_path]
+  if has_key(s:file_content, a:full_path)
+    unlet s:file_content[a:full_path]
   endif
 endfunction
 
