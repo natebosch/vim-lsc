@@ -314,6 +314,7 @@ go                      |:LSClientDocumentSymbol|
 gS                      |:LSClientWorkspaceSymbol|
 ga                      |:LSClientFindCodeActions|
 gR                      |:LSClientRename|
+gm                      |:LSClientSignatureHelp|
 |K| (via |keywordprg|)      |:LSClientShowHover|
 
 

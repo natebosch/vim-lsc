@@ -70,7 +70,7 @@ let g:lsc_auto_map = {
     \ 'ShowHover': v:true,
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
-    \ 'SignatureHelp': '<C-m>',
+    \ 'SignatureHelp': 'gm',
     \ 'Completion': 'completefunc',
     \}
 ```

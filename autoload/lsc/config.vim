@@ -10,7 +10,7 @@ let s:default_maps = {
     \ 'ShowHover': v:true,
     \ 'DocumentSymbol': 'go',
     \ 'WorkspaceSymbol': 'gS',
-    \ 'SignatureHelp': '<C-m>',
+    \ 'SignatureHelp': 'gm',
     \ 'Completion': 'completefunc',
     \}
 

@@ -8,6 +8,7 @@
 **Minor breaking changes**
 - Server dictionaries no longer expose their full `init_results`, or their call
   logs.
+- Default keybinding for `LSClientSignatureHelp` changed to `gm`.
 
 **Enhancements**
 - More tolerant towards buggy language servers that omit the `result` field on
