@@ -27,15 +27,14 @@ function! lsc#file#onOpen() abort
   call s:FlushChanges(lsc#file#fullPath(), &filetype)
 endfunction
 
-function! lsc#file#onClose(file_path) abort
-  let full_path = fnamemodify(a:file_path, ':p')
-  let params = {'textDocument': {'uri': lsc#uri#documentUri(full_path)}}
-  call lsc#server#call(&filetype, 'textDocument/didClose', params)
-  if has_key(s:file_versions, full_path)
-    unlet s:file_versions[full_path]
+function! lsc#file#onClose(full_path, filetype) abort
+  let params = {'textDocument': {'uri': lsc#uri#documentUri(a:full_path)}}
+  call lsc#server#call(a:filetype, 'textDocument/didClose', params)
+  if has_key(s:file_versions, a:full_path)
+    unlet s:file_versions[a:full_path]
   endif
-  if has_key(s:file_content, full_path)
-    unlet s:file_content[full_path]
+  if has_key(s:file_content, a:full_path)
+    unlet s:file_content[a:full_path]
   endif
 endfunction
 

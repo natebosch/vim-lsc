@@ -87,7 +87,7 @@ augroup LSC
   autocmd TextChanged,TextChangedI,CompleteDone *
       \ call <SID>IfEnabled('lsc#file#onChange')
   autocmd BufLeave * call <SID>IfEnabled('lsc#file#flushChanges')
-  autocmd BufUnload * call <SID>IfEnabled('lsc#file#onClose', expand("<afile>"))
+  autocmd BufUnload * call <SID>OnClose()
   autocmd BufWritePost *
       \ call <SID>IfEnabled('lsc#file#onWrite', expand("<afile>"))
 
@@ -151,6 +151,15 @@ function! s:OnOpen() abort
   if !lsc#server#filetypeActive(&filetype) | return | endif
   call lsc#file#onOpen()
 endfunction
+
+function! s:OnClose() abort
+  let l:filetype = getbufvar(str2nr(expand('<abuf>')), '&filetype')
+  if !has_key(g:lsc_servers_by_filetype, l:filetype) | return | endif
+  if !lsc#server#filetypeActive(l:filetype) | return | endif
+  let l:full_path = expand('<afile>:p')
+  call lsc#file#onClose(l:full_path, l:filetype)
+endfunction
+
 
 " Highlight groups {{{2
 if !hlexists('lscDiagnosticError')
