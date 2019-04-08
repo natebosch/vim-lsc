@@ -121,6 +121,11 @@ function! s:Dispatch(message, OnMessage, callbacks) abort
       unlet a:callbacks[l:call_id]
       call l:Callback(a:message['result'])
     endif
+  elseif has_key(a:message, 'id') && has_key(a:callbacks, a:message.id)
+    let l:call_id = a:message['id']
+    let l:Callback = a:callbacks[l:call_id][0]
+    unlet a:callbacks[l:call_id]
+    call l:Callback(v:null)
   else
     call lsc#message#error('Unknown message type: '.string(a:message))
   endif
