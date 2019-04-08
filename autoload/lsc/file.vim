@@ -173,9 +173,7 @@ function! s:AllowIncrementalSync(filetype) abort
   return v:true
 endfunction
 
-" The full path to a buffer.
-"
-" By default uses the current buffer, as if '%' was passed.
+" The full path to the current  buffer.
 "
 " The association between a buffer and full path may change if the file has not
 " been written yet - this makes a best-effort attempt to get a full path anyway.
@@ -183,7 +181,7 @@ endfunction
 "
 " Paths which do need to be manually normalized are stored so that the full path
 " can be associated back to a buffer with `lsc#file#bufnr()`.
-function! lsc#file#fullPath(...) abort
+function! lsc#file#fullPath() abort
   let l:file_path = expand('%:p')
   if l:file_path ==# expand('%')
     " Path could not be expanded due to pointing to a non-existent directory
