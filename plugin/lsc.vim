@@ -88,7 +88,7 @@ augroup LSC
       \ call <SID>IfEnabled('lsc#file#onChange')
   autocmd BufLeave * call <SID>IfEnabled('lsc#file#flushChanges')
   autocmd BufUnload * call <SID>OnClose()
-  autocmd BufWritePost * call <SID>IfEnabled('lsc#file#onWrite')
+  autocmd BufWritePost * call <SID>OnWrite()
 
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
   autocmd WinLeave * call <SID>IfEnabled('lsc#cursor#onWinLeave')
@@ -138,6 +138,9 @@ function! LSCEnsureCurrentWindowState() abort
 endfunction
 
 " Run `function` if LSC is enabled for the current filetype.
+"
+" This should only be used for the autocommands which are known to only fire for
+" the current buffer where '&filetype' can be trusted.
 function! s:IfEnabled(function, ...) abort
   if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
   if !lsc#server#filetypeActive(&filetype) | return | endif
@@ -159,6 +162,13 @@ function! s:OnClose() abort
   call lsc#file#onClose(l:full_path, l:filetype)
 endfunction
 
+function! s:OnWrite() abort
+  let l:filetype = getbufvar(str2nr(expand('<abuf>')), '&filetype')
+  if !has_key(g:lsc_servers_by_filetype, l:filetype) | return | endif
+  if !lsc#server#filetypeActive(l:filetype) | return | endif
+  let l:full_path = expand('<afile>:p')
+  call lsc#file#onWrite(l:full_path, l:filetype)
+endfunction
 
 " Highlight groups {{{2
 if !hlexists('lscDiagnosticError')

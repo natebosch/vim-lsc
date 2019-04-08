@@ -41,11 +41,9 @@ function! lsc#file#onClose(full_path, filetype) abort
 endfunction
 
 " Send a `textDocument/didSave` notification if the server may be interested.
-function! lsc#file#onWrite() abort
-  let l:full_path = expand('<afile>:p')
-  let l:filetype = getbufvar(expand('<afile'), '&filetype')
-  let l:params = {'textDocument': {'uri': lsc#uri#documentUri(l:full_path)}}
-  for l:server in lsc#server#forFileType(l:filetype)
+function! lsc#file#onWrite(full_path, filetype) abort
+  let l:params = {'textDocument': {'uri': lsc#uri#documentUri(a:full_path)}}
+  for l:server in lsc#server#forFileType(a:filetype)
     if !l:server.capabilities.textDocumentSync.sendDidSave | continue | endif
     call l:server.notify('textDocument/didSave', l:params)
   endfor
