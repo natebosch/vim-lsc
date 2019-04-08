@@ -152,7 +152,7 @@ function! s:OnOpen() abort
 endfunction
 
 function! s:OnClose() abort
-  let l:filetype = getbufvar(expand('<afile'), '&filetype')
+  let l:filetype = getbufvar(str2nr(expand('<abuf>')), '&filetype')
   if !has_key(g:lsc_servers_by_filetype, l:filetype) | return | endif
   if !lsc#server#filetypeActive(l:filetype) | return | endif
   let l:full_path = expand('<afile>:p')

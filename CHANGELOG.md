@@ -2,6 +2,8 @@
 
 **Bug fixes**
 - Allow use with version that don't have the `trim()` function.
+- Avoid sending unnecessary `didClose` notifications for buffers of the wrong
+  filetype.
 
 **Minor breaking changes**
 - Server dictionaries no longer expose their full `init_results`.
