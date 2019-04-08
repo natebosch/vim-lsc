@@ -39,15 +39,12 @@ function! lsc#file#onClose(full_path, filetype) abort
 endfunction
 
 " Send a `textDocument/didSave` notification if the server may be interested.
-function! lsc#file#onWrite(file_path) abort
-  let l:full_path = fnamemodify(a:file_path, ':p')
-  let l:bufnr = lsc#file#bufnr(a:file_path)
-  let l:filetype = getbufvar(l:bufnr, '&filetype')
+function! lsc#file#onWrite(full_path, filetype) abort
   " TODO: honor multiple servers
-  let l:server = lsc#server#forFileType(l:filetype)[0]
+  let l:server = lsc#server#forFileType(a:filetype)[0]
   if !l:server.capabilities.textDocumentSync.sendDidSave | return | endif
-  let params = {'textDocument': {'uri': lsc#uri#documentUri(l:full_path)}}
-  call lsc#server#call(l:filetype, 'textDocument/didSave', params)
+  let params = {'textDocument': {'uri': lsc#uri#documentUri(a:full_path)}}
+  call lsc#server#call(a:filetype, 'textDocument/didSave', params)
 endfunction
 
 " Flushes changes for the current buffer.
