@@ -6,7 +6,8 @@
   filetype.
 
 **Minor breaking changes**
-- Server dictionaries no longer expose their full `init_results`.
+- Server dictionaries no longer expose their full `init_results`, or their call
+  logs.
 
 **Enhancements**
 - More tolerant towards buggy language servers that omit the `result` field on
