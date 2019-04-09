@@ -115,6 +115,10 @@ function! s:Start(server) abort
   let a:server._channel = lsc#protocol#open(l:command,
       \ function('<SID>Dispatch', [a:server]),
       \ a:server.on_err, a:server.on_exit)
+  if type(a:server._channel) == type(v:null)
+    let a:server.status = 'failed'
+    return
+  endif
   function! OnInitialize(init_result) closure abort
     let a:server.status = 'running'
     call a:server.notify('initialized', {})
