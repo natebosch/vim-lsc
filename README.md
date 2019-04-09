@@ -16,7 +16,10 @@ Install with your plugin management method of choice. If you don't have a
 preference check out [vim-plug][]. Install a language server and ensure it is
 executable from your `$PATH`.
 
-vim-lsc is compatible with vim 8.0, and neovim.
+vim-lsc is compatible with vim 8, and neovim.
+
+Note: When using neovim be sure to use `set shortmess-=F` to avoid suppressing
+error messages from this plugin.
 
 [vim-plug]:https://github.com/junegunn/vim-plug
 
