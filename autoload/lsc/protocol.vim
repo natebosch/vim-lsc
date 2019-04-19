@@ -18,7 +18,7 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit)
     cal lsc#util#shift(self._in, 10, l:message)
     call self._send(l:message)
   endfunction
-  function l:c.respond(id, response) abort
+  function l:c.respond(id, result) abort
     call self._send({'id': a:id, 'result': a:result})
   endfunction
   function l:c._send(message) abort
@@ -113,7 +113,7 @@ function! s:Dispatch(message, OnMessage, callbacks) abort
     let l:error = a:message.error
     let l:message = has_key(l:error, 'message') ?
         \ l:error.message :
-        \ string(a:error)
+        \ string(l:error)
     call lsc#message#error(l:message)
   elseif has_key(a:message, 'result')
     let l:call_id = a:message['id']

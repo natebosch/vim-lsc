@@ -292,8 +292,8 @@ function! s:Dispatch(server, method, params) abort
   elseif a:method ==? 'window/showMessageRequest'
     let l:response =
         \ lsc#message#showRequest(a:params['message'], a:params['actions'])
-    if has_key(a:message, 'id')
-      let l:id = a:message['id']
+    if has_key(a:params['message'], 'id')
+      let l:id = a:params['message']['id']
       call a:server.reply(id, response)
     endif
   elseif a:method ==? 'window/logMessage'
@@ -306,15 +306,15 @@ function! s:Dispatch(server, method, params) abort
     if has_key(a:params, 'message')
       let l:full = a:params['title'] . a:params['message']
       call lsc#message#show('Progress ' . l:full)
-    elseif has_key(params, 'done')
+    elseif has_key(a:params, 'done')
       call lsc#message#show('Finished ' . a:params['title'])
     else
       call lsc#message#show('Starting ' . a:params['title'])
     endif
   elseif a:method ==? 'workspace/applyEdit'
     let applied = lsc#edit#apply(a:params.edit)
-    if has_key(a:message, 'id')
-      let l:id = a:message['id']
+    if has_key(a:params, 'message') && has_key(a:params['message'], 'id')
+      let l:id = a:params['message']['id']
       let l:response = {'applied': applied}
       call a:server.reply(l:id, l:response)
     endif
