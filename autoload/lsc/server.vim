@@ -235,12 +235,14 @@ function! lsc#server#register(filetype, config) abort
   function server.request(method, params, callback) abort
     if self.status != 'running' | return v:false | endif
     let l:params = lsc#config#messageHook(self, a:method, a:params)
+    if l:params is lsc#config#skip() | return v:false | endif
     call self._channel.request(a:method, l:params, a:callback)
     return v:true
   endfunction
   function server.notify(method, params) abort
     if self.status != 'running' | return v:false | endif
     let l:params = lsc#config#messageHook(self, a:method, a:params)
+    if l:params is lsc#config#skip() | return v:false | endif
     call self._channel.notify(a:method, l:params)
     return v:true
   endfunction

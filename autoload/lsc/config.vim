@@ -1,18 +1,22 @@
-let s:default_maps = {
-    \ 'GoToDefinition': '<C-]>',
-    \ 'GoToDefinitionSplit': ['<C-W>]', '<C-W><C-]>'],
-    \ 'FindReferences': 'gr',
-    \ 'NextReference': '<C-n>',
-    \ 'PreviousReference': '<C-p>',
-    \ 'FindImplementations': 'gI',
-    \ 'FindCodeActions': 'ga',
-    \ 'Rename': 'gR',
-    \ 'ShowHover': v:true,
-    \ 'DocumentSymbol': 'go',
-    \ 'WorkspaceSymbol': 'gS',
-    \ 'SignatureHelp': 'gm',
-    \ 'Completion': 'completefunc',
-    \}
+if !exists('s:initialized')
+  let s:initialized = v:true
+  let s:default_maps = {
+      \ 'GoToDefinition': '<C-]>',
+      \ 'GoToDefinitionSplit': ['<C-W>]', '<C-W><C-]>'],
+      \ 'FindReferences': 'gr',
+      \ 'NextReference': '<C-n>',
+      \ 'PreviousReference': '<C-p>',
+      \ 'FindImplementations': 'gI',
+      \ 'FindCodeActions': 'ga',
+      \ 'Rename': 'gR',
+      \ 'ShowHover': v:true,
+      \ 'DocumentSymbol': 'go',
+      \ 'WorkspaceSymbol': 'gS',
+      \ 'SignatureHelp': 'gm',
+      \ 'Completion': 'completefunc',
+      \}
+  let s:skip_marker = {}
+endif
 
 function! s:ApplyDefaults(config) abort
   if type(a:config) == v:t_bool || type(a:config) == v:t_number
@@ -165,4 +169,10 @@ function! lsc#config#shouldEcho(server, type) abort
     endif
   endif
   return a:type <= l:threshold
+endfunction
+
+" A maker from returns from "message_hook" functions indicating that a call
+" should not be made.
+function! lsc#config#skip() abort
+  return s:skip_marker
 endfunction

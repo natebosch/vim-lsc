@@ -423,6 +423,9 @@ for that key. Functions must take two arguments, the method name being called
 which take no parameters the second value may be `v:null`. The modified or new
 params should be returned by the function.
 
+If the returned value is specifically the return from `lsc#config#skip()` then
+the call will not be made.
+
 For example:
 >
  let g:lsc_server_commands = {
