@@ -17,6 +17,8 @@
   for before starting autocomplete. Set to `0` or `v:false` to disable
   autocomplete on anything other than trigger characters, or to a number to vary
   the length before autocomplete from the default of `3`.
+- Add support for skipping calls by adding a `message_hook` and returning
+  `lsc#config#skip()`.
 
 # 0.3.2
 
