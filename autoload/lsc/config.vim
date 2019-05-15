@@ -72,7 +72,9 @@ function! lsc#config#mapKeys() abort
       execute 'nnoremap <buffer>'.m.' :LSClient'.command.'<CR>'
     endfor
   endfor
-  if has_key(l:maps, 'Completion')
+  if has_key(l:maps, 'Completion') &&
+      \ type(l:maps['Completion']) == v:t_string &&
+      \ len(l:maps['Completion']) > 0
     execute 'setlocal '.l:maps['Completion'].'=lsc#complete#complete'
   endif
   if has_key(l:maps, 'ShowHover')
