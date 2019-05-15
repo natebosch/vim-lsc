@@ -124,9 +124,11 @@ the documentation window use the following:
 autocmd CompleteDone * silent! pclose
 ```
 
-Disable autocomplete with `let g:lsc_enable_autocomplete = v:false`. When using
-manual completion the `completefunc` may have no results if completion is
-requested before the server responds with suggestions.
+Disable autocomplete with `let g:lsc_enable_autocomplete = v:false`. A
+completion function is available at `lsc#complete#complete` (set to
+`completefunc` if applying the default keymap). This is synchronous and has a
+cap of 5 seconds to wait for the server to respond. It can be used whether
+autocomplete is enabled or not.
 
 ### Reference Highlights
 
