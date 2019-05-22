@@ -9,7 +9,7 @@ function! lsc#search#workspaceSymbol(...) abort
 endfunction
 
 function! s:setQuickFixSymbols(results) abort
-  if type(a:results) != v:t_list || len(a:results) == 0
+  if type(a:results) != type([]) || len(a:results) == 0
     call lsc#message#show('No symbols found')
     return
   endif

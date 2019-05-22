@@ -14,19 +14,19 @@ function! lsc#edit#findCodeActions(...) abort
 endfunction
 
 function! s:SelectAction(result, action_filter) abort
-  if type(a:result) != v:t_list || len(a:result) == 0
+  if type(a:result) != type([]) || len(a:result) == 0
     call lsc#message#show('No actions available')
     return
   endif
   let l:choice = a:action_filter(a:result)
-  if type(l:choice) == v:t_dict
-    if has_key(l:choice, 'command') && type(l:choice.command) == v:t_string
+  if type(l:choice) == type({})
+    if has_key(l:choice, 'command') && type(l:choice.command) == type('')
       call s:ExecuteCommand(l:choice)
     else
-      if has_key(l:choice, 'edit') && type(l:choice.edit) == v:t_dict
+      if has_key(l:choice, 'edit') && type(l:choice.edit) == type({})
         call lsc#edit#apply(l:choice.edit)
       endif
-      if has_key(l:choice, 'command') && type(l:choice.command) == v:t_dict
+      if has_key(l:choice, 'command') && type(l:choice.command) == type({})
         call s:ExecuteCommand(l:choice.command)
       endif
     endif

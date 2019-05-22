@@ -146,12 +146,12 @@ function! lsc#util#gateResult(name, callback, ...)
   endif
   let gate = s:callback_gates[a:name]
   let old_pos = getcurpos()
-  if a:0 >= 1 && type(a:1) == v:t_func
+  if a:0 >= 1 && type(a:1) == type({_->)})
     let OnSkip = a:1
   else
     let OnSkip = v:false
   endif
-  if a:0 >= 2 && type(a:2) == v:t_list
+  if a:0 >= 2 && type(a:2) == type([])
     let extra_args = a:2
   else
     let extra_args = []
@@ -168,7 +168,7 @@ function! s:Gated(name, gate, old_pos, on_call, on_skip, extra_args, ...) abort
   endif
   if s:callback_gates[a:name] != a:gate ||
       \ a:old_pos != getcurpos()
-    if type(a:on_skip) == v:t_func
+    if type(a:on_skip) == type({_->_})
       call call(a:on_skip, args)
     endif
   else

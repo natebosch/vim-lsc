@@ -73,7 +73,7 @@ function! s:Consume(server) abort
   let a:server._buffer = remaining_message
   try
     let content = json_decode(payload)
-    if type(content) != v:t_dict | throw 1 | endif
+    if type(content) != type({}) | throw 1 | endif
   catch
     call lsc#message#error('Could not decode message: '.payload)
   endtry

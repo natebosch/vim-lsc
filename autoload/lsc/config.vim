@@ -19,10 +19,10 @@ if !exists('s:initialized')
 endif
 
 function! s:ApplyDefaults(config) abort
-  if type(a:config) == v:t_bool || type(a:config) == v:t_number
+  if type(a:config) == type(v:true) || type(a:config) == type(0)
     return s:default_maps
   endif
-  if type(a:config) != v:t_dict
+  if type(a:config) != type({})
       \ || !has_key(a:config, 'defaults')
       \ || !a:config.defaults
     return a:config
@@ -41,12 +41,12 @@ endfunction
 
 function! lsc#config#mapKeys() abort
   if !exists('g:lsc_auto_map')
-      \ || (type(g:lsc_auto_map) == v:t_bool && !g:lsc_auto_map)
-      \ || (type(g:lsc_auto_map) == v:t_number && !g:lsc_auto_map)
+      \ || (type(g:lsc_auto_map) == type(v:true) && !g:lsc_auto_map)
+      \ || (type(g:lsc_auto_map) == type(0) && !g:lsc_auto_map)
     return
   endif
   let l:maps = s:ApplyDefaults(g:lsc_auto_map)
-  if type(l:maps) != v:t_dict
+  if type(l:maps) != type({})
     call lsc#message#error('g:lsc_auto_map must be a bool or dict')
     return
   endif
@@ -65,21 +65,21 @@ function! lsc#config#mapKeys() abort
       \ 'SignatureHelp',
       \] + (get(g:, 'lsc_enable_apply_edit', 1) ? ['Rename'] : [])
     let lhs = get(l:maps, command, [])
-    if type(lhs) != v:t_string && type(lhs) != v:t_list
+    if type(lhs) != type('') && type(lhs) != type([])
       continue
     endif
-    for m in type(lhs) == v:t_list ? lhs : [lhs]
+    for m in type(lhs) == type([]) ? lhs : [lhs]
       execute 'nnoremap <buffer>'.m.' :LSClient'.command.'<CR>'
     endfor
   endfor
   if has_key(l:maps, 'Completion') &&
-      \ type(l:maps['Completion']) == v:t_string &&
+      \ type(l:maps['Completion']) == type('') &&
       \ len(l:maps['Completion']) > 0
     execute 'setlocal '.l:maps['Completion'].'=lsc#complete#complete'
   endif
   if has_key(l:maps, 'ShowHover')
     let l:show_hover = l:maps['ShowHover']
-    if type(l:show_hover) == v:t_bool || type(l:show_hover) == v:t_number
+    if type(l:show_hover) == type(v:true) || type(l:show_hover) == type(0)
       if l:show_hover
         setlocal keywordprg=:LSClientShowHover
       endif
@@ -92,9 +92,9 @@ function! lsc#config#messageHook(server, method, params) abort
   let hooks = a:server.config.message_hooks
   if !has_key(hooks, a:method) | return a:params | endif
   let l:Hook = hooks[a:method]
-  if type(l:Hook) == v:t_func
+  if type(l:Hook) == type({_->_})
     return s:RunHookFunction(l:Hook, a:method, a:params)
-  elseif type(l:Hook) == v:t_dict
+  elseif type(l:Hook) == type({})
     return s:MergeHookDict(l:Hook, a:method, a:params)
   else
     call lsc#message#error('Message hook must be a function or a dict. '.
@@ -127,9 +127,9 @@ function! s:ResolveHookDict(hook, method, params) abort
   if !s:HasFunction(a:hook) | return a:hook | endif
   let copied = deepcopy(a:hook)
   for key in keys(a:hook)
-    if type(a:hook[key]) == v:t_dict
+    if type(a:hook[key]) == type({})
       let copied[key] = s:ResolveHookDict(a:hook[key], a:method, a:params)
-    elseif type(a:hook[key]) == v:t_func
+    elseif type(a:hook[key]) == type({_->_})
       let Func = a:hook[key]
       let copied[key] = Func(a:method, a:params)
     endif
@@ -139,9 +139,9 @@ endfunction
 
 function! s:HasFunction(hook) abort
   for Value in values(a:hook)
-    if type(Value) == v:t_dict && s:HasFunction(Value)
+    if type(Value) == type({}) && s:HasFunction(Value)
       return v:true
-    elseif type(Value) == v:t_func
+    elseif type(Value) == type({_->_})
       return v:true
     endif
   endfor
@@ -155,7 +155,7 @@ endfunction
 function! lsc#config#shouldEcho(server, type) abort
   let l:threshold = 3
   if has_key(a:server.config, 'log_level')
-    if type(a:server.config.log_level) == v:t_number
+    if type(a:server.config.log_level) == type(0)
       let l:threshold = a:server.config.log_level
     else
       let l:config = a:server.config.log_level
