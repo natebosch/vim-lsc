@@ -146,7 +146,7 @@ function! lsc#util#gateResult(name, callback, ...)
   endif
   let gate = s:callback_gates[a:name]
   let old_pos = getcurpos()
-  if a:0 >= 1 && type(a:1) == type({_->)})
+  if a:0 >= 1 && type(a:1) == type({_->_})
     let OnSkip = a:1
   else
     let OnSkip = v:false
