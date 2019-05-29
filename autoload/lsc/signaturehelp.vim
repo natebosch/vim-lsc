@@ -19,7 +19,7 @@ endfunction
 function! s:ShowHelp(signatureHelp) abort
   let signatures = []
   if has_key(a:signatureHelp, 'signatures')
-    if type(a:signatureHelp.signatures) == v:t_list
+    if type(a:signatureHelp.signatures) == type([])
       let signatures = a:signatureHelp.signatures
     endif
   endif

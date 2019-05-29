@@ -33,7 +33,7 @@ function! s:Echo(echo_cmd, message, level) abort
 endfunction
 
 function! s:Level(level) abort
-  if type(a:level) == v:t_number
+  if type(a:level) == type(0)
     if a:level == 1
       return ['Error', 'lscDiagnosticError']
     elseif a:level == 2

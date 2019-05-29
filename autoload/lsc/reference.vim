@@ -8,7 +8,7 @@ endfunction
 
 function! s:GoToDefinition(mods, issplit, result) abort
   if type(a:result) == type(v:null) ||
-      \ (type(a:result) == v:t_list && len(a:result) == 0)
+      \ (type(a:result) == type([]) && len(a:result) == 0)
     call lsc#message#error('No definition found')
     return
   endif
@@ -132,12 +132,12 @@ function! s:showHover(result) abort
     return
   endif
   let contents = a:result.contents
-  if type(contents) != v:t_list
+  if type(contents) != type([])
     let contents = [contents]
   endif
   let lines = []
   for item in contents
-    if type(item) == v:t_dict
+    if type(item) == type({})
       let l:lines += split(item.value, "\n")
     else
       let l:lines += split(item, "\n")

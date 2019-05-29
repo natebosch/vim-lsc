@@ -122,7 +122,7 @@ function! s:Start(server) abort
   function! OnInitialize(init_result) closure abort
     let a:server.status = 'running'
     call a:server.notify('initialized', {})
-    if type(a:init_result) == v:t_dict && has_key(a:init_result, 'capabilities')
+    if type(a:init_result) == type({}) && has_key(a:init_result, 'capabilities')
       let a:server.capabilities =
           \ lsc#capabilities#normalize(a:init_result.capabilities)
     endif
@@ -200,12 +200,12 @@ function! lsc#server#enable()
 endfunction
 
 function! lsc#server#register(filetype, config) abort
-  if type(a:config) == v:t_string
+  if type(a:config) == type('')
     let config = {'command': a:config, 'name': a:config}
-  elseif type(a:config) == v:t_list
+  elseif type(a:config) == type([])
     let config = {'command': a:config, 'name': string(a:config)}
   else
-    if type(a:config) != v:t_dict
+    if type(a:config) != type({})
       throw 'Server configuration must be an executable or a dict'
     endif
     let config = a:config

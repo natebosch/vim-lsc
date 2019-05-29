@@ -136,11 +136,11 @@ function! s:SuggestCompletions(completion) abort
 endfunction
 
 function! s:SetCompleteOpt() abort
-  if type(g:lsc_auto_completeopt) == v:t_string
+  if type(g:lsc_auto_completeopt) == type('')
     " Set completeopt locally exactly like the user wants
     execute 'setl completeopt='.g:lsc_auto_completeopt
-  elseif (type(g:lsc_auto_completeopt) == v:t_bool
-      \ || type(g:lsc_auto_completeopt) == v:t_number)
+  elseif (type(g:lsc_auto_completeopt) == type(v:true)
+      \ || type(g:lsc_auto_completeopt) == type(0))
       \ && g:lsc_auto_completeopt
     " Set the options that impact behavior for autocomplete use cases without
     " touching other like `preview`
@@ -199,7 +199,7 @@ endfunction
 
 function! s:MatchSuggestion(base, suggestion) abort
   let word = a:suggestion
-  if type(word) == v:t_dict | let word = word.word | endif
+  if type(word) == type({}) | let word = word.word | endif
   return word =~? a:base
 endfunction
 
@@ -214,9 +214,9 @@ endfunction
 " single start columns for every suggestion.
 function! s:CompletionItems(completion_result) abort
   let completion_items = []
-  if type(a:completion_result) == v:t_list
+  if type(a:completion_result) == type([])
     let completion_items = a:completion_result
-  elseif type(a:completion_result) == v:t_dict
+  elseif type(a:completion_result) == type({})
     let completion_items = a:completion_result.items
   endif
   call map(completion_items, {_, item -> s:CompletionItem(item)})
@@ -240,7 +240,7 @@ endfunction
 function! s:CompletionItem(completion_item) abort
   let item = {'abbr': a:completion_item.label, 'icase': 1, 'dup': 1}
   if has_key(a:completion_item, 'textEdit')
-      \ && type(a:completion_item.textEdit) == v:t_dict
+      \ && type(a:completion_item.textEdit) == type({})
       \ && has_key(a:completion_item.textEdit, 'newText')
     let item.word = a:completion_item.textEdit.newText
     let item.start_col = a:completion_item.textEdit.range.start.character + 1
@@ -268,9 +268,9 @@ function! s:CompletionItem(completion_item) abort
   let item.info = ' '
   if has_key(a:completion_item, 'documentation')
     let documentation = a:completion_item.documentation
-    if type(documentation) == v:t_string
+    if type(documentation) == type('')
       let item.info = documentation
-    elseif type(documentation) == v:t_dict && has_key(documentation, 'value')
+    elseif type(documentation) == type({}) && has_key(documentation, 'value')
       let item.info = documentation.value
     endif
   endif

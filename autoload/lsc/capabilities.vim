@@ -16,7 +16,7 @@ function! lsc#capabilities#normalize(capabilities) abort
     let l:text_document_sync = a:capabilities['textDocumentSync']
     let l:incremental = v:false
     let l:send_did_save = v:true
-    if type(l:text_document_sync) == v:t_dict
+    if type(l:text_document_sync) == type({})
       if has_key(l:text_document_sync, 'change')
         let l:incremental = l:text_document_sync['change'] == 2
       endif
