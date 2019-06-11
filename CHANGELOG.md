@@ -19,6 +19,8 @@
   the length before autocomplete from the default of `3`.
 - Add support for skipping calls by adding a `message_hook` and returning
   `lsc#config#skip()`.
+- Add `'notifications'` support in server config to add callbacks for server
+  specific notifications.
 
 # 0.3.2
 

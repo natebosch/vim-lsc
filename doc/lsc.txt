@@ -442,6 +442,31 @@ For example:
      \  },
      \}
 <
+                                                *lsc-server-notifications*
+`notifications`: Set to a dictionary where the keys are LSP notification
+methods and the values are |funcref|s to be invoked when those notifications
+arrive. The callback should take two arguments, the first is the `method` for
+the notification, the second is the `params`. The method will start with `$`.
+This can be used to hook in to server specific functionality that isn't part
+of the LSP spec.
+
+For example:
+>
+ let g:lsc_server_commands = {
+     \ 'dart': {
+     \    'command': 'dart_language_server',
+     \    'notifications': {
+     \        '$/analyzerStatus': function('<SID>HandleStatus'),
+     \    },
+     \  },
+     \}
+
+ function! s:HandleStatus(method, params) abort
+   " Used in statusline to show when server is busy
+   let g:dart_server_status = a:params.isAnalyzing
+ endfunction
+
+<
 
 DEBUGGING TIPS                                  *lsc-debugging*
 

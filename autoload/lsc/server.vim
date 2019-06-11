@@ -321,7 +321,7 @@ function! s:Dispatch(server, method, params) abort
       call a:server.reply(l:id, l:response)
     endif
   elseif a:method =~? '\v^\$'
-    " Unhandled extension to the protocol, drop the message
+    call lsc#config#handleNotification(a:server, a:method, a:params)
   else
     echom 'Got notification: ' . a:method .
         \ ' params: ' . string(a:params)

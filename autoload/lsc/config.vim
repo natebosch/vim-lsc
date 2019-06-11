@@ -178,3 +178,21 @@ endfunction
 function! lsc#config#skip() abort
   return s:skip_marker
 endfunction
+
+function! lsc#config#handleNotification(server, method, params) abort
+  if !has_key(a:server.config, 'notifications') | return | endif
+  let l:hooks = a:server.config.notifications
+  if !has_key(l:hooks, a:method) | return | endif
+  let l:Hook = l:hooks[a:method]
+  if type(l:Hook) != type({_->_})
+    call lsc#message#error('Notification handlers must be functions: '.a:method)
+    unlet l:hooks[a:method]
+    return
+  endif
+  try
+    call l:Hook(a:method, a:params)
+  catch
+    call lsc#message#error('Failed to run callback for '.a:method.
+        \': '.v:exception)
+  endtry
+endfunction
