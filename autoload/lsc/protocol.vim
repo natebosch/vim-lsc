@@ -108,7 +108,8 @@ function! s:Dispatch(message, OnMessage, callbacks) abort
   if has_key(a:message, 'method')
     let l:method = a:message.method
     let l:params = has_key(a:message, 'params') ? a:message.params : v:null
-    call a:OnMessage(l:method, l:params)
+    let l:id = has_key(a:message, 'id') ? a:message.id : v:null
+    call a:OnMessage(l:method, l:params, l:id)
   elseif has_key(a:message, 'error')
     let l:error = a:message.error
     let l:message = has_key(l:error, 'message') ?

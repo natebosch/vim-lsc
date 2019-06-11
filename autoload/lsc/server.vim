@@ -246,8 +246,8 @@ function! lsc#server#register(filetype, config) abort
     call self._channel.notify(a:method, l:params)
     return v:true
   endfunction
-  function server.respond(method, params) abort
-    call self._channel.respond(a:method, a:params)
+  function server.respond(id, result) abort
+    call self._channel.respond(a:id, a:result)
   endfunction
   function server._initialize(params, callback) abort
     let l:params = lsc#config#messageHook(self, 'initialize', a:params)
@@ -285,7 +285,7 @@ function! lsc#server#register(filetype, config) abort
   let s:servers[config.name] = server
 endfunction
 
-function! s:Dispatch(server, method, params) abort
+function! s:Dispatch(server, method, params, id) abort
   if a:method ==? 'textDocument/publishDiagnostics'
     let file_path = lsc#uri#documentPath(a:params['uri'])
     call lsc#diagnostics#setForFile(file_path, a:params['diagnostics'])
@@ -294,10 +294,7 @@ function! s:Dispatch(server, method, params) abort
   elseif a:method ==? 'window/showMessageRequest'
     let l:response =
         \ lsc#message#showRequest(a:params['message'], a:params['actions'])
-    if has_key(a:params['message'], 'id')
-      let l:id = a:params['message']['id']
-      call a:server.reply(id, response)
-    endif
+    call a:server.respond(a:id, l:response)
   elseif a:method ==? 'window/logMessage'
     if lsc#config#shouldEcho(a:server, a:params.type)
       call lsc#message#log(a:params.message, a:params.type)
@@ -314,12 +311,9 @@ function! s:Dispatch(server, method, params) abort
       call lsc#message#show('Starting ' . a:params['title'])
     endif
   elseif a:method ==? 'workspace/applyEdit'
-    let applied = lsc#edit#apply(a:params.edit)
-    if has_key(a:params, 'message') && has_key(a:params['message'], 'id')
-      let l:id = a:params['message']['id']
-      let l:response = {'applied': applied}
-      call a:server.reply(l:id, l:response)
-    endif
+    let l:applied = lsc#edit#apply(a:params.edit)
+    let l:response = {'applied': l:applied}
+    call a:server.respond(a:id, l:response)
   elseif a:method =~? '\v^\$'
     call lsc#config#handleNotification(a:server, a:method, a:params)
   else
