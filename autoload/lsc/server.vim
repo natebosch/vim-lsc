@@ -287,8 +287,10 @@ endfunction
 
 function! s:Dispatch(server, method, params, id) abort
   if a:method ==? 'textDocument/publishDiagnostics'
-    let file_path = lsc#uri#documentPath(a:params['uri'])
-    call lsc#diagnostics#setForFile(file_path, a:params['diagnostics'])
+    let l:file_path = lsc#uri#documentPath(a:params['uri'])
+    let l:diagnostics =
+        \ lsc#config#filterDiagnostics(a:server, a:params['diagnostics'])
+    call lsc#diagnostics#setForFile(l:file_path, l:diagnostics)
   elseif a:method ==? 'window/showMessage'
     call lsc#message#show(a:params['message'], a:params['type'])
   elseif a:method ==? 'window/showMessageRequest'

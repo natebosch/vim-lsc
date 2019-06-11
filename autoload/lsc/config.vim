@@ -196,3 +196,10 @@ function! lsc#config#handleNotification(server, method, params) abort
         \': '.v:exception)
   endtry
 endfunction
+
+function! lsc#config#filterDiagnostics(server, diagnostics) abort
+  if !has_key(a:server.config, 'diagnostic_filter')
+    return a:diagnostics
+  endif
+  return filter(a:diagnostics, a:server.config.diagnostic_filter)
+endfunction
