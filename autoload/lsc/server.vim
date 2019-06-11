@@ -314,7 +314,6 @@ function! s:Dispatch(server, method, params, id) abort
     let l:applied = lsc#edit#apply(a:params.edit)
     let l:response = {'applied': l:applied}
     call a:server.respond(a:id, l:response)
-    endif
   elseif a:method =~? '\v^\$'
     call lsc#config#handleNotification(a:server, a:method, a:params)
   else
