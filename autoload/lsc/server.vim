@@ -11,6 +11,7 @@ if !exists('s:initialized')
   " - capabilities. Configuration for client/server interaction.
   " - filetypes. List of filetypes handled by this server.
   " - logs. The last 100 logs from `window/logMessage`.
+  " - tracelog. A buffer with all LSP communication with this server.
   " - config. Config dict. Contains:
   "   - name: Same as the key into `s:servers`
   "   - command: Executable
@@ -111,8 +112,9 @@ function! s:Start(server) abort
     " Server is already running
     return
   endif
-  let l:command = a:server.config.command
-  let a:server._channel = lsc#protocol#open(l:command,
+  let a:server._channel = lsc#protocol#open(
+      \ a:server.config.command,
+      \ a:server.tracelog,
       \ function('<SID>Dispatch', [a:server]),
       \ a:server.on_err, a:server.on_exit)
   if type(a:server._channel) == type(v:null)
@@ -227,6 +229,7 @@ function! lsc#server#register(filetype, config) abort
   endif
   let server = {
       \ 'status': initial_status,
+      \ 'tracelog': lsc#log#create(a:config.name),
       \ 'logs': [],
       \ 'filetypes': [a:filetype],
       \ 'config': config,

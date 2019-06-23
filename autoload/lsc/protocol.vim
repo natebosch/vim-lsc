@@ -1,11 +1,10 @@
-function! lsc#protocol#open(command, on_message, on_err, on_exit)
+function! lsc#protocol#open(command, tracelog, on_message, on_err, on_exit)
   let l:c = {
       \ '_call_id': 0,
-      \ '_in': [],
-      \ '_out': [],
       \ '_buffer': '',
       \ '_on_message': a:on_message,
       \ '_callbacks': {},
+      \ '_tracelog': a:tracelog,
       \}
   function l:c.request(method, params, callback) abort
     let self._call_id += 1
@@ -15,15 +14,17 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit)
   endfunction
   function l:c.notify(method, params) abort
     let l:message = s:Format(a:method, a:params, v:null)
-    cal lsc#util#shift(self._in, 10, l:message)
     call self._send(l:message)
   endfunction
   function l:c.respond(id, result) abort
     call self._send({'id': a:id, 'result': a:result})
   endfunction
   function l:c._send(message) abort
-    call lsc#util#shift(self._in, 10, a:message)
-    call self._channel.send(s:Encode(a:message))
+    let a:message['jsonrpc'] = '2.0'
+    let l:encoded = json_encode(a:message)
+    let l:length = len(l:encoded)
+    call self._tracelog.append('IN: '.l:encoded)
+    call self._channel.send("Content-Length: ".l:length."\r\n\r\n".l:encoded)
   endfunction
   function l:c._recieve(message) abort
     let self._buffer .= a:message
@@ -42,14 +43,6 @@ function! s:Format(method, params, id) abort
   if type(a:params) != type(v:null) | let message['params'] = a:params | endif
   if type(a:id) != type(v:null) | let message['id'] = a:id | endif
   return message
-endfunction
-
-" Prepend the JSON RPC headers and serialize to JSON.
-function! s:Encode(message) abort
-  let a:message['jsonrpc'] = '2.0'
-  let encoded = json_encode(a:message)
-  let length = len(encoded)
-  return "Content-Length: ".length."\r\n\r\n".encoded
 endfunction
 
 " Reads from the buffer for server_name and processes the message. Continues to
@@ -78,7 +71,7 @@ function! s:Consume(server) abort
     call lsc#message#error('Could not decode message: '.payload)
   endtry
   if exists('l:content')
-    call lsc#util#shift(a:server._out, 10, content)
+    call a:server._tracelog.append('OUT: '.l:payload)
     try
       call s:Dispatch(content, a:server._on_message, a:server._callbacks)
     catch
