@@ -103,6 +103,10 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
       endif
       call sort(add(line, diagnostic), function('<SID>CompareDiagnostics'))
     endfor
+    if has_key(s:file_diagnostics, a:file_path) &&
+        \ s:file_diagnostics[a:file_path] == l:diagnostics_by_line
+      return
+    endif
     let s:file_diagnostics[a:file_path] = diagnostics_by_line
   else
     unlet s:file_diagnostics[a:file_path]
