@@ -206,13 +206,38 @@ function! lsc#diagnostics#showInQuickFix() abort
 endfunction
 
 function! s:UpdateQuickFix() abort
-  let l:current = get(getqflist({'context': 1}), 'context', {})
-  if type(l:current) != type({}) ||
-      \ !has_key(l:current, 'client') ||
-      \ l:current.client != 'LSC'
+  let l:current = getqflist({'context': 1, 'idx': 1, 'items': 1})
+  let l:context = get(l:current, 'context', 0)
+  if type(l:context) != type({}) ||
+      \ !has_key(l:context, 'client') ||
+      \ l:context.client != 'LSC'
     return
   endif
-  call setqflist(s:AllDiagnostics(), 'r')
+  if l:current.idx >= 0 && len(l:current.items) > l:current.idx
+    let l:prev_item = l:current.items[l:current.idx]
+  endif
+  let l:new_list = s:AllDiagnostics()
+  if len(l:new_list) == 0
+    call setqflist([], 'r')
+    return
+  endif
+  let l:new_idx = exists('l:prev_item') ?
+      \ s:FindNearest(l:prev_item, l:new_list) : 0
+  call setqflist([], 'r', {
+      \ 'items': l:new_list,
+      \ 'idx': l:new_idx,
+      \})
+endfunction
+
+function! s:FindNearest(prev, items) abort
+  let l:idx = 0
+  for l:item in a:items
+    if lsc#util#compareQuickFixItems(l:item, a:prev) >= 0
+      return l:idx
+    endif
+    let l:idx += 1
+  endfor
+  return l:idx
 endfunction
 
 function! s:AllDiagnostics() abort
