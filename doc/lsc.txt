@@ -147,7 +147,9 @@ exist if |g:lsc_enable_apply_edit| is set to `v:false`.
 Popupate the quickfix list with all diagnostics that have been sent by the
 server, spanning all files. Depending on the server implementation this may
 show all diagnostics for open files, or also diagnostics for files that have
-not yet been opened.
+not yet been opened. After running this command the quickfix list will be
+updated any time diagnostics change, until the quickfix list is set by some
+other command.
 
                                                 *:LSClientLineDiagnostics*
 Echo the full text of all diagnostics on the current line. Useful when a

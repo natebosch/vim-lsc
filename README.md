@@ -108,6 +108,9 @@ displayed.
 Diagnostics are also reported in the location list for each window which has the
 buffer open.
 
+Run `:LSClientAllDiagnostics` to populate, and maintain, a list of all
+diagnostics across the project in the quickfix list.
+
 ### Autocomplete
 
 When more than 3 word characters or a trigger character are typed a request for

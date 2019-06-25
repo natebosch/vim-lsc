@@ -21,6 +21,9 @@
   `lsc#config#skip()`.
 - Add `'notifications'` support in server config to add callbacks for server
   specific notifications.
+- After calling `:LSClientAllDiagnostics` the quickfix list will be kept up to
+  date with all diagnostics across the project, until it is set by some other
+  tool.
 
 # 0.3.2
 
