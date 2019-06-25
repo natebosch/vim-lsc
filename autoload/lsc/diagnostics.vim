@@ -40,14 +40,11 @@ endfunction
 
 " Finds the human readable label for a diagnsotic severity level
 function! s:SeverityLabel(severity) abort
-    if a:severity == 1
-      return 'Error'
-    elseif a:severity == 2
-      return 'Warning'
-    elseif a:severity == 3
-      return 'Info'
-    elseif a:severity == 4
-      return 'Hint'
+    if a:severity == 1 | return 'Error'
+    elseif a:severity == 2 | return 'Warning'
+    elseif a:severity == 3 | return 'Info'
+    elseif a:severity == 4 | return 'Hint'
+    else | return ''
     endif
 endfunction
 
