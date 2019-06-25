@@ -42,9 +42,9 @@ endfunction
 " Compare two quickfix or location list items.
 "
 " Items are compared with priority order:
-" filename > line > column
+" filename > line > column > type (severity) > text
 "
-" filnames within cwd are always considered to have a lower sort than others.
+" filenames within cwd are always considered to have a lower sort than others.
 function! lsc#util#compareQuickFixItems(i1, i2) abort
   let file_1 = s:QuickFixFilename(a:i1)
   let file_2 = s:QuickFixFilename(a:i2)
@@ -56,7 +56,21 @@ function! lsc#util#compareQuickFixItems(i1, i2) abort
     return file_1 > file_2 ? 1 : -1
   endif
   if a:i1.lnum != a:i2.lnum | return a:i1.lnum - a:i2.lnum | endif
-  return a:i1.col - a:i2.col
+  if a:i1.col != a:i2.col | return a:i1.col - a:i2.col | endif
+  if a:i1.type != a:i2.type
+    " Reverse order so high severity is ordered first
+    return s:QuickFixSeverity(a:i2.type) - s:QuickFixSeverity(a:i1.type)
+  endif
+  return a:i1.text == a:i2.text ? 0 : a:i1.text > a:i2.text ? 1 : -1
+endfunction
+
+function! s:QuickFixSeverity(type)
+  if a:type == 'E' | return 1
+  elseif a:type == 'W' | return 2
+  elseif a:type == 'I' | return 3
+  elseif a:type == 'H' | return 4
+  else | return 5
+  endif
 endfunction
 
 function! s:QuickFixFilename(item) abort
