@@ -213,8 +213,8 @@ function! s:UpdateQuickFix() abort
       \ l:context.client != 'LSC'
     return
   endif
-  if l:current.idx >= 0 && len(l:current.items) > l:current.idx
-    let l:prev_item = l:current.items[l:current.idx]
+  if l:current.idx > 0 && len(l:current.items) >= l:current.idx
+    let l:prev_item = l:current.items[l:current.idx - 1]
   endif
   let l:new_list = s:AllDiagnostics()
   if len(l:new_list) == 0
@@ -230,14 +230,14 @@ function! s:UpdateQuickFix() abort
 endfunction
 
 function! s:FindNearest(prev, items) abort
-  let l:idx = 0
+  let l:idx = 1
   for l:item in a:items
     if lsc#util#compareQuickFixItems(l:item, a:prev) >= 0
       return l:idx
     endif
     let l:idx += 1
   endfor
-  return l:idx
+  return l:idx - 1
 endfunction
 
 function! s:AllDiagnostics() abort
