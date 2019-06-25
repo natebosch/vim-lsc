@@ -213,20 +213,14 @@ function! s:UpdateQuickFix() abort
       \ l:context.client != 'LSC'
     return
   endif
-  if l:current.idx > 0 && len(l:current.items) >= l:current.idx
+  let l:new_list = {'items': s:AllDiagnostics()}
+  if len(l:new_list.items) > 0 &&
+      \ l:current.idx > 0 &&
+      \ len(l:current.items) >= l:current.idx
     let l:prev_item = l:current.items[l:current.idx - 1]
+    let l:new_list.idx = s:FindNearest(l:prev_item, l:new_list.items)
   endif
-  let l:new_list = s:AllDiagnostics()
-  if len(l:new_list) == 0
-    call setqflist([], 'r')
-    return
-  endif
-  let l:new_idx = exists('l:prev_item') ?
-      \ s:FindNearest(l:prev_item, l:new_list) : 0
-  call setqflist([], 'r', {
-      \ 'items': l:new_list,
-      \ 'idx': l:new_idx,
-      \})
+  call setqflist([], 'r', l:new_list)
 endfunction
 
 function! s:FindNearest(prev, items) abort
