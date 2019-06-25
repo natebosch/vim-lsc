@@ -53,14 +53,11 @@ endfunction
 
 " Finds the location list type given a diagnostic severity level
 function! s:SeverityType(severity) abort
-    if a:severity == 1
-      return 'E'
-    elseif a:severity == 2
-      return 'W'
-    elseif a:severity == 3
-      return 'I'
-    elseif a:severity == 4
-      return 'H'
+    if a:severity == 1 | return 'E'
+    elseif a:severity == 2 | return 'W'
+    elseif a:severity == 3 | return 'I'
+    elseif a:severity == 4 | return 'H'
+    else | return ''
     endif
 endfunction
 
