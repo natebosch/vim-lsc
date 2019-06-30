@@ -266,6 +266,13 @@ with "g:lsc_preview_split_direction" set to either |above| or |below|. This
 configuration will not impact the preview window which may open during
 completion.
 
+                                                *lsc-configure-flush-on-change*
+                                                *g:lsc_flush_on_change*
+By default all changes to a buffer are flushed to the server and diagnostics
+are updated as soon as you stop typing. You can disable this behaviour by
+setting `g:lsc_flush_on_change` to `v:false`. With `g:lsc_flush_on_change`
+disabled, diagnostics are only updated when you save the file.
+
                                                 *lsc-configure-highlight*
 vim-lsc uses highlight groups "lscDiagnosticError", "lscDiagnosticWarning",
 "lscDiagnosticInfo", "lscDiagnosticHint", "lscReference", and
