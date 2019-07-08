@@ -266,6 +266,10 @@ with "g:lsc_preview_split_direction" set to either |above| or |below|. This
 configuration will not impact the preview window which may open during
 completion.
 
+                                                *g:lsc_preview_hover_popup*
+Enabled use |popup| `:LSClientShowHover`.
+Require greater then or equal patch-8.1.1513
+
                                                 *lsc-configure-highlight*
 vim-lsc uses highlight groups "lscDiagnosticError", "lscDiagnosticWarning",
 "lscDiagnosticInfo", "lscDiagnosticHint", "lscReference", and

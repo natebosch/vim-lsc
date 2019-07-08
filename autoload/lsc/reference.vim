@@ -143,6 +143,15 @@ function! s:showHover(result) abort
       let l:lines += split(item, "\n")
     endif
   endfor
+  if exists('g:lsc_preview_hover_popup') && has("patch-8.1.1513")
+    call popup_clear()
+    call popup_atcursor(l:lines, {
+          \ "padding": [1, 1, 1, 1],
+          \ "border": [0, 0, 0, 0],
+          \ })
+    return
+  endif
+
   call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
 endfunction
 
