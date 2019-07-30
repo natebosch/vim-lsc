@@ -249,6 +249,17 @@ different number of word characters. Set to `0` or `v:false` to disable
 autocomplete following word characters and to use exclusively trigger
 characters instead.
 
+                                                *lsc-configure-complete-timeout*
+                                                *g:lsc_complete_timeout*
+When used as a manually invoked `completefunc` the results are expected
+synchronously and the editor will be unresponsive. By default the client will
+wait up to 5 seconds for results. The timeout can be adjusted by setting a
+global variable `g;lsc_complete_timeout` to the number of seconds to wait. For
+example:
+>
+ let g:lsc_complete_timeout = 0.5 " Wait up to a half second
+<
+
                                                 *lsc-configure-diagnostics*
                                                 *g:lsc_enable_diagnostics*
 Diagnostics highlighting and location list updating is enabled by default. To

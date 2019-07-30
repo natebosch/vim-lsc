@@ -153,8 +153,9 @@ function! lsc#complete#complete(findstart, base) abort
   if !exists('b:lsc_completion')
     let l:searchStart = reltime()
     call s:startCompletion(v:false)
+    let l:timeout = get(g:, 'lsc_complete_timeout', 5)
     while !exists('b:lsc_completion')
-        \ && reltimefloat(reltime(l:searchStart)) <= 5.0
+        \ && reltimefloat(reltime(l:searchStart)) <= l:timeout
       sleep 100m
     endwhile
     if !exists('b:lsc_completion')
