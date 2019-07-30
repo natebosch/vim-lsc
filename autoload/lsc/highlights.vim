@@ -16,8 +16,18 @@ function! lsc#highlights#update() abort
   if &diff | return | endif
   for line in values(lsc#diagnostics#forFile(lsc#file#fullPath()))
     for diagnostic in line
-      let match = matchaddpos(diagnostic.group, diagnostic.ranges, -1)
-      call add(w:lsc_diagnostic_matches, match)
+      if l:diagnostic.ranges[0][0] > line('$')
+        " Diagnostic starts after end of file
+        let l:match = matchadd(diagnostic.group, '\%'.line('$').'l$')
+      elseif len(l:diagnostic.ranges) == 1 &&
+          \ l:diagnostic.ranges[0][1] > len(getline(l:diagnostic.ranges[0][0]))
+        " Diagnostic starts after end of line
+        let l:match =
+            \ matchadd(diagnostic.group, '\%'.l:diagnostic.ranges[0][0].'l$')
+      else
+        let l:match = matchaddpos(diagnostic.group, diagnostic.ranges, -1)
+      endif
+      call add(w:lsc_diagnostic_matches, l:match)
     endfor
   endfor
   call s:MarkCurrentWindowFresh()
