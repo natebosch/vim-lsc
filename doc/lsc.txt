@@ -481,6 +481,24 @@ For example:
 
 <
 
+                                                *lsc-server-workspace_config*
+`workspace_config`: Set to any json encodable value which will be sent to the
+server after startup as the `settings` in a `workspace/didChangeConfiguration`
+notificaiton. See the documentation for your server for what values are accepted
+in this notification.
+
+For example:
+>
+ let g:lsc_server_commands = {
+     \ 'rust': {
+     \    'command': 'rls',
+     \    'workspace_config': {
+     \        'clippy_preference': 'on',
+     \    },
+     \  },
+     \}
+<
+
 DEBUGGING TIPS                                  *lsc-debugging*
 
 If you are having difficulty with integration with a particular language

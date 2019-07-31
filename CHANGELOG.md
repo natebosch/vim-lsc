@@ -25,6 +25,8 @@
 - After calling `:LSClientAllDiagnostics` the quickfix list will be kept up to
   date with all diagnostics across the project, until it is set by some other
   tool.
+- Add support for a `workspace_config` server configuration key which causes a
+  `workspace/didChangeConfiguration` notification on server startup.
 
 # 0.3.2
 
