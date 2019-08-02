@@ -163,7 +163,10 @@ function! lsc#complete#complete(findstart, base) abort
     endif
   endif
   if a:findstart
-    if len(b:lsc_completion.items) == 0 | return -3 | endif
+    if len(b:lsc_completion.items) == 0
+      unlet b:lsc_completion
+      return -3
+    endif
     return  s:FindStart(b:lsc_completion) - 1
   else
     return s:FindSuggestions(a:base, b:lsc_completion)
