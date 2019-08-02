@@ -16,6 +16,8 @@ if !exists('s:initialized')
   "   - command: Executable
   "   - enabled: (optional) Whether the server should be started.
   "   - message_hooks: (optional) Functions call to override params
+  "   - workspace_config: (optional) Arbitrary data to send as
+  "     `workspace/didChangeConfiguration` settings on startup.
   let s:servers = {}
   let s:initialized = v:true
 endif
@@ -125,6 +127,11 @@ function! s:Start(server) abort
     if type(a:init_result) == type({}) && has_key(a:init_result, 'capabilities')
       let a:server.capabilities =
           \ lsc#capabilities#normalize(a:init_result.capabilities)
+    endif
+    if has_key(a:server.config, 'workspace_config')
+      call a:server.notify('workspace/didChangeConfiguration', {
+          \ 'settings': a:server.config.workspace_config
+          \})
     endif
     for filetype in a:server.filetypes
       call lsc#file#trackAll(filetype)
