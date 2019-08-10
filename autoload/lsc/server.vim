@@ -16,6 +16,8 @@ if !exists('s:initialized')
   "   - command: Executable
   "   - enabled: (optional) Whether the server should be started.
   "   - message_hooks: (optional) Functions call to override params
+  "   - workspace_config: (optional) Arbitrary data to send as
+  "     `workspace/didChangeConfiguration` settings on startup.
   let s:servers = {}
   let s:initialized = v:true
 endif
@@ -75,10 +77,14 @@ endfunction
 function! s:Kill(server, status, OnExit) abort
   function! Exit(result) closure abort
     let a:server.status = a:status
-    call a:server._channel.notify('exit', v:null) " Don't block on server status
+    if has_key(a:server, '_channel')
+      " An early exit still could have remove the channel.
+      " The status has been updated so `a:server.notify` would bail
+      call a:server._channel.notify('exit', v:null)
+    endif
     if a:OnExit != v:null | call a:OnExit() | endif
   endfunction
-  call a:server.request('shutdown', v:null, function('Exit'))
+  return a:server.request('shutdown', v:null, function('Exit'))
 endfunction
 
 function! lsc#server#restart() abort
@@ -125,6 +131,11 @@ function! s:Start(server) abort
     if type(a:init_result) == type({}) && has_key(a:init_result, 'capabilities')
       let a:server.capabilities =
           \ lsc#capabilities#normalize(a:init_result.capabilities)
+    endif
+    if has_key(a:server.config, 'workspace_config')
+      call a:server.notify('workspace/didChangeConfiguration', {
+          \ 'settings': a:server.config.workspace_config
+          \})
     endif
     for filetype in a:server.filetypes
       call lsc#file#trackAll(filetype)

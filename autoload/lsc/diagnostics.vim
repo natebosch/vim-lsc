@@ -27,7 +27,7 @@ function! s:Convert(diagnostic) abort
 endfunction
 
 function! lsc#diagnostics#clean(filetype) abort
-  for buffer in getbufinfo({'loaded': v:true})
+  for buffer in getbufinfo({'bufloaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
     call lsc#diagnostics#setForFile(lsc#file#normalize(buffer.name), [])
   endfor

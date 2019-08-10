@@ -96,7 +96,7 @@ endfunction
 function! lsc#edit#apply(workspace_edit) abort
   if (exists('g:lsc_enable_apply_edit')
       \ && !g:lsc_enable_apply_edit)
-      \ || !has_key(a:workspace_edit, 'changes')
+      \ || (!has_key(a:workspace_edit, 'changes') && !has_key(a:workspace_edit, 'documentChanges'))
     return v:false
   endif
   let view = winsaveview()
@@ -108,8 +108,19 @@ function! lsc#edit#apply(workspace_edit) abort
   set paste
   set selection=exclusive
   set virtualedit=onemore
+
+
+  if (!has_key(a:workspace_edit, 'documentChanges'))
+    let l:changes = a:workspace_edit.changes
+  else
+    let l:changes = {}
+    for l:textDocumentEdit in a:workspace_edit.documentChanges
+      let l:changes[l:textDocumentEdit.textDocument.uri] = l:textDocumentEdit.edits
+    endfor
+  endif
+
   try
-    call s:ApplyAll(a:workspace_edit.changes)
+    call s:ApplyAll(l:changes)
   finally
     if len(alternate) > 0 | let @#=alternate | endif
     if old_buffer != bufnr('%') | execute 'buffer' old_buffer | endif

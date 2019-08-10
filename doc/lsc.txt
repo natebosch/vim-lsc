@@ -249,6 +249,17 @@ different number of word characters. Set to `0` or `v:false` to disable
 autocomplete following word characters and to use exclusively trigger
 characters instead.
 
+                                                *lsc-configure-complete-timeout*
+                                                *g:lsc_complete_timeout*
+When used as a manually invoked `completefunc` the results are expected
+synchronously and the editor will be unresponsive. By default the client will
+wait up to 5 seconds for results. The timeout can be adjusted by setting a
+global variable `g;lsc_complete_timeout` to the number of seconds to wait. For
+example:
+>
+ let g:lsc_complete_timeout = 0.5 " Wait up to a half second
+<
+
                                                 *lsc-configure-diagnostics*
                                                 *g:lsc_enable_diagnostics*
 Diagnostics highlighting and location list updating is enabled by default. To
@@ -473,6 +484,24 @@ For example:
    let g:dart_server_status = a:params.isAnalyzing
  endfunction
 
+<
+
+                                                *lsc-server-workspace_config*
+`workspace_config`: Set to any json encodable value which will be sent to the
+server after startup as the `settings` in a `workspace/didChangeConfiguration`
+notificaiton. See the documentation for your server for what values are accepted
+in this notification.
+
+For example:
+>
+ let g:lsc_server_commands = {
+     \ 'rust': {
+     \    'command': 'rls',
+     \    'workspace_config': {
+     \        'clippy_preference': 'on',
+     \    },
+     \  },
+     \}
 <
 
 DEBUGGING TIPS                                  *lsc-debugging*
