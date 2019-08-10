@@ -143,7 +143,7 @@ function! s:showHover(result) abort
       let l:lines += split(item, "\n")
     endif
   endfor
-  if exists('g:lsc_preview_hover_popup') && exists('*popup_atcursor')
+  if get(g:, 'lsc_preview_hover_popup', 1) && exists('*popup_atcursor')
     call popup_clear()
     call popup_atcursor(l:lines, {
           \ "padding": [1, 1, 1, 1],
