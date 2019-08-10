@@ -146,8 +146,8 @@ function! s:showHover(result) abort
   if get(g:, 'lsc_hover_popup', v:true) && exists('*popup_atcursor')
     call popup_clear()
     call popup_atcursor(l:lines, {
-          \ "padding": [1, 1, 1, 1],
-          \ "border": [0, 0, 0, 0],
+          \ 'padding': [1, 1, 1, 1],
+          \ 'border': [0, 0, 0, 0],
           \ })
   else
     call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))

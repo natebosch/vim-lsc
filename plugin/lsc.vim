@@ -1,4 +1,4 @@
-if exists("g:loaded_lsc")
+if exists('g:loaded_lsc')
   finish
 endif
 let g:loaded_lsc = 1

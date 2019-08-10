@@ -204,7 +204,7 @@ function! s:UpdateQuickFix() abort
   let l:context = get(l:current, 'context', 0)
   if type(l:context) != type({}) ||
       \ !has_key(l:context, 'client') ||
-      \ l:context.client != 'LSC'
+      \ l:context.client !=# 'LSC'
     return
   endif
   let l:new_list = {'items': s:AllDiagnostics()}

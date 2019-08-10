@@ -26,7 +26,7 @@ function! s:DecodePath(value) abort
       \ '\=s:DecodeChar(submatch(1))', 'g')
 endfunction
 
-function! s:DecodeChar(hexcode)
+function! s:DecodeChar(hexcode) abort
   let charcode = str2nr(a:hexcode, 16)
   return nr2char(charcode)
 endfunction

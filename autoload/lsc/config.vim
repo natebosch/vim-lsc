@@ -159,13 +159,13 @@ function! lsc#config#shouldEcho(server, type) abort
       let l:threshold = a:server.config.log_level
     else
       let l:config = a:server.config.log_level
-      if l:config == 'Error'
+      if l:config ==# 'Error'
         let l:threshold = 1
-      elseif l:config == 'Warning'
+      elseif l:config ==# 'Warning'
         let l:threshold = 2
-      elseif l:config == 'Info'
+      elseif l:config ==# 'Info'
         let l:threshold = 3
-      elseif l:config == 'Log'
+      elseif l:config ==# 'Log'
         let l:threshold = 4
       endif
     endif

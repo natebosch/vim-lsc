@@ -5,17 +5,20 @@
 "
 " Finds a single change between the common prefix, and common postfix.
 function! lsc#diff#compute(old, new) abort
-  let [start_line, start_char] = s:FirstDifference(a:old, a:new)
+  let [l:start_line, start_char] = s:FirstDifference(a:old, a:new)
   let [end_line, end_char] =
-      \ s:LastDifference(a:old[start_line:], a:new[start_line:], start_char)
+      \ s:LastDifference(a:old[l:start_line : ],
+      \ a:new[l:start_line : ], start_char)
 
-  let text = s:ExtractText(a:new, start_line, start_char, end_line, end_char)
-  let length = s:Length(a:old, start_line, start_char, end_line, end_char)
+  let text = s:ExtractText(a:new, l:start_line, start_char, end_line, end_char)
+  let length = s:Length(a:old, l:start_line, start_char, end_line, end_char)
 
   let adj_end_line = len(a:old) + end_line
-  let adj_end_char = end_line == 0 ? 0 : strchars(a:old[end_line]) + end_char + 1
+  let adj_end_char =
+      \ end_line == 0 ? 0 : strchars(a:old[end_line]) + end_char + 1
 
-  let result = { 'range': {'start': {'line': start_line, 'character': start_char},
+  let result = { 'range': {
+      \  'start': {'line': l:start_line, 'character': start_char},
       \  'end': {'line': adj_end_line, 'character': adj_end_char}},
       \ 'text': text,
       \ 'rangeLength': length,

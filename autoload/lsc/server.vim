@@ -91,7 +91,7 @@ function! lsc#server#restart() abort
   let l:server_name = g:lsc_servers_by_filetype[&filetype]
   let l:server = s:servers[l:server_name]
   let l:old_status = l:server.status
-  if l:old_status == 'starting' || l:old_status == 'running'
+  if l:old_status ==# 'starting' || l:old_status ==# 'running'
     call s:Kill(l:server, 'restarting', v:null)
   else
     call s:Start(server)
@@ -192,7 +192,7 @@ function! lsc#server#filetypeActive(filetype) abort
   return !has_key(server.config, 'enabled') || server.config.enabled
 endfunction
 
-function! lsc#server#disable()
+function! lsc#server#disable() abort
   if !has_key(g:lsc_servers_by_filetype, &filetype)
     return v:false
   endif
@@ -201,7 +201,7 @@ function! lsc#server#disable()
   call s:Kill(l:server, 'disabled', v:null)
 endfunction
 
-function! lsc#server#enable()
+function! lsc#server#enable() abort
   if !has_key(g:lsc_servers_by_filetype, &filetype)
     return v:false
   endif
@@ -243,43 +243,43 @@ function! lsc#server#register(filetype, config) abort
       \ 'config': config,
       \ 'capabilities': lsc#capabilities#defaults()
       \}
-  function server.request(method, params, callback) abort
-    if self.status != 'running' | return v:false | endif
+  function! server.request(method, params, callback) abort
+    if self.status !=# 'running' | return v:false | endif
     let l:params = lsc#config#messageHook(self, a:method, a:params)
     if l:params is lsc#config#skip() | return v:false | endif
     call self._channel.request(a:method, l:params, a:callback)
     return v:true
   endfunction
-  function server.notify(method, params) abort
-    if self.status != 'running' | return v:false | endif
+  function! server.notify(method, params) abort
+    if self.status !=# 'running' | return v:false | endif
     let l:params = lsc#config#messageHook(self, a:method, a:params)
     if l:params is lsc#config#skip() | return v:false | endif
     call self._channel.notify(a:method, l:params)
     return v:true
   endfunction
-  function server.respond(id, result) abort
+  function! server.respond(id, result) abort
     call self._channel.respond(a:id, a:result)
   endfunction
-  function server._initialize(params, callback) abort
+  function! server._initialize(params, callback) abort
     let l:params = lsc#config#messageHook(self, 'initialize', a:params)
     call self._channel.request('initialize', l:params, a:callback)
   endfunction
-  function server.on_err(message) abort
-    if self.status == 'starting'
+  function! server.on_err(message) abort
+    if self.status ==# 'starting'
         \ || !has_key(self.config, 'suppress_stderr')
         \ || !self.config.suppress_stderr
       call lsc#message#error('StdErr from '.self.config.name.': '.a:message)
     endif
   endfunction
-  function server.on_exit() abort
+  function! server.on_exit() abort
     unlet self._channel
     let l:old_status = self.status
-    if l:old_status == 'starting'
+    if l:old_status ==# 'starting'
       let self.status= 'failed'
       call lsc#message#error('Failed to initialize server: '.self.config.name)
-    elseif l:old_status == 'exiting'
+    elseif l:old_status ==# 'exiting'
       let self.status= 'exited'
-    elseif l:old_status == 'running'
+    elseif l:old_status ==# 'running'
       let self.status = 'unexpected exit'
       call lsc#message#error('Command exited unexpectedly: '.self.config.name)
     endif
@@ -289,7 +289,7 @@ function! lsc#server#register(filetype, config) abort
       call lsc#file#clean(filetype)
       call lsc#cursor#clean()
     endfor
-    if l:old_status == 'restarting'
+    if l:old_status ==# 'restarting'
       call s:Start(self)
     endif
   endfunction

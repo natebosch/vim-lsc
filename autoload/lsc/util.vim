@@ -23,7 +23,7 @@ function! lsc#util#once(event, function) abort
   exec 'augroup END'
 endfunction
 
-function! s:Callback(group)
+function! s:Callback(group) abort
   exec 'autocmd! '.a:group
   exec 'augroup! '.a:group
   call s:callbacks[a:group][0]()
@@ -64,11 +64,11 @@ function! lsc#util#compareQuickFixItems(i1, i2) abort
   return a:i1.text == a:i2.text ? 0 : a:i1.text > a:i2.text ? 1 : -1
 endfunction
 
-function! s:QuickFixSeverity(type)
-  if a:type == 'E' | return 1
-  elseif a:type == 'W' | return 2
-  elseif a:type == 'I' | return 3
-  elseif a:type == 'H' | return 4
+function! s:QuickFixSeverity(type) abort
+  if a:type ==# 'E' | return 1
+  elseif a:type ==# 'W' | return 2
+  elseif a:type ==# 'I' | return 3
+  elseif a:type ==# 'H' | return 4
   else | return 5
   endif
 endfunction
@@ -152,7 +152,7 @@ function! lsc#util#shift(list, max_length, value) abort
   if len(a:list) > a:max_length | call remove(a:list, 0) | endif
 endfunction
 
-function! lsc#util#gateResult(name, callback, ...)
+function! lsc#util#gateResult(name, callback, ...) abort
   if !has_key(s:callback_gates, a:name)
     let s:callback_gates[a:name] = 0
   else
@@ -190,5 +190,5 @@ function! s:Gated(name, gate, old_pos, on_call, on_skip, extra_args, ...) abort
   endif
 endfunction
 
-function! lsc#util#noop()
+function! lsc#util#noop() abort
 endfunction

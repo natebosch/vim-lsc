@@ -2,7 +2,7 @@ function! lsc#edit#findCodeActions(...) abort
   if a:0 > 0
     let ActionFilter = a:1
   else
-    let ActionFilter = function("<SID>ActionMenu")
+    let ActionFilter = function('<SID>ActionMenu')
   endif
   call lsc#file#flushChanges()
   let params = lsc#params#documentRange()
@@ -81,7 +81,7 @@ function! lsc#edit#rename(...) abort
   else
     let new_name = input('Enter a new name: ')
   endif
-  if l:new_name =~ '\v^\s*$'
+  if l:new_name =~# '\v^\s*$'
     echo "\n"
     call lsc#message#error('Name can not be blank')
     return
