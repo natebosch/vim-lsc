@@ -5,6 +5,8 @@
 - Avoid sending unnecessary `didClose` notifications for buffers of the wrong
   filetype.
 - Fix `getbufinfo` calls for loaded buffers.
+- Fix completions starting at the beginning of the line when the server did not
+  send any items containing a `textEdit` field.
 
 **Minor breaking changes**
 - Server dictionaries no longer expose their full `init_results`, or their call
