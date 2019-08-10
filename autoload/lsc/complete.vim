@@ -173,6 +173,7 @@ function! lsc#complete#complete(findstart, base) abort
   endif
 endfunction
 
+" Finds the 1-based index of the first character in the completion.
 function! s:FindStart(completion) abort
   if has_key(a:completion, 'start_col')
     return a:completion.start_col
@@ -180,7 +181,8 @@ function! s:FindStart(completion) abort
   return s:GuessCompletionStart()
 endfunction
 
-" Finds the character after the last non word character behind the cursor.
+" Finds the 1-based index of the character after the last non word character
+" behind the cursor.
 function! s:GuessCompletionStart()
   let search = col('.') - 2
   let line = getline('.')
@@ -191,8 +193,7 @@ function! s:GuessCompletionStart()
     endif
     let search -= 1
   endwhile
-  " TODO: ??? completion at the beginning of the line?
-  return 0
+  return 1
 endfunction
 
 function! s:FindSuggestions(base, completion) abort
