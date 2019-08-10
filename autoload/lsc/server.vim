@@ -77,10 +77,14 @@ endfunction
 function! s:Kill(server, status, OnExit) abort
   function! Exit(result) closure abort
     let a:server.status = a:status
-    call a:server._channel.notify('exit', v:null) " Don't block on server status
+    if has_key(a:server, '_channel')
+      " An early exit still could have remove the channel.
+      " The status has been updated so `a:server.notify` would bail
+      call a:server._channel.notify('exit', v:null)
+    endif
     if a:OnExit != v:null | call a:OnExit() | endif
   endfunction
-  call a:server.request('shutdown', v:null, function('Exit'))
+  return a:server.request('shutdown', v:null, function('Exit'))
 endfunction
 
 function! lsc#server#restart() abort
