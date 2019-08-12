@@ -75,14 +75,14 @@ function! s:isCompletable() abort
   if exists('b:lsc_is_completing') && b:lsc_is_completing
     return v:false
   endif
-  if s:next_char !~ '\w' | return v:false | endif
+  if s:next_char !~# '\w' | return v:false | endif
   let l:cur_col = col('.')
   let l:min_length = exists('g:lsc_autocomplete_length') ?
       \ g:lsc_autocomplete_length : 3
   if l:min_length == v:false | return v:false | endif
   if l:cur_col < (l:min_length + 1) | return v:false | endif
   let word = getline('.')[l:cur_col - (l:min_length + 1):l:cur_col - 2]
-  return word =~ '^\w*$'
+  return word =~# '^\w*$'
 endfunction
 
 function! s:startCompletion(isAuto) abort
@@ -118,7 +118,7 @@ function! s:OnSkip(completion) abort
 endfunction
 
 function! s:SuggestCompletions(completion) abort
-  if mode() != 'i' || len(a:completion.items) == 0
+  if mode() !=# 'i' || len(a:completion.items) == 0
     let b:lsc_is_completing = v:false
     return
   endif
@@ -163,13 +163,17 @@ function! lsc#complete#complete(findstart, base) abort
     endif
   endif
   if a:findstart
-    if len(b:lsc_completion.items) == 0 | return -3 | endif
+    if len(b:lsc_completion.items) == 0
+      unlet b:lsc_completion
+      return -3
+    endif
     return  s:FindStart(b:lsc_completion) - 1
   else
     return s:FindSuggestions(a:base, b:lsc_completion)
   endif
 endfunction
 
+" Finds the 1-based index of the first character in the completion.
 function! s:FindStart(completion) abort
   if has_key(a:completion, 'start_col')
     return a:completion.start_col
@@ -177,19 +181,19 @@ function! s:FindStart(completion) abort
   return s:GuessCompletionStart()
 endfunction
 
-" Finds the character after the last non word character behind the cursor.
-function! s:GuessCompletionStart()
+" Finds the 1-based index of the character after the last non word character
+" behind the cursor.
+function! s:GuessCompletionStart() abort
   let search = col('.') - 2
   let line = getline('.')
   while search > 0
     let char = line[search]
-    if char !~ '\w'
+    if char !~# '\w'
       return search + 2
     endif
     let search -= 1
   endwhile
-  " TODO: ??? completion at the beginning of the line?
-  return 0
+  return 1
 endfunction
 
 function! s:FindSuggestions(base, completion) abort

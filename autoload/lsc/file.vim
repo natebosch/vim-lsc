@@ -13,7 +13,7 @@ endif
 " Send a 'didOpen' message for all open files of type `filetype` if they aren't
 " already tracked.
 function! lsc#file#trackAll(filetype) abort
-  for buffer in getbufinfo({'loaded': v:true})
+  for buffer in getbufinfo({'bufloaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
     call s:FlushChanges(lsc#file#normalize(buffer.name), a:filetype)
   endfor
@@ -84,7 +84,7 @@ endfunction
 
 " Mark all files of type `filetype` as untracked.
 function! lsc#file#clean(filetype) abort
-  for buffer in getbufinfo({'loaded': v:true})
+  for buffer in getbufinfo({'bufloaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
     if has_key(s:file_versions, buffer.name)
       unlet s:file_versions[buffer.name]

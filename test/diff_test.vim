@@ -1,3 +1,5 @@
+scriptencoding utf-8
+
 function! TestDiff() abort
   " First and last lines swapped
   call s:TestDiff(
@@ -114,8 +116,8 @@ function! TestDiff() abort
   " Delete with repeated substring
   call s:TestDiff(
       \ [0, 4, 0, 6], 2, '',
-      \ "ABABAB",
-      \ "ABAB")
+      \ 'ABABAB',
+      \ 'ABAB')
 
   " Delete at beginning
   call s:TestDiff(
@@ -139,7 +141,7 @@ function! TestDiff() abort
   call s:TestDiff(
       \ [0, 3, 2, 3], 14, '',
       \ "// foo\n// b╵r\n// baz",
-      \ "// baz")
+      \ '// baz')
 
   " Delete at end
   call s:TestDiff(
@@ -151,7 +153,7 @@ function! TestDiff() abort
   call s:TestDiff(
       \ [0, 3, 2, 3], 8, '',
       \ "foo\nb╵r\nbaz",
-      \ "foo")
+      \ 'foo')
 
   " Handles multiple blank lines
   call s:TestDiff(

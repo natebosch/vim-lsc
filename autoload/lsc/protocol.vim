@@ -1,4 +1,4 @@
-function! lsc#protocol#open(command, on_message, on_err, on_exit)
+function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
   let l:c = {
       \ '_call_id': 0,
       \ '_in': [],
@@ -7,25 +7,25 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit)
       \ '_on_message': a:on_message,
       \ '_callbacks': {},
       \}
-  function l:c.request(method, params, callback) abort
+  function! l:c.request(method, params, callback) abort
     let self._call_id += 1
     let l:message = s:Format(a:method, a:params, self._call_id)
     let self._callbacks[self._call_id] = [a:callback]
     call self._send(l:message)
   endfunction
-  function l:c.notify(method, params) abort
+  function! l:c.notify(method, params) abort
     let l:message = s:Format(a:method, a:params, v:null)
     cal lsc#util#shift(self._in, 10, l:message)
     call self._send(l:message)
   endfunction
-  function l:c.respond(id, result) abort
+  function! l:c.respond(id, result) abort
     call self._send({'id': a:id, 'result': a:result})
   endfunction
-  function l:c._send(message) abort
+  function! l:c._send(message) abort
     call lsc#util#shift(self._in, 10, a:message)
     call self._channel.send(s:Encode(a:message))
   endfunction
-  function l:c._recieve(message) abort
+  function! l:c._recieve(message) abort
     let self._buffer .= a:message
     while s:Consume(self) | endwhile
   endfunction
@@ -49,7 +49,7 @@ function! s:Encode(message) abort
   let a:message['jsonrpc'] = '2.0'
   let encoded = json_encode(a:message)
   let length = len(encoded)
-  return "Content-Length: ".length."\r\n\r\n".encoded
+  return 'Content-Length: '.length."\r\n\r\n".encoded
 endfunction
 
 " Reads from the buffer for server_name and processes the message. Continues to
@@ -62,14 +62,14 @@ function! s:Consume(server) abort
     return v:false
   endif
   let headers = split(message[:end_of_header - 1], "\r\n")
-  let message_start = end_of_header + len("\r\n\r\n")
-  let message_end = message_start + s:ContentLength(headers)
-  if len(message) < message_end
+  let l:message_start = end_of_header + len("\r\n\r\n")
+  let l:message_end = l:message_start + s:ContentLength(headers)
+  if len(message) < l:message_end
     " Wait for the rest of the message to get buffered
     return v:false
   endif
-  let payload = message[message_start:message_end-1]
-  let remaining_message = message[message_end:]
+  let payload = message[l:message_start : l:message_end-1]
+  let remaining_message = message[l:message_end : ]
   let a:server._buffer = remaining_message
   try
     let content = json_decode(payload)
@@ -88,7 +88,7 @@ function! s:Consume(server) abort
       let g:lsc_last_error_message = content
     endtry
   endif
-  return remaining_message != ''
+  return remaining_message !=# ''
 endfunction
 
 " Finds the header with 'Content-Length' and returns the integer value
@@ -97,7 +97,7 @@ function! s:ContentLength(headers) abort
     if header =~? '^Content-Length'
       let parts = split(header, ':')
       let length = parts[1]
-      if length[0] == ' ' | let length = length[1:] | endif
+      if length[0] ==# ' ' | let length = length[1:] | endif
       return length + 0
     endif
   endfor

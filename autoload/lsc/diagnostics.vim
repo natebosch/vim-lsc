@@ -27,7 +27,7 @@ function! s:Convert(diagnostic) abort
 endfunction
 
 function! lsc#diagnostics#clean(filetype) abort
-  for buffer in getbufinfo({'loaded': v:true})
+  for buffer in getbufinfo({'bufloaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
     call lsc#diagnostics#setForFile(lsc#file#normalize(buffer.name), [])
   endfor
@@ -204,7 +204,7 @@ function! s:UpdateQuickFix() abort
   let l:context = get(l:current, 'context', 0)
   if type(l:context) != type({}) ||
       \ !has_key(l:context, 'client') ||
-      \ l:context.client != 'LSC'
+      \ l:context.client !=# 'LSC'
     return
   endif
   let l:new_list = {'items': s:AllDiagnostics()}

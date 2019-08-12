@@ -43,7 +43,7 @@ endfunction
 
 function! lsc#cursor#onChangesFlushed() abort
   let mode = mode()
-  if mode == 'n' || mode == 'no'
+  if mode ==# 'n' || mode ==# 'no'
     call s:HighlightReferences(v:true)
   endif
 endfunction

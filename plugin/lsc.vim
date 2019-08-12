@@ -1,4 +1,4 @@
-if exists("g:loaded_lsc")
+if exists('g:loaded_lsc')
   finish
 endif
 let g:loaded_lsc = 1
@@ -57,7 +57,7 @@ endfunction
 " restarted the next time a window or tab is entered with this file type.
 function! RegisterLanguageServer(filetype, config) abort
   call lsc#server#register(a:filetype, a:config)
-  for buffer in getbufinfo({'loaded': v:true})
+  for buffer in getbufinfo({'bufloaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') == a:filetype
       call lsc#server#start(a:filetype)
       return

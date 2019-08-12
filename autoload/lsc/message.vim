@@ -43,11 +43,11 @@ function! s:Level(level) abort
     endif
     return ['Log', 'None'] " Level 4 or unmatched
   endif
-  if a:level == 'Error'
+  if a:level ==# 'Error'
     return ['Error', 'lscDiagnosticError']
-  elseif a:level == 'Warning'
+  elseif a:level ==# 'Warning'
     return ['Warning', 'lscDiagnosticWarning']
-  elseif a:level == 'Info'
+  elseif a:level ==# 'Info'
     return ['Info', 'lscDiagnosticInfo']
   endif
   return ['Log', 'None'] " 'Log' or unmatched

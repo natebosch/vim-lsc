@@ -143,7 +143,15 @@ function! s:showHover(result) abort
       let l:lines += split(item, "\n")
     endif
   endfor
-  call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
+  if get(g:, 'lsc_hover_popup', v:true) && exists('*popup_atcursor')
+    call popup_clear()
+    call popup_atcursor(l:lines, {
+          \ 'padding': [1, 1, 1, 1],
+          \ 'border': [0, 0, 0, 0],
+          \ })
+  else
+    call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
+  endif
 endfunction
 
 " Request a list of symbols in the current document and populate the quickfix

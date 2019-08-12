@@ -277,6 +277,11 @@ with "g:lsc_preview_split_direction" set to either |above| or |below|. This
 configuration will not impact the preview window which may open during
 completion.
 
+                                                *g:lsc_hover_popup*
+When the |popup| feature is available it will be used for `:LSClientShowHover`
+by default. Restore the old behavior of using the |preview-window| by setting
+`g:lsc_hover_popup` to `v:false`.
+
                                                 *lsc-configure-highlight*
 vim-lsc uses highlight groups "lscDiagnosticError", "lscDiagnosticWarning",
 "lscDiagnosticInfo", "lscDiagnosticHint", "lscReference", and
@@ -479,6 +484,24 @@ For example:
    let g:dart_server_status = a:params.isAnalyzing
  endfunction
 
+<
+
+                                                *lsc-server-workspace_config*
+`workspace_config`: Set to any json encodable value which will be sent to the
+server after startup as the `settings` in a `workspace/didChangeConfiguration`
+notificaiton. See the documentation for your server for what values are accepted
+in this notification.
+
+For example:
+>
+ let g:lsc_server_commands = {
+     \ 'rust': {
+     \    'command': 'rls',
+     \    'workspace_config': {
+     \        'clippy_preference': 'on',
+     \    },
+     \  },
+     \}
 <
 
 DEBUGGING TIPS                                  *lsc-debugging*
