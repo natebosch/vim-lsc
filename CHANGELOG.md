@@ -7,6 +7,7 @@
 - Fix `getbufinfo` calls for loaded buffers.
 - Fix completions starting at the beginning of the line when the server did not
   send any items containing a `textEdit` field.
+- Truncate diagnostics at 1 character shorter for when `ruler` is used.
 
 **Minor breaking changes**
 - Server dictionaries no longer expose their full `init_results`, or their call
