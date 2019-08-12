@@ -24,9 +24,11 @@ endfunction
 function! lsc#cursor#showDiagnostic() abort
   let l:diagnostic = lsc#diagnostics#underCursor()
   if has_key(l:diagnostic, 'message')
-    let l:max_width = &columns - 18
+    let l:max_width = &columns
+    let l:max_width -= 19 " Default ruler width (18) plus 1 character buffer
     let l:message = strtrans(l:diagnostic.message)
     if strdisplaywidth(l:message) > l:max_width
+      let l:max_width -= 3 " 3 chars for '...'
       let l:truncated = strcharpart(l:message, 0, l:max_width)
       " Trim by character until a satisfactory display width.
       while strdisplaywidth(l:truncated) > l:max_width
