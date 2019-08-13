@@ -278,6 +278,7 @@ function! lsc#diagnostics#underCursor() abort
         return l:file_diagnostics[l:diagnostic_line][0]
       endif
     endfor
+    return {}
   endif
   let diagnostics = l:file_diagnostics[l:line]
   let col = col('.')
