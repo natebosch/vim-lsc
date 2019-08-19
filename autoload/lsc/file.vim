@@ -205,3 +205,13 @@ function! lsc#file#normalize(buffer_name) abort
   let s:normalized_paths[l:full_path] = a:buffer_name
   return l:full_path
 endfunction
+
+function! lsc#file#compare(file_1, file_2) abort
+  if a:file_1 == a:file_2 | return 0 | endif
+  let l:cwd = '^'.getcwd()
+  let l:file_1_in_cwd = a:file_1 =~# l:cwd
+  let l:file_2_in_cwd = a:file_2 =~# l:cwd
+  if l:file_1_in_cwd && !l:file_2_in_cwd | return -1 | endif
+  if l:file_2_in_cwd && !l:file_1_in_cwd | return 1 | endif
+  return a:file_1 > a:file_2 ? 1 : -1
+endfunction

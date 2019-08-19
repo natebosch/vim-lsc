@@ -1,30 +1,21 @@
 if !exists('s:file_diagnostics')
-  " file path -> line number -> [diagnostic]
+  " file path -> Diagnostics
   "
   " Diagnostics are dictionaries with:
-  " 'group': The highlight group, like 'lscDiagnosticError'.
-  " 'ranges': 1-based [[start line, start column, length]]
-  " 'message': The message to display.
-  " 'type': Single letter representation of severity for location list.
+  " 'Highlights()': Highlight groups and ranges
+  " 'ByLine()': Nested dictionaries with the structure:
+  "     { line: [{
+  "         message: Human readable message with code
+  "         range: LSP Range object
+  "         severity: String label for severity
+  "       }]
+  "     }
+  " 'ListItems()': QuickFix or Location list items
   let s:file_diagnostics = {}
 
   " file path -> incrementing version number
   let s:diagnostic_versions = {}
 endif
-
-" Converts between an LSP diagnostic and the internal representation used for
-" highlighting.
-function! s:Convert(diagnostic) abort
-  let group = <SID>SeverityGroup(a:diagnostic.severity)
-  let type = <SID>SeverityType(a:diagnostic.severity)
-  let message = a:diagnostic.message
-  if has_key(a:diagnostic, 'code')
-    let message = message.' ['.a:diagnostic.code.']'
-  endif
-  return {'group': group, 'message': message, 'type': type,
-      \ 'ranges': lsc#convert#rangeToHighlights(a:diagnostic.range),
-      \ 'lsp': a:diagnostic}
-endfunction
 
 function! lsc#diagnostics#clean(filetype) abort
   for buffer in getbufinfo({'bufloaded': v:true})
@@ -58,9 +49,17 @@ function! s:SeverityType(severity) abort
     endif
 endfunction
 
+function! s:DiagnosticMessage(diagnostic) abort
+  let l:message = a:diagnostic.message
+  if has_key(a:diagnostic, 'code')
+    let l:message = message.' ['.a:diagnostic.code.']'
+  endif
+  return l:message
+endfunction
+
 function! lsc#diagnostics#forFile(file_path) abort
   if !has_key(s:file_diagnostics, a:file_path)
-    return {}
+    return s:EmptyDiagnostics()
   endif
   return s:file_diagnostics[a:file_path]
 endfunction
@@ -84,24 +83,13 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   else
     let s:diagnostic_versions[a:file_path] = 1
   endif
-  call map(a:diagnostics, {_, diagnostic -> s:Convert(diagnostic)})
   if !empty(a:diagnostics)
-    let diagnostics_by_line = {}
-    for diagnostic in a:diagnostics
-      let line_number = string(diagnostic.ranges[0][0])
-      if !has_key(diagnostics_by_line, line_number)
-        let line = []
-        let diagnostics_by_line[line_number] = line
-      else
-        let line = diagnostics_by_line[line_number]
-      endif
-      call sort(add(line, diagnostic), function('<SID>CompareDiagnostics'))
-    endfor
     if has_key(s:file_diagnostics, a:file_path) &&
-        \ s:file_diagnostics[a:file_path] == l:diagnostics_by_line
+        \ s:file_diagnostics[a:file_path].lsp_diagnostics == a:diagnostics
       return
     endif
-    let s:file_diagnostics[a:file_path] = diagnostics_by_line
+    let s:file_diagnostics[a:file_path] =
+        \ s:Diagnostics(a:file_path, a:diagnostics)
   else
     unlet s:file_diagnostics[a:file_path]
   endif
@@ -113,25 +101,14 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   endif
 endfunction
 
-function! s:CompareDiagnostics(d1, d2) abort
-  let l:range_1 = a:d1.ranges[0]
-  let l:range_2 = a:d2.ranges[0]
-  if l:range_1[1] != l:range_2[1]
-    return l:range_1[1] - l:range_2[1]
-  endif
-  return l:range_1[2] - l:range_2[2]
-endfunction
-
 " Updates location list for all windows showing [file_path].
 function! lsc#diagnostics#updateLocationList(file_path) abort
-  let bufnr = lsc#file#bufnr(a:file_path)
-  if bufnr == -1 | return | endif
-  let file_ref = {'bufnr': bufnr}
+  if lsc#file#bufnr(a:file_path) == -1 | return | endif
   let diagnostics_version = s:DiagnosticsVersion(a:file_path)
   for window_id in lsc#util#windowsForFile(a:file_path)
     if !s:WindowIsCurrent(window_id, a:file_path, diagnostics_version)
       if !exists('l:items')
-        let items = s:ListItems(a:file_path, file_ref)
+        let items = lsc#diagnostics#forFile(a:file_path).ListItems()
       endif
       call setloclist(window_id, items)
       call s:MarkManagingLocList(window_id, a:file_path, diagnostics_version)
@@ -139,31 +116,6 @@ function! lsc#diagnostics#updateLocationList(file_path) abort
     endif
   endfor
 endfunction
-
-" Returns a list of quick fix or location list items for the diagnostics in
-" [file_path].
-"
-" [file_ref] is a dict with either 'bufnr' or 'filename'.
-function! s:ListItems(file_path, file_ref) abort
-  let items = []
-  for line in values(lsc#diagnostics#forFile(a:file_path))
-    for diagnostic in line
-      call add(items, s:ListItem(diagnostic, a:file_ref))
-    endfor
-  endfor
-  call sort(items, 'lsc#util#compareQuickFixItems')
-  return items
-endfunction
-
-" Converts between an internal diagnostic and an item for the location list.
-function! s:ListItem(diagnostic, file_ref) abort
-  let range = a:diagnostic.ranges[0]
-  let item = {'lnum': range[0], 'col': range[1],
-      \ 'text': a:diagnostic.message, 'type': a:diagnostic.type}
-  call extend(item, a:file_ref)
-  return item
-endfunction
-
 
 function! s:MarkManagingLocList(window_id, file_path, version) abort
   let window_info = getwininfo(a:window_id)[0]
@@ -177,16 +129,14 @@ endfunction
 "
 " If the number grows very large returns instead a String like `'500+'`
 function! lsc#diagnostics#count() abort
-  let total = 0
-  for file_path in keys(s:file_diagnostics)
-    for line in values(lsc#diagnostics#forFile(file_path))
-      let total += len(line)
-    endfor
-    if total > 500
-      return string(total).'+'
+  let l:total = 0
+  for l:diagnostics in values(s:file_diagnostics)
+    let l:total += len(l:diagnostics.lsp_diagnostics)
+    if l:total > 500
+      return string(l:total).'+'
     endif
   endfor
-  return total
+  return l:total
 endfunction
 
 " Finds all diagnostics and populates the quickfix list.
@@ -230,16 +180,14 @@ endfunction
 
 function! s:AllDiagnostics() abort
   let l:all_diagnostics = []
-  for l:file_path in keys(s:file_diagnostics)
-    let l:bufnr = lsc#file#bufnr(l:file_path)
-    if l:bufnr == -1
-      let l:file_ref = {'filename': fnamemodify(l:file_path, ':.')}
-    else
-      let l:file_ref = {'bufnr': l:bufnr}
+  let l:files = sort(keys(s:file_diagnostics), function('lsc#file#compare'))
+  for l:file_path in l:files
+    let l:diagnostics = s:file_diagnostics[l:file_path]
+    call extend(l:all_diagnostics, l:diagnostics.ListItems())
+    if len(l:all_diagnostics) >= 500
+      break
     endif
-    call extend(l:all_diagnostics, s:ListItems(l:file_path, l:file_ref))
   endfor
-  call sort(l:all_diagnostics, 'lsc#util#compareQuickFixItems')
   return l:all_diagnostics
 endfunction
 
@@ -268,10 +216,10 @@ endfunction
 " no diagnostic is directly under the cursor returns the last seen diagnostic
 " on this line.
 function! lsc#diagnostics#underCursor() abort
-  let l:file_diagnostics = lsc#diagnostics#forFile(lsc#file#fullPath())
+  let l:file_diagnostics = lsc#diagnostics#forFile(lsc#file#fullPath()).ByLine()
   let l:line = line('.')
   if !has_key(l:file_diagnostics, l:line)
-    if l:line !=line('$') | return {} | endif
+    if l:line != line('$') | return {} | endif
     " Find a diagnostic reported after the end of the file
     for l:diagnostic_line in keys(l:file_diagnostics)
       if l:diagnostic_line > l:line
@@ -280,37 +228,43 @@ function! lsc#diagnostics#underCursor() abort
     endfor
     return {}
   endif
-  let diagnostics = l:file_diagnostics[l:line]
-  let col = col('.')
-  let closest_diagnostic = {}
-  let closest_distance = -1
-  for diagnostic in diagnostics
-    let range = diagnostic.ranges[0]
-    let start = range[1]
-    let end = range[1] + range[2]
-    let distance = min([abs(start - col), abs(end - col)])
-    if closest_distance < 0 || distance < closest_distance
-      let closest_diagnostic = diagnostic
-      let closest_distance = distance
+  let l:diagnostics = l:file_diagnostics[l:line]
+  let l:col = col('.')
+  let l:closest_diagnostic = {}
+  let l:closest_distance = -1
+  let l:closest_is_within = v:false
+  for l:diagnostic in l:file_diagnostics[l:line]
+    let l:range = l:diagnostic.range
+    let l:is_within = l:range.start.character < l:col &&
+        \ (l:range.end.line >= l:line || l:range.end.character > l:col)
+    echo 'Is within? '.string(l:is_within)
+    if l:closest_is_within && !l:is_within
+      continue
+    endif
+    let l:distance = abs(l:range.start.character - l:col)
+    if l:closest_distance < 0 || l:distance < l:closest_distance
+      let l:closest_diagnostic = l:diagnostic
+      let l:closest_distance = l:distance
+      let l:closest_is_within = l:is_within
     endif
   endfor
-  return closest_diagnostic
+  return l:closest_diagnostic
 endfunction
 
 " Returns the original LSP representation of diagnostics on a line.
 function! lsc#diagnostics#forLine(file, line) abort
   let l:result = []
-  let l:file_diagnostics = lsc#diagnostics#forFile(a:file)
-  if has_key(l:file_diagnostics, a:line)
-    for l:diagnostic in l:file_diagnostics[a:line]
-      call add(l:result, l:diagnostic.lsp)
-    endfor
-  endif
+  for l:diagnostic in lsc#diagnostics#forFile(a:file).lsp_diagnostics
+    if l:diagnostic.range.start.line <= a:line &&
+        \ l:diagnostic.range.end.line >= a:line
+      call add(l:result, l:diagnostic)
+    endif
+  endfor
   return l:result
 endfunction
 
 function! lsc#diagnostics#echoForLine() abort
-  let l:file_diagnostics = lsc#diagnostics#forFile(lsc#file#fullPath())
+  let l:file_diagnostics = lsc#diagnostics#forFile(lsc#file#fullPath()).ByLine()
   let l:line = line('.')
   if !has_key(l:file_diagnostics, l:line)
     echo 'No diagnostics'
@@ -318,7 +272,7 @@ function! lsc#diagnostics#echoForLine() abort
   endif
   let l:diagnostics = l:file_diagnostics[l:line]
   for l:diagnostic in l:diagnostics
-    let l:label = '['.s:SeverityLabel(l:diagnostic.lsp.severity).']'
+    let l:label = '['.l:diagnostic.severity.']'
     if stridx(l:diagnostic.message, "\n") >= 0
       echo l:label
       echo l:diagnostic.message
@@ -326,4 +280,98 @@ function! lsc#diagnostics#echoForLine() abort
       echo l:label.': '.l:diagnostic.message
     endif
   endfor
+endfunction
+
+function! s:Diagnostics(file_path, lsp_diagnostics) abort
+  let l:diagnostics = {
+      \ 'file_path': a:file_path,
+      \ 'lsp_diagnostics': a:lsp_diagnostics,
+      \}
+  function! l:diagnostics.Highlights() abort
+    if !has_key(self, '_highlights')
+      let self._highlights = []
+      for l:diagnostic in self.lsp_diagnostics
+        call add(self._highlights, {
+            \ 'group': s:SeverityGroup(l:diagnostic.severity),
+            \ 'ranges': lsc#convert#rangeToHighlights(l:diagnostic.range),
+            \})
+      endfor
+    endif
+    return self._highlights
+  endfunction
+  function! l:diagnostics.ListItems() abort
+    if !has_key(self, '_list_items')
+      let self._list_items = []
+      let l:bufnr = lsc#file#bufnr(self.file_path)
+      if l:bufnr == -1
+        let l:file_ref = {'filename': fnamemodify(self.file_path, ':.')}
+      else
+        let l:file_ref = {'bufnr': l:bufnr}
+      endif
+      for l:diagnostic in self.lsp_diagnostics
+        let l:item = {
+            \ 'lnum': l:diagnostic.range.start.line + 1,
+            \ 'col': l:diagnostic.range.start.character + 1,
+            \ 'text': s:DiagnosticMessage(l:diagnostic),
+            \ 'type': s:SeverityType(l:diagnostic.severity)
+            \}
+        call extend(l:item, l:file_ref)
+        call add(self._list_items, l:item)
+      endfor
+      call sort(self._list_items, 'lsc#util#compareQuickFixItems')
+    endif
+    return self._list_items
+  endfunction
+  function! l:diagnostics.ByLine() abort
+    if !has_key(self, '_by_line')
+      let self._by_line = {}
+      for l:diagnostic in self.lsp_diagnostics
+        let l:start_line = string(l:diagnostic.range.start.line + 1)
+        if !has_key(self._by_line, l:start_line)
+          let l:line = []
+          let self._by_line[l:start_line] = l:line
+        else
+          let l:line = self._by_line[l:start_line]
+        endif
+        let l:simple = {
+            \ 'message': s:DiagnosticMessage(l:diagnostic),
+            \ 'range': l:diagnostic.range,
+            \ 'severity': s:SeverityLabel(l:diagnostic.severity),
+            \}
+        call add(l:line, l:simple)
+      endfor
+      for l:line in values(self._by_line)
+        call sort(l:line, function('<SID>CompareRanges'))
+      endfor
+    endif
+    return self._by_line
+  endfunction
+  return l:diagnostics
+endfunction
+
+function! s:EmptyDiagnostics() abort
+  if !exists('s:empty_diagnostics')
+    let s:empty_diagnostics = {'lsp_diagnostics': []}
+    function! s:empty_diagnostics.Highlights() abort
+      return []
+    endfunction
+    function! s:empty_diagnostics.ListItems() abort
+      return []
+    endfunction
+    function! s:empty_diagnostics.ByLine() abort
+      return {}
+    endfunction
+  endif
+  return s:empty_diagnostics
+endfunction
+
+" Compare the ranges of 2 diagnostics that start on the same line
+function! s:CompareRanges(d1, d2) abort
+  if a:d1.range.start.character != a:d2.range.start.character
+    return a:d1.range.start.character - a:d2.range.start.character
+  endif
+  if a:d1.range.end.line != a:d2.range.end.line
+    return a:d1.range.end.line - a:d2.range.end.line
+  endif
+  return a.d1.range.end.character - a:d2.range.end.character
 endfunction
