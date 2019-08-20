@@ -14,21 +14,19 @@ function! lsc#highlights#update() abort
   if s:CurrentWindowIsFresh() | return | endif
   call lsc#highlights#clear()
   if &diff | return | endif
-  for line in values(lsc#diagnostics#forFile(lsc#file#fullPath()))
-    for diagnostic in line
-      if l:diagnostic.ranges[0][0] > line('$')
-        " Diagnostic starts after end of file
-        let l:match = matchadd(diagnostic.group, '\%'.line('$').'l$')
-      elseif len(l:diagnostic.ranges) == 1 &&
-          \ l:diagnostic.ranges[0][1] > len(getline(l:diagnostic.ranges[0][0]))
-        " Diagnostic starts after end of line
-        let l:match =
-            \ matchadd(diagnostic.group, '\%'.l:diagnostic.ranges[0][0].'l$')
-      else
-        let l:match = matchaddpos(diagnostic.group, diagnostic.ranges, -1)
-      endif
-      call add(w:lsc_diagnostic_matches, l:match)
-    endfor
+  for l:highlight in lsc#diagnostics#forFile(lsc#file#fullPath()).Highlights()
+    if l:highlight.ranges[0][0] > line('$')
+      " Diagnostic starts after end of file
+      let l:match = matchadd(l:highlight.group, '\%'.line('$').'l$')
+    elseif len(l:highlight.ranges) == 1 &&
+        \ l:highlight.ranges[0][1] > len(getline(l:highlight.ranges[0][0]))
+      " Diagnostic starts after end of line
+      let l:match =
+          \ matchadd(l:highlight.group, '\%'.l:highlight.ranges[0][0].'l$')
+    else
+      let l:match = matchaddpos(l:highlight.group, l:highlight.ranges, -1)
+    endif
+    call add(w:lsc_diagnostic_matches, l:match)
   endfor
   call s:MarkCurrentWindowFresh()
 endfunction
