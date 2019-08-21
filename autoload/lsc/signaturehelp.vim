@@ -17,6 +17,10 @@ function! s:HighlightCurrentParameter() abort
 endfunction
 
 function! s:ShowHelp(signatureHelp) abort
+  if a:signatureHelp == v:null
+    call lsc#message#show('No signature help available')
+    return
+  endif
   let signatures = []
   if has_key(a:signatureHelp, 'signatures')
     if type(a:signatureHelp.signatures) == type([])
