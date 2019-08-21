@@ -270,7 +270,6 @@ function! s:CompletionItem(completion_item) abort
       let item.menu = detail_lines[0]
     endif
   endif
-  let item.info = ' '
   if has_key(a:completion_item, 'documentation')
     let documentation = a:completion_item.documentation
     if type(documentation) == type('')
