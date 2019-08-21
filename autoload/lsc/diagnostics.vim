@@ -373,5 +373,5 @@ function! s:CompareRanges(d1, d2) abort
   if a:d1.range.end.line != a:d2.range.end.line
     return a:d1.range.end.line - a:d2.range.end.line
   endif
-  return a.d1.range.end.character - a:d2.range.end.character
+  return a:d1.range.end.character - a:d2.range.end.character
 endfunction
