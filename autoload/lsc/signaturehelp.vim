@@ -46,6 +46,11 @@ function! s:ShowHelp(signatureHelp) abort
     return
   endif
 
+  if !has_key(signature, 'parameters')
+    call lsc#util#displayAsPreview([signature.label], function('<SID>HighlightCurrentParameter'))
+    return
+  endif
+
   if has_key(a:signatureHelp, 'activeParameter')
     let active_parameter = a:signatureHelp.activeParameter
     if active_parameter < len(signature.parameters)
