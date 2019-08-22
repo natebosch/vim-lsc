@@ -17,7 +17,7 @@ function! s:HighlightCurrentParameter() abort
 endfunction
 
 function! s:ShowHelp(signatureHelp) abort
-  if a:signatureHelp == v:null
+  if empty(a:signatureHelp)
     call lsc#message#show('No signature help available')
     return
   endif
