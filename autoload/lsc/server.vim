@@ -60,7 +60,7 @@ function! lsc#server#exit() abort
     let l:pending -= 1
   endfunction
   for l:server in values(s:servers)
-    if s:Kill(l:server, 'exiting', function('OnExit'))
+    if s:Kill(l:server, 'exiting', funcref('OnExit'))
       let l:pending += 1
     endif
   endfor
@@ -84,7 +84,7 @@ function! s:Kill(server, status, OnExit) abort
     endif
     if a:OnExit != v:null | call a:OnExit() | endif
   endfunction
-  return a:server.request('shutdown', v:null, function('Exit'))
+  return a:server.request('shutdown', v:null, funcref('Exit'))
 endfunction
 
 function! lsc#server#restart() abort
@@ -152,7 +152,7 @@ function! s:Start(server) abort
       \ 'capabilities': s:ClientCapabilities(),
       \ 'trace': trace_level
       \}
-  call a:server._initialize(l:params, function('OnInitialize'))
+  call a:server._initialize(l:params, funcref('OnInitialize'))
 endfunction
 
 " Missing value means no support
