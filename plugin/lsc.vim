@@ -58,7 +58,8 @@ endfunction
 function! RegisterLanguageServer(filetype, config) abort
   call lsc#server#register(a:filetype, a:config)
   for buffer in getbufinfo({'bufloaded': v:true})
-    if getbufvar(buffer.bufnr, '&filetype') == a:filetype
+    if getbufvar(buffer.bufnr, '&filetype') == a:filetype &&
+        \ getbufvar(buffer.bufnr, '&modifiable')
       call lsc#server#start(a:filetype)
       return
     endif
