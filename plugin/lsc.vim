@@ -59,7 +59,8 @@ function! RegisterLanguageServer(filetype, config) abort
   call lsc#server#register(a:filetype, a:config)
   for buffer in getbufinfo({'bufloaded': v:true})
     if getbufvar(buffer.bufnr, '&filetype') == a:filetype &&
-        \ getbufvar(buffer.bufnr, '&modifiable')
+        \ getbufvar(buffer.bufnr, '&modifiable') &&
+        \ buffer.name !~# '\v^fugitive:///'
       call lsc#server#start(a:filetype)
       return
     endif

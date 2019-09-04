@@ -23,7 +23,7 @@ endfunction
 " flush file changes.
 function! lsc#file#onOpen() abort
   call lsc#config#mapKeys()
-  if &modifiable
+  if &modifiable && expand('%') !~# '\vfugitive:///'
     call lsc#server#start(&filetype)
     call s:FlushChanges(lsc#file#fullPath(), &filetype)
   endif
