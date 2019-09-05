@@ -149,7 +149,7 @@ function! s:ApplyAll(changes) abort
       let l:cmd .= '\<C-r>=l:edits['.string(l:idx).'].newText\<cr>"'
     endfor
     execute l:cmd
-    if !&hidden | execute 'update' | endif
+    if !&hidden | update | endif
     call lsc#file#onChange(l:file_path)
   endfor
 endfunction
