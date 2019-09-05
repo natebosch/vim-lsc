@@ -142,8 +142,11 @@ function! s:ApplyAll(changes) abort
     else
       let l:cmd .= ' edit '.l:file_path
     endif
-    for edit in sort(edits, '<SID>CompareEdits')
-      let l:cmd .= ' | execute "keepjumps normal! '.s:Apply(edit).'"'
+    call sort(l:edits, '<SID>CompareEdits')
+    for l:idx in range(0, len(l:edits) - 1)
+      let l:cmd .= ' | silent execute "keepjumps normal! '
+      let l:cmd .= s:Apply(l:edits[l:idx])
+      let l:cmd .= '\<C-r>=l:edits['.string(l:idx).'].newText\<cr>"'
     endfor
     execute l:cmd
     if !&hidden | execute 'update' | endif
@@ -151,28 +154,28 @@ function! s:ApplyAll(changes) abort
   endfor
 endfunction
 
-" Find the command to apply a `TextEdit`.
+" Find the normal mode commands to prepare for inserting the text in [edit].
+"
+" For inserts, moves the cursor and uses an `a` or `i` to append or insert.
+" For replacements, selects the text with `v` and then `c` to change.
 function! s:Apply(edit) abort
-  let l:new_text = substitute(a:edit.newText, '"', '\\"', 'g')
   if s:IsEmptyRange(a:edit.range)
     if a:edit.range.start.character >= len(getline(a:edit.range.start.line + 1))
       let l:insert = 'a'
     else
       let l:insert = 'i'
     endif
-    return printf('%dG%d|%s%s',
+    return printf('%dG%d|%s',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
         \ l:insert,
-        \ l:new_text
         \)
   else
-    return printf('%dG%d|v%dG%d|c%s',
+    return printf('%dG%d|v%dG%d|c',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
         \ a:edit.range.end.line + 1,
         \ a:edit.range.end.character + 1,
-        \ l:new_text
         \)
   endif
 endfunction
