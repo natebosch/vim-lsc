@@ -173,7 +173,8 @@ function! s:openHoverPopup(lines)
     endfor
     let opts = {
           \ 'relative': 'cursor',
-          \ 'row': 1,
+          \ 'anchor': 'SW',
+          \ 'row': 0,
           \ 'col': 0,
           \ 'width': width,
           \ 'height': height,
