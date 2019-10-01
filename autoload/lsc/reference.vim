@@ -1,3 +1,5 @@
+let s:popup_id = 0
+
 function! lsc#reference#goToDefinition(mods, issplit) abort
   call lsc#file#flushChanges()
   call lsc#server#userCall('textDocument/definition',
@@ -143,15 +145,66 @@ function! s:showHover(result) abort
       let l:lines += split(item, "\n")
     endif
   endfor
-  if get(g:, 'lsc_hover_popup', v:true) && exists('*popup_atcursor')
-    call popup_clear()
-    call popup_atcursor(l:lines, {
-          \ 'padding': [1, 1, 1, 1],
-          \ 'border': [0, 0, 0, 0],
-          \ })
+  if get(g:, 'lsc_hover_popup', v:true) 
+        \ && (exists('*popup_atcursor') || exists('*nvim_open_win'))
+    call s:closeHoverPopup()
+    call s:openHoverPopup(l:lines)
   else
     call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
   endif
+endfunction
+
+function! s:openHoverPopup(lines)
+  " Sanity check, if there is no hover text then don't waste resources creating an
+  " empty popup.
+  if len(a:lines) == 0
+    return
+  endif
+  if has("nvim")
+    let buf = nvim_create_buf(v:false, v:true)
+    " Note, the +2s below will be used for padding around the hover text.
+    let height = len(a:lines) + 2
+    let width = 1
+    " Need to figure out the longest line and base the popup width on that.
+    for val in a:lines
+      if strdisplaywidth(val) + 2 > l:width
+        let l:width = strdisplaywidth(val) + 2
+      endif
+    endfor
+    let opts = {
+          \ 'relative': 'cursor',
+          \ 'anchor': 'SW',
+          \ 'row': 0,
+          \ 'col': 0,
+          \ 'width': width,
+          \ 'height': height,
+          \ 'style': 'minimal',
+          \ 'focusable': v:false,
+          \ }
+    let s:popup_id = nvim_open_win(buf, v:false, opts)
+    " Add padding to the left and right of each text line.
+    call map(a:lines, {_, val -> ' ' . val . ' '})
+    call nvim_buf_set_lines(winbufnr(s:popup_id), 1, -1, v:false, a:lines)
+    " Close the floating window upon a cursor move.
+    autocmd CursorMoved <buffer> ++once call s:closeHoverPopup()
+  else
+    let s:popup_id = popup_atcursor(a:lines, {
+          \ 'padding': [1, 1, 1, 1],
+          \ 'border': [0, 0, 0, 0],
+          \ 'moved': 'any',
+          \ })
+  end
+endfunction
+
+function! s:closeHoverPopup()
+  if has("nvim")
+    if win_id2win(s:popup_id) > 0 && nvim_win_is_valid(s:popup_id)
+      call nvim_win_close(s:popup_id, v:true)
+    endif
+  else
+    call popup_close(s:popup_id)
+  end
+  let s:popup_id = 0
 endfunction
 
 " Request a list of symbols in the current document and populate the quickfix
