@@ -167,7 +167,7 @@ function! s:openHoverPopup(lines)
     let width = 1
     " Need to figure out the longest line and base the popup width on that.
     for val in a:lines
-      if len(val) + 2 > l:width
+      if strdisplaywidth(val) + 2 > l:width
         let l:width = strdisplaywidth(val) + 2
       endif
     endfor
