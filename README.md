@@ -187,6 +187,6 @@ of the chosen action.
 
 ### Signature help
 
-Call `LSClientSignatureHelp` (`<C-m>` if using the default mappings) to get help while writing
+Call `LSClientSignatureHelp` (`gm` if using the default mappings) to get help while writing
 a function call. The currently active parameter is highlighted with the group
 `lscCurrentParameter`.
