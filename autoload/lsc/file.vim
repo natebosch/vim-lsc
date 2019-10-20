@@ -202,7 +202,7 @@ endfunction
 
 " If `buffer_name` is relative, normalize it against `cwd`.
 function! lsc#file#normalize(buffer_name) abort
-  if a:buffer_name =~ '^/\|\%([c-zC-Z]:[/\\]\)' | return a:buffer_name | endif
+  if a:buffer_name =~# '^/\|\%([c-zC-Z]:[/\\]\)' | return a:buffer_name | endif
   let l:full_path = getcwd().'/'.a:buffer_name
   let s:normalized_paths[l:full_path] = a:buffer_name
   return l:full_path
