@@ -186,7 +186,10 @@ function! s:openHoverPopup(lines) abort
     call map(a:lines, {_, val -> ' ' . val . ' '})
     call nvim_buf_set_lines(winbufnr(s:popup_id), 1, -1, v:false, a:lines)
     " Close the floating window upon a cursor move.
-    autocmd LSCPopup CursorMoved <buffer> ++once call s:closeHoverPopup()
+    " vint: -ProhibitAutocmdWithNoGroup
+    " https://github.com/Kuniwak/vint/issues/285
+    autocmd CursorMoved <buffer> ++once call s:closeHoverPopup()
+    " vint: +ProhibitAutocmdWithNoGroup
   else
     let s:popup_id = popup_atcursor(a:lines, {
           \ 'padding': [1, 1, 1, 1],
