@@ -87,6 +87,16 @@ function! lsc#config#mapKeys() abort
   endif
 endfunction
 
+" Wraps [Callback] with a function that will first translate a result through a
+" user provided translation.
+function! lsc#config#responseHook(server, method, Callback) abort
+  if !has_key(a:server.config, 'response_hooks') | return a:Callback | endif
+  let l:hooks = a:server.config.response_hooks
+  if !has_key(l:hooks, a:method) | return a:Callback | endif
+  let l:Hook = l:hooks[a:method]
+  return {result -> a:Callback(l:Hook(result))}
+endfunction
+
 function! lsc#config#messageHook(server, method, params) abort
   if !has_key(a:server.config, 'message_hooks') | return a:params | endif
   let hooks = a:server.config.message_hooks
