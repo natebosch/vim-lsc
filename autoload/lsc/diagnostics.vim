@@ -237,7 +237,6 @@ function! lsc#diagnostics#underCursor() abort
     let l:range = l:diagnostic.range
     let l:is_within = l:range.start.character < l:col &&
         \ (l:range.end.line >= l:line || l:range.end.character > l:col)
-    echo 'Is within? '.string(l:is_within)
     if l:closest_is_within && !l:is_within
       continue
     endif
