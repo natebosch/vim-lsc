@@ -31,6 +31,8 @@
 - Add support for a `workspace_config` server configuration key which causes a
   `workspace/didChangeConfiguration` notification on server startup.
 - Use the popup window for hover.
+- Add autocmd `User LSCDiagnosticsChange` to trigger when diagnostics are
+  received.
 
 # 0.3.2
 

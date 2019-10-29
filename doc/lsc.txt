@@ -387,6 +387,10 @@ below:
    autocmd CompleteDone * setlocal nosplitbelow
  augroup END
 <
+                                                *autocmd-LSCDiagnosticsChange*
+Fires when LSC receives new diagnostics for any file in the workspace. Never
+fires if |g:lsc_enable_diagnostics| is set to `v:false`.
+
                                                 *autocmd-LSCShowPreview*
 Fires when LSC opens a new preview window during `:LSClientShowHover` or
 `LSClientSignatureHelp`. Does not fire if an exist preview window was reused.

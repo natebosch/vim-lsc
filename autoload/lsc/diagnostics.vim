@@ -78,11 +78,6 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   if empty(a:diagnostics) && !has_key(s:file_diagnostics, a:file_path)
     return
   endif
-  if has_key(s:diagnostic_versions, a:file_path)
-    let s:diagnostic_versions[a:file_path] += 1
-  else
-    let s:diagnostic_versions[a:file_path] = 1
-  endif
   if !empty(a:diagnostics)
     if has_key(s:file_diagnostics, a:file_path) &&
         \ s:file_diagnostics[a:file_path].lsp_diagnostics == a:diagnostics
@@ -93,9 +88,17 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   else
     unlet s:file_diagnostics[a:file_path]
   endif
+  if has_key(s:diagnostic_versions, a:file_path)
+    let s:diagnostic_versions[a:file_path] += 1
+  else
+    let s:diagnostic_versions[a:file_path] = 1
+  endif
   call lsc#diagnostics#updateLocationList(a:file_path)
   call lsc#highlights#updateDisplayed()
   call s:UpdateQuickFix()
+  if exists('#User#LSCDiagnosticsChange')
+    doautocmd <nomodeline> User LSCDiagnosticsChange
+  endif
   if(a:file_path ==# lsc#file#fullPath())
     call lsc#cursor#showDiagnostic()
   endif
