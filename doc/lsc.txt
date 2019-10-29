@@ -460,6 +460,41 @@ For example:
      \  },
      \}
 <
+                                                *lsc-server-response_hooks*
+`'response_hooks'`: Set to a dictionary where the keys are LSP method names and
+the values are |funcref|s which may modify the response to a call. The
+modified or new response should be returned by the function. This can be used
+if a server sends a response in a way that is not compatible with this client,
+but the response can be translated into a compatible version.
+
+For example:
+>
+ let g:lsc_server_commands = {
+     \ 'java': {
+     \    'command': 'run_java_server.sh',
+     \    'response_hooks': {
+     \        'textDocument/codeAction': function('<SID>fixEdits'),
+     \    },
+     \  },
+     \}
+
+ " Turn the invalid java.apply.workspaceEdit commands into an edit
+ " action which complies with the LSP spec
+ function! s:fixEdits(actions) abort
+   return map(a:actions, function('<SID>fixEdit'))
+ endfunction
+
+ function! s:fixEdit(idx, maybeEdit) abort
+   if !has_key(a:maybeEdit, 'command') ||
+       \ !has_key(a:maybEdit.command, 'command') ||
+       \ a:maybeEdit.command.command !=# 'java.apply.workspaceEdit'
+         return a:maybeEdit
+   endif
+   return {
+       \ 'edit': a:maybeEdit.command.arguments[0],
+       \ 'title': a:maybeEdit.command.title}
+ endfunction
+<
                                                 *lsc-server-notifications*
 `notifications`: Set to a dictionary where the keys are LSP notification
 methods and the values are |funcref|s to be invoked when those notifications
