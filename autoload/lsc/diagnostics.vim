@@ -250,7 +250,7 @@ function! lsc#diagnostics#underCursor() abort
   return l:closest_diagnostic
 endfunction
 
-" Returns the original LSP representation of diagnostics on a line.
+" Returns the original LSP representation of diagnostics on a zero-indexed line.
 function! lsc#diagnostics#forLine(file, line) abort
   let l:result = []
   for l:diagnostic in lsc#diagnostics#forFile(a:file).lsp_diagnostics
