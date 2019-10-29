@@ -7,7 +7,7 @@ function! lsc#edit#findCodeActions(...) abort
   call lsc#file#flushChanges()
   let params = lsc#params#documentRange()
   let params.context = {'diagnostics':
-      \ lsc#diagnostics#forLine(lsc#file#fullPath(), line('.'))}
+      \ lsc#diagnostics#forLine(lsc#file#fullPath(), line('.') - 1)}
   call lsc#server#userCall('textDocument/codeAction', params,
       \ lsc#util#gateResult('CodeActions', function('<SID>SelectAction'),
       \     v:null, [ActionFilter]))
