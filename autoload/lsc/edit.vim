@@ -19,15 +19,19 @@ function! s:SelectAction(result, action_filter) abort
     return
   endif
   let l:choice = a:action_filter(a:result)
-  if type(l:choice) == type({})
-    if has_key(l:choice, 'command') && type(l:choice.command) == type('')
-      call s:ExecuteCommand(l:choice)
+  call lsc#edit#applyCodeAction(l:choice)
+endfunction
+
+function! lsc#edit#applyCodeAction(action) abort
+  if type(a:action) == type({})
+    if has_key(a:action, 'command') && type(a:action.command) == type('')
+      call s:ExecuteCommand(a:action)
     else
-      if has_key(l:choice, 'edit') && type(l:choice.edit) == type({})
-        call lsc#edit#apply(l:choice.edit)
+      if has_key(a:action, 'edit') && type(a:action.edit) == type({})
+        call lsc#edit#apply(a:action.edit)
       endif
-      if has_key(l:choice, 'command') && type(l:choice.command) == type({})
-        call s:ExecuteCommand(l:choice.command)
+      if has_key(a:action, 'command') && type(a:action.command) == type({})
+        call s:ExecuteCommand(a:action.command)
       endif
     endif
   endif
