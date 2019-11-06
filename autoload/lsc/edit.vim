@@ -18,26 +18,20 @@ function! s:SelectAction(result, action_filter) abort
     call lsc#message#show('No actions available')
     return
   endif
-  let l:choice = a:action_filter(a:result)
-  if type(l:choice) == type({})
-    if has_key(l:choice, 'command') && type(l:choice.command) == type('')
-      call s:ExecuteCommand(l:choice)
-    else
-      if has_key(l:choice, 'edit') && type(l:choice.edit) == type({})
-        call lsc#edit#apply(l:choice.edit)
-      endif
-      if has_key(l:choice, 'command') && type(l:choice.command) == type({})
-        call s:ExecuteCommand(l:choice.command)
-      endif
-    endif
-  endif
+  call a:action_filter(a:result, function('<SID>ExecuteCommand'))
 endfunction
 
-function! s:ExecuteCommand(command) abort
-  call lsc#server#userCall('workspace/executeCommand',
-      \ {'command': a:command.command,
-      \ 'arguments': a:command.arguments},
-      \ {_->0})
+function! s:ExecuteCommand(choice) abort
+  if has_key(a:choice, 'command')
+    let l:command = type(a:choice.command) == type('') ?
+        \ a:choice : a:choice.command
+    call lsc#server#userCall('workspace/executeCommand',
+        \ {'command': l:command.command,
+        \ 'arguments': l:command.arguments},
+        \ {_->0})
+  elseif has_key(a:choice, 'edit') && type(a:choice.edit) == type({})
+    call lsc#edit#apply(a:choice.edit)
+  endif
 endfunction
 
 " Returns a function which can filter actions against a patter and select when
@@ -50,17 +44,24 @@ function! lsc#edit#filterActions(...) abort
   endif
 endfunction
 
-function! s:FilteredActionMenu(filter, actions) abort
+function! s:FilteredActionMenu(filter, actions, OnSelected) abort
   call filter(a:actions, {idx, val -> val.title =~ a:filter})
   if empty(a:actions)
     call lsc#message#show('No actions available matching '.a:filter)
     return v:false
   endif
-  if len(a:actions) == 1 | return a:actions[0] | endif
-  return s:ActionMenu(a:actions)
+  if len(a:actions) == 1
+    call a:OnSelected(a:actions[0])
+  else
+    call s:ActionMenu(a:actions, a:OnSelected)
+  endif
 endfunction
 
-function! s:ActionMenu(actions) abort
+function! s:ActionMenu(actions, OnSelected) abort
+  if has_key(g:, 'LSC_action_menu')
+    call g:LSC_action_menu(a:actions, a:OnSelected)
+    return
+  endif
   let choices = ['Choose an action:']
   let idx = 0
   while idx < len(a:actions)
@@ -69,9 +70,8 @@ function! s:ActionMenu(actions) abort
   endwhile
   let choice = inputlist(choices)
   if choice > 0
-    return a:actions[choice - 1]
+    call a:OnSelected(a:actions[choice - 1])
   endif
-  return v:false
 endfunction
 
 function! lsc#edit#rename(...) abort
