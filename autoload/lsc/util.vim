@@ -53,7 +53,7 @@ function! lsc#util#compareQuickFixItems(i1, i2) abort
   endif
   if a:i1.lnum != a:i2.lnum | return a:i1.lnum - a:i2.lnum | endif
   if a:i1.col != a:i2.col | return a:i1.col - a:i2.col | endif
-  if a:i1.type != a:i2.type
+  if has_key(a:i1, 'type') && has_key(a:i2, 'type') && a:i1.type != a:i2.type
     " Reverse order so high severity is ordered first
     return s:QuickFixSeverity(a:i2.type) - s:QuickFixSeverity(a:i1.type)
   endif
