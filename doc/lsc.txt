@@ -374,6 +374,15 @@ cursor whenver the server has support. Disable these highlights by setting
 `g:lsc_reference_highlights` to `v:false`. Configure highlighting with the
 `lscReference` highlight group. See |lsc-configure-highlight|.
 
+                                                *lsc-configure-action-menu*
+                                                *g:LSC_action_menu*
+By default vim-lsc will use a numbered menu for selecting a "code action". To
+replace this menu assign `g:LSC_action_menu` to a function that takes as input
+the actions to run (see the LSP spec for format, each action will have at least
+a `title` field) and the callback to invoke an action after it is chosen. If no
+action should be run, skip the call to the passed callback. This may be used,
+for example, to add in fuzzy finding of actions instead of a numbered selection.
+
 AUTOCMDS                                        *lsc-autocmds*
 
                                                 *autocmd-LSCAutocomplete*
