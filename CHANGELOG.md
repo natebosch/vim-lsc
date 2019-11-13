@@ -33,6 +33,7 @@
 - Use the popup window for hover.
 - Add autocmd `User LSCDiagnosticsChange` to trigger when diagnostics are
   received.
+- Add support for a custom action menu with `g:LSC_action_menu`.
 
 # 0.3.2
 
