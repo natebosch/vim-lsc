@@ -190,3 +190,8 @@ of the chosen action.
 Call `LSClientSignatureHelp` (`gm` if using the default mappings) to get help while writing
 a function call. The currently active parameter is highlighted with the group
 `lscCurrentParameter`.
+
+## Integrations with other plugins
+
+- [vista.vim](https://github.com/liuchengxu/vista.vim)
+- [deoplete-vim-lsc](https://github.com/hrsh7th/deoplete-vim-lsc)
