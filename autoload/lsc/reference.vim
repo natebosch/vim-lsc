@@ -166,22 +166,44 @@ function! s:openHoverPopup(lines) abort
     let height = len(a:lines) + 2
     let width = 1
     " Need to figure out the longest line and base the popup width on that.
+    " Also increase the floating window 'height' if any lines are going to wrap.
     for val in a:lines
-      if strdisplaywidth(val) + 2 > l:width
-        let l:width = strdisplaywidth(val) + 2
+      let val_width = strdisplaywidth(val) + 2
+      if val_width > width
+        let width = val_width
+      endif
+      if val_width > &columns
+        let height = height + (val_width / &columns)
       endif
     endfor
+
+    " Prefer an upward floating window, but if there is no space fallback to
+    " a downward floating window.
+    let current_position = getpos('.')
+    let top_line_number = line('w0')
+    if current_position[1] - top_line_number >= height
+      " There is space to display the floating window above the current cursor
+      " line.
+      let vertical_alignment = 'S'
+      let row = 0
+    else
+      " No space above, so we will float downward instead.
+      let vertical_alignment = 'N'
+      let row = 1
+    endif
+
     let opts = {
           \ 'relative': 'cursor',
-          \ 'anchor': 'SW',
-          \ 'row': 0,
-          \ 'col': 0,
+          \ 'anchor':  vertical_alignment . 'W',
+          \ 'row': row,
+          \ 'col': 1,
           \ 'width': width,
           \ 'height': height,
           \ 'style': 'minimal',
           \ 'focusable': v:false,
           \ }
     let s:popup_id = nvim_open_win(buf, v:false, opts)
+    call nvim_win_set_option(s:popup_id, 'colorcolumn', '')
     " Add padding to the left and right of each text line.
     call map(a:lines, {_, val -> ' ' . val . ' '})
     call nvim_buf_set_lines(winbufnr(s:popup_id), 1, -1, v:false, a:lines)
