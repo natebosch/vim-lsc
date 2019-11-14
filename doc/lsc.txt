@@ -383,6 +383,12 @@ a `title` field) and the callback to invoke an action after it is chosen. If no
 action should be run, skip the call to the passed callback. This may be used,
 for example, to add in fuzzy finding of actions instead of a numbered selection.
 
+                                                *lsc-configure-complete-match*
+                                                *g:lsc_prefix_match_completions*
+By default vim-lsc will display completions that loosely substring match the
+entered word characters. To display matches that strictly prefix match the
+entered word characters please set `g:lsc_prefix_match_completions` to `v:true`.
+
 AUTOCMDS                                        *lsc-autocmds*
 
                                                 *autocmd-LSCAutocomplete*

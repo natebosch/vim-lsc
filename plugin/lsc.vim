@@ -16,6 +16,9 @@ endif
 if !exists('g:lsc_enable_snippet_support')
   let g:lsc_enable_snippet_support = v:false
 endif
+if !exists('g:lsc_prefix_match_completions')
+  let g:lsc_prefix_match_completions = v:false
+endif
 
 command! LSClientGoToDefinitionSplit
     \ call lsc#reference#goToDefinition(<q-mods>, 1)

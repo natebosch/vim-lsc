@@ -199,10 +199,20 @@ endfunction
 function! s:FindSuggestions(base, completion) abort
   let items = copy(a:completion.items)
   if len(a:base) == 0 | return items | endif
-  return filter(items, {_, item -> s:MatchSuggestion(a:base, item)})
+  if exists('g:lsc_prefix_match_completions') && g:lsc_prefix_match_completions
+      return filter(items, {_, item -> s:MatchSuggestionByPrefix(a:base, item)})
+  else
+      return filter(items, {_, item -> s:MatchSuggestionBySubstr(a:base, item)})
+  endif
 endfunction
 
-function! s:MatchSuggestion(base, suggestion) abort
+function! s:MatchSuggestionByPrefix(base, suggestion) abort
+  let word = a:suggestion
+  if type(word) == type({}) | let word = word.word | endif
+  return match(word, '\C' . a:base) == 0
+endfunction
+
+function! s:MatchSuggestionBySubstr(base, suggestion) abort
   let word = a:suggestion
   if type(word) == type({}) | let word = word.word | endif
   return word =~? a:base
