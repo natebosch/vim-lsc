@@ -36,6 +36,8 @@
 - Add autocmd `User LSCDiagnosticsChange` to trigger when diagnostics are
   received.
 - Add support for a custom action menu with `g:LSC_action_menu`.
+- Sort completion suggestions that match by prefix higher than those that match
+  by substring.
 
 # 0.3.2
 
