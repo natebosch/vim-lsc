@@ -383,6 +383,11 @@ a `title` field) and the callback to invoke an action after it is chosen. If no
 action should be run, skip the call to the passed callback. This may be used,
 for example, to add in fuzzy finding of actions instead of a numbered selection.
 
+                                                *g:lsc_enable_popup_syntax*
+By default vim-lsc will not syntax highlight content displayed in popups, for
+example when invoking |:LSClientShowHover|. To display content with syntax
+highlighting, if applicable, please set `g:lsc_popup_syntax` to `v:true`.
+
 AUTOCMDS                                        *lsc-autocmds*
 
                                                 *autocmd-LSCAutocomplete*
