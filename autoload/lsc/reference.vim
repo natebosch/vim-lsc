@@ -145,7 +145,7 @@ function! s:showHover(result) abort
       if has_key(item, 'language')
         let l:filetype = item.language
       elseif has_key(item, 'kind')
-        let l:filetype = item.kind
+        let l:filetype = item.kind == 'markdown' ? 'markdown' : 'text'
       endif
     else
       let l:lines += split(item, "\n")
