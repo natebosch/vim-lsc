@@ -64,7 +64,7 @@ endfunction
 augroup LscCompletion
   autocmd!
   autocmd CompleteDone * let b:lsc_is_completing = v:false
-      \ | silent! unlet b:lsc_completion
+      \ | silent! unlet b:lsc_completion | let s:next_char = ''
 augroup END
 
 " Whether the cursor follows a minimum count of  word characters, and completion
