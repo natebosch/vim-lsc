@@ -145,7 +145,7 @@ function! s:showHover(result) abort
       if has_key(item, 'language')
         let l:filetype = item.language
       elseif has_key(item, 'kind')
-        let l:filetype = item.kind == 'markdown' ? 'markdown' : 'text'
+        let l:filetype = item.kind ==# 'markdown' ? 'markdown' : 'text'
       endif
     else
       let l:lines += split(item, "\n")
@@ -169,7 +169,7 @@ function! s:openHoverPopup(lines, filetype) abort
   if has('nvim')
     let buf = nvim_create_buf(v:false, v:true)
     call nvim_buf_set_option(buf, 'synmaxcol', 0)
-    if exists('g:lsc_enable_popup_syntax') && g:lsc_enable_popup_syntax
+    if g:lsc_enable_popup_syntax
       call nvim_buf_set_option(buf, 'filetype', a:filetype)
     endif
     " Note, the +2s below will be used for padding around the hover text.
@@ -236,7 +236,7 @@ function! s:openHoverPopup(lines, filetype) abort
           \ 'border': [0, 0, 0, 0],
           \ 'moved': 'any',
           \ })
-    if exists('g:lsc_enable_popup_syntax') && g:lsc_enable_popup_syntax
+    if g:lsc_enable_popup_syntax
       call setbufvar(winbufnr(s:popup_id), '&filetype', a:filetype)
     endif
   end
