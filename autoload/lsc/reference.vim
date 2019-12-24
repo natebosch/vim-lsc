@@ -175,16 +175,19 @@ function! s:openHoverPopup(lines, filetype) abort
     " Note, the +2s below will be used for padding around the hover text.
     let height = len(a:lines) + 2
     let width = 1
+    " The maximum width of the floating window should not exceed 95% of the
+    " screen width.
+    let max_width = float2nr(&columns * 0.95)
+
     " Need to figure out the longest line and base the popup width on that.
     " Also increase the floating window 'height' if any lines are going to wrap.
     for val in a:lines
       let val_width = strdisplaywidth(val) + 2
-      if val_width > width
-        let width = val_width
+      if val_width > max_width
+        let height = height + (val_width / max_width)
+        let val_width = max_width
       endif
-      if val_width > &columns
-        let height = height + (val_width / &columns)
-      endif
+      let width = val_width > width ? val_width : width
     endfor
 
     " Prefer an upward floating window, but if there is no space fallback to
@@ -203,8 +206,8 @@ function! s:openHoverPopup(lines, filetype) abort
       " Truncate the float height so that the popup always floats below and
       " never overflows into and above the cursor line.
       let lines_above_cursor = current_position[1] - top_line_number
-      if height > &lines - lines_above_cursor
-        let height = &lines - lines_above_cursor - 2
+      if height > winheight(0) + 2 - lines_above_cursor
+        let height = winheight(0) - lines_above_cursor
       endif
     endif
 
@@ -231,11 +234,31 @@ function! s:openHoverPopup(lines, filetype) abort
     " Also close the floating window when focussed into with the escape key.
     call nvim_buf_set_keymap(buf, 'n', '<Esc>', ':close<CR>', {})
   else
-    let s:popup_id = popup_atcursor(a:lines, {
-          \ 'padding': [1, 1, 1, 1],
-          \ 'border': [0, 0, 0, 0],
+    " Launch a temporary hidden popup to gather dimension details that helps
+    " ascertain if scrolling is required.
+    let temp_popup = popup_atcursor(a:lines, {'padding': [], 'hidden': v:true})
+    let popup_pos = popup_getpos(temp_popup)
+    call popup_close(temp_popup)
+
+    let opts = {
+          \ 'padding': [],
           \ 'moved': 'any',
-          \ })
+          \}
+    if popup_pos["core_height"] == &lines || popup_pos["core_height"] == &lines - 1
+      " This is a downward popup that hits the bottom of the screen, so add a
+      " scrollbar by setting the maxheight to the visible height of the
+      " temp_popup.
+      let opts["maxheight"] = popup_pos["core_height"] - popup_pos["core_line"] - 1
+    elseif popup_pos["line"] == 1
+      " This is an upward popup that hits the top of the screen, so add a
+      " scrollbar by setting the maxheight to the visible height of the
+      " temp_popup.
+      let opts["maxheight"] = popup_pos["height"]
+    endif
+
+    " Launch the actual popup.
+    let s:popup_id = popup_atcursor(a:lines, opts)
+
     if g:lsc_enable_popup_syntax
       call setbufvar(winbufnr(s:popup_id), '&filetype', a:filetype)
     endif
