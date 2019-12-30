@@ -62,9 +62,10 @@ function! s:Consume(server) abort
     return v:false
   endif
   let headers = split(message[:end_of_header - 1], "\r\n")
-  if headers[0] =~ '^[]'
+  if headers[0] =~? '^[]'
     let headers[0] = headers[0][3:]
   endif
+  let g:headers = headers
   let l:message_start = end_of_header + len("\r\n\r\n")
   let l:message_end = l:message_start + s:ContentLength(headers)
   if len(message) < l:message_end
