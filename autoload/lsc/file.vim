@@ -220,8 +220,7 @@ endfunction
 
 function! lsc#file#compare(file_1, file_2) abort
   if a:file_1 == a:file_2 | return 0 | endif
-  " TODO - is this used in a way where normalization matters for getcwd?
-  let l:cwd = '^'.getcwd()
+  let l:cwd = '^'.s:os_normalize(getcwd())
   let l:file_1_in_cwd = a:file_1 =~# l:cwd
   let l:file_2_in_cwd = a:file_2 =~# l:cwd
   if l:file_1_in_cwd && !l:file_2_in_cwd | return -1 | endif
