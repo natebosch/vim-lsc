@@ -148,7 +148,7 @@ function! s:Start(server) abort
     let trace_level = 'off'
   endif
   let l:params = {'processId': getpid(),
-      \ 'rootUri': lsc#uri#documentUri(getcwd()),
+      \ 'rootUri': lsc#uri#documentUri(lsc#file#cwd()),
       \ 'capabilities': s:ClientCapabilities(),
       \ 'trace': trace_level
       \}

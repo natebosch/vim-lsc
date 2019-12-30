@@ -182,38 +182,58 @@ endfunction
 " Paths which do need to be manually normalized are stored so that the full path
 " can be associated back to a buffer with `lsc#file#bufnr()`.
 function! lsc#file#fullPath() abort
-  let l:file_path = expand('%:p')
-  if l:file_path ==# expand('%')
+  let l:full_path = expand('%:p')
+  if l:full_path ==# expand('%')
     " Path could not be expanded due to pointing to a non-existent directory
-    let l:file_path = lsc#file#normalize(getbufinfo('%')[0].name)
+    let l:full_path = lsc#file#normalize(getbufinfo('%')[0].name)
+  elseif has('win32')
+    let l:full_path = s:os_normalize(l:full_path)
   endif
-  return l:file_path
+  return l:full_path
 endfunction
 
 " Like `bufnr()` but handles the case where a relative path was normalized
 " against cwd.
-function! lsc#file#bufnr(file_path) abort
-  let l:bufnr = bufnr(a:file_path)
-  if l:bufnr == -1 && has_key(s:normalized_paths, a:file_path)
-    let l:bufnr = bufnr(s:normalized_paths[a:file_path])
+function! lsc#file#bufnr(full_path) abort
+  let l:bufnr = bufnr(a:full_path)
+  if l:bufnr == -1 && has_key(s:normalized_paths, a:full_path)
+    let l:bufnr = bufnr(s:normalized_paths[a:full_path])
   endif
   return l:bufnr
 endfunction
 
-" If `buffer_name` is relative, normalize it against `cwd`.
-function! lsc#file#normalize(buffer_name) abort
-  if a:buffer_name =~# '^/\|\%([c-zC-Z]:[/\\]\)' | return a:buffer_name | endif
-  let l:full_path = getcwd().'/'.a:buffer_name
-  let s:normalized_paths[l:full_path] = a:buffer_name
+" Normalize `original_path` for OS separators and relative paths, and store the
+" mapping.
+"
+" The return value is always a full path, even if vim won't expand it with `:p`
+" because it is in a non-existent directory. The original path is stored, keyed
+" by the normalized path, so that it can be retrieved by `lsc#file#bufnr`.
+function! lsc#file#normalize(original_path) abort
+  let l:full_path = a:original_path
+  if l:full_path !~# '^/\|\%([c-zC-Z]:[/\\]\)'
+    let l:full_path = getcwd().'/'.l:full_path
+  endif
+  let l:full_path = s:os_normalize(l:full_path)
+  let s:normalized_paths[l:full_path] = a:original_path
   return l:full_path
 endfunction
 
 function! lsc#file#compare(file_1, file_2) abort
   if a:file_1 == a:file_2 | return 0 | endif
-  let l:cwd = '^'.getcwd()
+  let l:cwd = '^'.s:os_normalize(getcwd())
   let l:file_1_in_cwd = a:file_1 =~# l:cwd
   let l:file_2_in_cwd = a:file_2 =~# l:cwd
   if l:file_1_in_cwd && !l:file_2_in_cwd | return -1 | endif
   if l:file_2_in_cwd && !l:file_1_in_cwd | return 1 | endif
   return a:file_1 > a:file_2 ? 1 : -1
+endfunction
+
+" `getcwd` with OS path normalization.
+function! lsc#file#cwd() abort
+  return s:os_normalize(getcwd())
+endfunction
+
+function! s:os_normalize(path) abort
+  if has('win32') | return substitute(a:path, '\\', '/', 'g') | endif
+  return a:path
 endfunction
