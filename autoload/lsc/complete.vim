@@ -210,11 +210,11 @@ function! s:FilterAndSort(base, items) abort
   for l:item in a:items
     let l:word = type(l:item) == type({}) ? l:item.word : l:item
     if l:word =~# l:prefix_base
-      call add(l:prefix_case_matches, l:word)
+      call add(l:prefix_case_matches, l:item)
     elseif l:word =~? l:prefix_base
-      call add(l:prefix_matches, l:word)
+      call add(l:prefix_matches, l:item)
     elseif l:word =~? a:base
-      call add(l:substring_matches, l:word)
+      call add(l:substring_matches, l:item)
     endif
   endfor
   return l:prefix_case_matches + l:prefix_matches + l:substring_matches
@@ -272,6 +272,7 @@ function! s:CompletionItem(completion_item) abort
           \ 'snippet': item.word,
           \ 'snippet_trigger': item.word
           \ })
+    let l:item.word = a:completion_item.label
   endif
   if has_key(a:completion_item, 'kind')
     let item.kind = s:CompletionItemKind(a:completion_item.kind)
