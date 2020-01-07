@@ -106,15 +106,23 @@ search string, with one string argument it will search matching the argument.
 With |lsc-default-map| this command is bound to "gS".
 
                                                 *:LSClientShowHover*
-Open a |preview| window with hover information corresponding to the element
-under the cursor. Sends a "textDocument/hover" request with the location set
-to the cursor's position. If there is no hover information will show a message
-without opening the preview window. With |lsc-default-map| the |keywordprg| is
-set to invoke this command.
+Open a |popup-window| or |preview| window with hover information corresponding
+to the element under the cursor. Sends a "textDocument/hover" request with the
+location set to the cursor's position. If there is no hover information will
+show a message without opening a window. With |lsc-default-map| the |keywordprg|
+is set to invoke this command, and by default this is bound to `K`.
 
-If the preview window is already visible it will reuse it and maintain layout,
-resizing it only if it is smaller than both |previewheight| and the size of
-The new hover information.
+If the editor has support for floating windows (|popup-window| in vim or
+|api-floatwin| in nvim) and popups have not been disabled with
+|g:lsc_hover_popup| the hover information is shown in a floating window.
+Invoking `:LSClientShowHover` again without moving the cursor will close the
+floating window and open a preview window with the same information. The preview
+window can be freely resized, moved, or scrolled which can make more of the
+hover information available.
+
+When opening with the preview window, if the preview was already visible it will
+reuse it and maintain layout, resizing it only if it is smaller than both
+|previewheight| and the size of The new hover information.
 
 If the preview window is not visible it will |split| the window and size it no
 bigger than |previewheight|. Override the direction of the split by setting
@@ -278,9 +286,11 @@ configuration will not impact the preview window which may open during
 completion.
 
                                                 *g:lsc_hover_popup*
-When the Vim |popup| or Neovim |api-floatwin| feature is available it will be
-used for `:LSClientShowHover` by default. Restore the old behavior of using the
-|preview-window| by setting `g:lsc_hover_popup` to `v:false`.
+When the Vim |popup-window| or Neovim |api-floatwin| feature is available it
+will be used for `:LSClientShowHover` by default. Restore the old behavior of
+using the |preview-window| by setting `g:lsc_hover_popup` to `v:false`. While
+the popup is visible performing another request for hover information will move
+it to the preview window.
 
                                                 *lsc-configure-highlight*
 vim-lsc uses highlight groups "lscDiagnosticError", "lscDiagnosticWarning",

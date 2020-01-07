@@ -125,10 +125,21 @@ function! lsc#reference#hover() abort
   call lsc#file#flushChanges()
   let params = lsc#params#documentPosition()
   call lsc#server#userCall('textDocument/hover', params,
-      \ function('<SID>showHover'))
+      \ function('<SID>showHover', [s:hasOpenHover()]))
 endfunction
 
-function! s:showHover(result) abort
+function! s:hasOpenHover() abort
+  if s:popup_id == 0 | return v:false | endif
+  if !exists('*nvim_win_get_config') && !exists('*popup_getoptions')
+    return v:false
+  endif
+  if has('nvim')
+    return nvim_win_is_valid(s:popup_id)
+  endif
+  return len(popup_getoptions(s:popup_id)) > 0
+endfunction
+
+function! s:showHover(force_preview, result) abort
   if empty(a:result) || empty(a:result.contents)
     echom 'No hover information'
     return
@@ -154,7 +165,11 @@ function! s:showHover(result) abort
   if get(g:, 'lsc_hover_popup', v:true) 
         \ && (exists('*popup_atcursor') || exists('*nvim_open_win'))
     call s:closeHoverPopup()
-    call s:openHoverPopup(l:lines, l:filetype)
+    if (a:force_preview)
+      call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
+    else
+      call s:openHoverPopup(l:lines, l:filetype)
+    endif
   else
     call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
   endif
