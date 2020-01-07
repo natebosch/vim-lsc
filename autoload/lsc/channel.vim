@@ -24,7 +24,8 @@ function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
   elseif exists('*jobstart')
     let l:job_options = {
         \ 'on_stdout': {_, data, __ -> a:Callback(join(data, "\n"))},
-        \ 'on_stderr': {_, data, __ -> a:ErrCallback(join(data, "\n"))},
+        \ 'on_stderr': {_, data, __ ->
+        \     data == [''] ? v:null : a:ErrCallback(join(data, "\n"))},
         \ 'on_exit': {_, __, ___ -> a:OnExit()}}
     let l:job = jobstart(a:command, l:job_options)
     call s:WrapNeovim(l:job, l:c)
