@@ -86,10 +86,14 @@ function! lsc#util#displayAsPreview(lines, filetype, function) abort
   let view = winsaveview()
   let alternate=@#
   call s:createOrJumpToPreview(s:countDisplayLines(a:lines, &previewheight))
+  setlocal modifiable
+  setlocal noreadonly
   %d
   call setline(1, a:lines)
   let &filetype = a:filetype
   call a:function()
+  setlocal nomodifiable
+  setlocal readonly
   wincmd p
   call winrestview(view)
   let @#=alternate
