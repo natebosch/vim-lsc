@@ -166,12 +166,13 @@ function! s:showHover(force_preview, result) abort
         \ && (exists('*popup_atcursor') || exists('*nvim_open_win'))
     call s:closeHoverPopup()
     if (a:force_preview)
-      call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
+      call lsc#util#displayAsPreview(lines, l:filetype,
+          \ function('lsc#util#noop'))
     else
       call s:openHoverPopup(l:lines, l:filetype)
     endif
   else
-    call lsc#util#displayAsPreview(lines, function('lsc#util#noop'))
+    call lsc#util#displayAsPreview(lines, l:filetype, function('lsc#util#noop'))
   endif
 endfunction
 

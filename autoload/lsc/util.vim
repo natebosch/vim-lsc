@@ -82,12 +82,13 @@ endfunction
 " otherwise split a window with a max height of `&previewheight`.
 " After the content of the content of the preview window is set,
 " `function` is called (the buffer is still the preview).
-function! lsc#util#displayAsPreview(lines, function) abort
+function! lsc#util#displayAsPreview(lines, filetype, function) abort
   let view = winsaveview()
   let alternate=@#
   call s:createOrJumpToPreview(s:countDisplayLines(a:lines, &previewheight))
   %d
   call setline(1, a:lines)
+  let &filetype = a:filetype
   call a:function()
   wincmd p
   call winrestview(view)
