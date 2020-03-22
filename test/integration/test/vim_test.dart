@@ -1,3 +1,5 @@
+@Timeout(Duration(seconds: 30))
+
 import 'package:_test/vim_remote.dart';
 import 'package:test/test.dart';
 
@@ -49,7 +51,7 @@ void main() {
         while (await vim.expr('lsc#server#status(\'text\')') != 'running') {
           await Future.delayed(const Duration(milliseconds: 50));
         }
-      }, timeout: const Timeout(Duration(seconds: 5)));
+      });
     });
   });
 }
