@@ -281,14 +281,20 @@ function! s:CompletionItem(completion_item) abort
     let detail_lines = split(a:completion_item.detail, "\n")
     if len(detail_lines) > 0
       let item.menu = detail_lines[0]
+      let l:item.info = a:completion_item.detail
     endif
   endif
   if has_key(a:completion_item, 'documentation')
     let documentation = a:completion_item.documentation
+    if has_key(l:item, 'info')
+      let l:item.info .= "\n\n"
+    else
+      let l:item.info = ''
+    endif
     if type(documentation) == type('')
-      let item.info = documentation
+      let l:item.info .= documentation
     elseif type(documentation) == type({}) && has_key(documentation, 'value')
-      let item.info = documentation.value
+      let l:item.info .= documentation.value
     endif
   endif
   return item
