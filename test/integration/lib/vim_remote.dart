@@ -7,6 +7,8 @@ class Vim {
   final Process _process;
 
   static Future<Vim> start() async {
+    final version = (await Process.run('vim', ['--version'])).stdout as String;
+    assert(version.contains('+clientserver'));
     final name = 'DARTVIM-${Random().nextInt(4294967296)}';
     final process = await Process.start(
         'vim', ['--servername', name, '-u', 'vimrc', '-U', 'NONE', '-V$name'],
