@@ -5,8 +5,9 @@
 " types.
 function! lsc#capabilities#normalize(capabilities) abort
   let l:normalized = lsc#capabilities#defaults()
-  if has_key(a:capabilities, 'completionProvider')
-    let l:completion_provider = a:capabilities['completionProvider']
+  if has_key(a:capabilities, 'completionProvider') &&
+      \ type(a:capabilities.completionProvider) != type(v:null)
+    let l:completion_provider = a:capabilities.completionProvider
     if has_key(l:completion_provider, 'triggerCharacters')
       let l:normalized.completion.triggerCharacters =
           \ l:completion_provider['triggerCharacters']
