@@ -11,6 +11,9 @@ class Vim {
     final process = await Process.start(
         'vim', ['--servername', name, '-u', 'vimrc', '-U', 'NONE'],
         mode: ProcessStartMode.detachedWithStdio);
+    process.stdout.drain().whenComplete(() {
+      print('Process Done!');
+    });
     while (!await _isRunning(name)) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -61,7 +64,5 @@ class Vim {
 Future<bool> _isRunning(String name) async {
   final result = await Process.run('vim', ['--serverlist']);
   final serverList = (result.stdout as String).split('\n');
-  print('ExitCode; ${result.exitCode}');
-  print('Running servers: $serverList');
   return serverList.contains(name);
 }
