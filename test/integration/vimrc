@@ -1,0 +1,15 @@
+set nocompatible
+
+let s:test_dir = expand('<sfile>:p:h')
+let s:plugin = fnamemodify(s:test_dir, ':h:h')
+exe 'set rtp+='.s:plugin
+exe 'set rtp+='.s:plugin.'/after'
+
+let g:lsc_server_commands = {
+    \ 'text': 'dart '.s:test_dir.'/bin/mock_server.dart',
+    \}
+let g:lsc_auto_map = v:true
+
+set noswapfile
+
+filetype plugin indent on
