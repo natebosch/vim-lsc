@@ -11,9 +11,6 @@ class Vim {
     final process = await Process.start(
         'vim', ['--servername', name, '-u', 'vimrc', '-U', 'NONE'],
         mode: ProcessStartMode.detachedWithStdio);
-    process.stdout.drain().whenComplete(() {
-      print('Process Done!');
-    });
     while (!await _isRunning(name)) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
