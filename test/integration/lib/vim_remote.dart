@@ -61,5 +61,7 @@ class Vim {
 Future<bool> _isRunning(String name) async {
   final result = await Process.run('vim', ['--serverlist']);
   final serverList = (result.stdout as String).split('\n');
+  print('ExitCode; ${result.exitCode}');
+  print('Running servers: $serverList');
   return serverList.contains(name);
 }
