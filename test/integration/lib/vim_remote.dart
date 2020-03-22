@@ -9,7 +9,7 @@ class Vim {
   static Future<Vim> start() async {
     final name = 'DARTVIM-${Random().nextInt(4294967296)}';
     final process = await Process.start(
-        'vim', ['--servername', name, '-u', 'vimrc', '-U', 'NONE'],
+        'vim', ['--servername', name, '-u', 'vimrc', '-U', 'NONE', '-V$name'],
         mode: ProcessStartMode.detachedWithStdio);
     while (!await _isRunning(name)) {
       await Future.delayed(const Duration(milliseconds: 100));

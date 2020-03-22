@@ -1,5 +1,7 @@
 @Timeout(Duration(seconds: 30))
 
+import 'dart:io';
+
 import 'package:_test/vim_remote.dart';
 import 'package:test/test.dart';
 
@@ -12,6 +14,7 @@ void main() {
 
     tearDownAll(() async {
       await vim.quit();
+      print(File(vim.name).readAsStringSync());
     });
 
     test('evaluates expressions', () async {
@@ -49,7 +52,6 @@ void main() {
 
       test('starts language server', () async {
         while (await vim.expr('lsc#server#status(\'text\')') != 'running') {
-          print('Status: ${await vim.expr('lsc#server#status(\'text\')')}');
           await Future.delayed(const Duration(milliseconds: 50));
         }
       });
