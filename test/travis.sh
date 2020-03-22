@@ -1,5 +1,7 @@
 #!/bin/bash
 
+vim --version
+
 pushd test/integration
 
 pub get
