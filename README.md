@@ -195,3 +195,6 @@ a function call. The currently active parameter is highlighted with the group
 
 - [vista.vim](https://github.com/liuchengxu/vista.vim)
 - [deoplete-vim-lsc](https://github.com/hrsh7th/deoplete-vim-lsc)
+- [vim-vsnip](https://github.com/hrsh7th/vim-vsnip)
+- [vim-vsnip-integ](https://github.com/hrsh7th/vim-vsnip-integ)
+
