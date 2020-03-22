@@ -49,6 +49,7 @@ void main() {
 
       test('starts language server', () async {
         while (await vim.expr('lsc#server#status(\'text\')') != 'running') {
+          print('Status: ${await vim.expr('lsc#server#status(\'text\')')}');
           await Future.delayed(const Duration(milliseconds: 50));
         }
       });
