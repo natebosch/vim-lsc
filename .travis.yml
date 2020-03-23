@@ -24,7 +24,7 @@ addons:
       - python3
       - python3-pip
       - python3-setuptools
-      - vim-gtk3
+      - vim-gnome
 
 before_install:
   - pip3 install --user vim-vint
