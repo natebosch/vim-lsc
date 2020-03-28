@@ -274,6 +274,10 @@ function! s:CompletionItem(completion_item) abort
           \ })
     let l:item.word = a:completion_item.label
   endif
+  if get(a:completion_item, 'deprecated', v:false) ||
+      \ index(get(a:completion_item, 'tags', []), 1) >=0
+    let l:item.abbr = substitute(l:item.word, '.', "\\0\<char-0x0336>", 'g')
+  endif
   if has_key(a:completion_item, 'kind')
     let item.kind = s:CompletionItemKind(a:completion_item.kind)
   endif

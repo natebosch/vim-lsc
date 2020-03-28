@@ -174,6 +174,10 @@ function! s:ClientCapabilities() abort
     \   'completion': {
     \     'completionItem': {
     \       'snippetSupport': g:lsc_enable_snippet_support,
+    \       'deprecatedSupport': v:true,
+    \       'tagSupport': {
+    \         'valueSet': [1],
+    \       },
     \      },
     \   },
     \   'definition': {'dynamicRegistration': v:false},
