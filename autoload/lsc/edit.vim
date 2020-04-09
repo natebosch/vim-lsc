@@ -165,13 +165,13 @@ function! s:Apply(edit) abort
     else
       let l:insert = 'i'
     endif
-    return printf('%dG%d|%s',
+    return printf('%dG0%dlh%s',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
         \ l:insert,
         \)
   else
-    return printf('%dG%d|v%dG%d|c',
+    return printf('%dG0%dlhv%dG0%dlhc',
         \ a:edit.range.start.line + 1,
         \ a:edit.range.start.character + 1,
         \ a:edit.range.end.line + 1,
