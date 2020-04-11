@@ -165,24 +165,33 @@ function! s:Apply(edit) abort
     else
       let l:insert = 'i'
     endif
-    return printf('%dG%d|%s',
-        \ a:edit.range.start.line + 1,
-        \ a:edit.range.start.character + 1,
+    return printf('%s%s',
+        \ s:GoToChar(a:edit.range.start)
         \ l:insert,
         \)
   else
-    return printf('%dG%d|v%dG%d|c',
-        \ a:edit.range.start.line + 1,
-        \ a:edit.range.start.character + 1,
-        \ a:edit.range.end.line + 1,
-        \ a:edit.range.end.character + 1,
-        \)
+    return printf('%sv%sc',
+        \ s:GoToChar(a:edit.range.start),
+        \ s:GoToChar(a:edit.range.end),
+	\)
   endif
 endfunction
 
 function! s:IsEmptyRange(range) abort
   return a:range.start.line == a:range.end.line &&
       \ a:range.start.character == a:range.end.character
+endfunction
+
+" Find the normal mode commands to go to [pos]
+function! s:GoToChar(pos) abort
+  let l:cmd = ''
+  let l:cmd .= printf('%dG', a:pos.line + 1)
+  if a:pos.character == 0
+    let l:cmd .= printf('0')
+  else
+    let l:cmd .= printf('0%dl', a:pos.character)
+  endif
+  return l:cmd
 endfunction
 
 " Orders edits such that those later in the document appear earlier, and inserts
