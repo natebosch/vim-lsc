@@ -166,7 +166,7 @@ function! s:Apply(edit) abort
       let l:insert = 'i'
     endif
     return printf('%s%s',
-        \ s:GoToChar(a:edit.range.start)
+        \ s:GoToChar(a:edit.range.start),
         \ l:insert,
         \)
   else
