@@ -173,7 +173,7 @@ function! s:Apply(edit) abort
     return printf('%sv%sc',
         \ s:GoToChar(a:edit.range.start),
         \ s:GoToChar(a:edit.range.end),
-	\)
+        \)
   endif
 endfunction
 
