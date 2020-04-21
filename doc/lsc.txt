@@ -398,6 +398,15 @@ By default vim-lsc will syntax highlight content displayed in popups, for
 example when invoking |:LSClientShowHover|. To disable such syntax highlighting
 please set `g:lsc_popup_syntax` to `v:false`.
 
+                                                *g:lsc_hover_contentformat*
+By default vim-lsc will indicate to the server that it supports both markdown
+and plaintext content formats for hover results. To override this, set
+`clientCapabilities.hover.contentFormat` in order of preference:
+>
+ " Prefer plaintext over markdown
+ let g:lsc_hover_contentformat = ['plaintext', 'markdown']
+<
+
 AUTOCMDS                                        *lsc-autocmds*
 
                                                 *autocmd-LSCAutocomplete*

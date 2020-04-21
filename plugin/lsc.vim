@@ -19,6 +19,9 @@ endif
 if !exists('g:lsc_enable_popup_syntax')
   let g:lsc_enable_popup_syntax = v:true
 endif
+if !exists('g:lsc_hover_contentformat')
+  let g:lsc_hover_contentformat = ['markdown', 'plaintext']
+endif
 
 command! LSClientGoToDefinitionSplit
     \ call lsc#reference#goToDefinition(<q-mods>, 1)

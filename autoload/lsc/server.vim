@@ -186,6 +186,7 @@ function! s:ClientCapabilities() abort
     \       'codeActionKind': {'valueSet': ['quickfix', 'refactor', 'source']}
     \     }
     \   },
+    \   'hover': {'contentFormat': g:lsc_hover_contentformat},
     \   'signatureHelp': {'dynamicRegistration': v:false},
     \ }
     \}
