@@ -162,6 +162,7 @@ function! s:showHover(force_preview, result) abort
       let l:lines += split(item, "\n")
     endif
   endfor
+  let b:lsc_last_preview = l:lines
   if get(g:, 'lsc_hover_popup', v:true) 
         \ && (exists('*popup_atcursor') || exists('*nvim_open_win'))
     call s:closeHoverPopup()
