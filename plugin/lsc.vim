@@ -2,6 +2,7 @@ if exists('g:loaded_lsc')
   finish
 endif
 let g:loaded_lsc = 1
+let g:_lsc_is_exiting = v:false
 
 if !exists('g:lsc_servers_by_filetype')
   " filetype -> server name
@@ -106,6 +107,7 @@ augroup LSC
   autocmd InsertCharPre * call <SID>IfEnabled('lsc#complete#insertCharPre')
 
   autocmd VimLeave * call lsc#server#exit()
+  autocmd ExitPre * let g:_lsc_is_exiting = v:true
 augroup END
 
 " Set window local state only if this is a brand new window which has not
@@ -160,6 +162,7 @@ function! s:OnOpen() abort
 endfunction
 
 function! s:OnClose() abort
+  if g:_lsc_is_exiting | return | endif
   let l:filetype = getbufvar(str2nr(expand('<abuf>')), '&filetype')
   if !has_key(g:lsc_servers_by_filetype, l:filetype) | return | endif
   if !lsc#server#filetypeActive(l:filetype) | return | endif
