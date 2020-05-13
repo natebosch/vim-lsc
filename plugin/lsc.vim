@@ -107,7 +107,9 @@ augroup LSC
   autocmd InsertCharPre * call <SID>IfEnabled('lsc#complete#insertCharPre')
 
   autocmd VimLeave * call lsc#server#exit()
-  autocmd ExitPre * let g:_lsc_is_exiting = v:true
+  if exists('##ExitPre')
+    autocmd ExitPre * let g:_lsc_is_exiting = v:true
+  endif
 augroup END
 
 " Set window local state only if this is a brand new window which has not
