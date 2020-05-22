@@ -45,6 +45,8 @@
 - Strikethrough deprecated completion options in the menu.
 - Improve performance of finding incremental changes for file syncing in very
   large files when lua support is available.
+- Send `hover.contentFormat` to prefer plaintext content which should be more
+  readable for most users.
 
 # 0.3.2
 
