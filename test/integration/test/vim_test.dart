@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:_test/vim_remote.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
@@ -10,6 +11,8 @@ void main() {
     Vim vim;
     setUpAll(() async {
       vim = await Vim.start();
+      final serverPath = p.absolute('bin', 'mock_server.dart');
+      await vim.expr('RegisterLanguageServer("text","dart $serverPath")');
     });
 
     tearDownAll(() async {
