@@ -36,14 +36,18 @@ void main() {
 
   tearDown(() async {
     await vim.sendKeys(':LSClientDisable<cr>');
-    await vim.sendKeys(':bwipeout<cr>');
+    await vim.sendKeys(':%bwipeout!<cr>');
     final file = File('foo.txt');
     if (await file.exists()) await file.delete();
+    await client.done;
+    client = null;
   });
 
   tearDownAll(() async {
     await vim.quit();
-    print(File(vim.name).readAsStringSync());
+    final log = File(vim.name);
+    print(await log.readAsString());
+    await log.delete();
     await serverSocket.close();
   });
 
