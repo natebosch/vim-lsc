@@ -17,7 +17,9 @@ void main() {
 
     tearDownAll(() async {
       await vim.quit();
-      print(File(vim.name).readAsStringSync());
+      final log = File(vim.name);
+      print(await log.readAsString());
+      await log.delete();
     });
 
     test('evaluates expressions', () async {

@@ -167,7 +167,6 @@ function! s:OnClose() abort
   if g:_lsc_is_exiting | return | endif
   let l:filetype = getbufvar(str2nr(expand('<abuf>')), '&filetype')
   if !has_key(g:lsc_servers_by_filetype, l:filetype) | return | endif
-  if !lsc#server#filetypeActive(l:filetype) | return | endif
   let l:full_path = lsc#file#normalize(expand('<afile>:p'))
   call lsc#file#onClose(l:full_path, l:filetype)
 endfunction
