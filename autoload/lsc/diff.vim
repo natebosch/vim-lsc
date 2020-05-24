@@ -63,6 +63,7 @@ let s:lua = 1
 " list of Strings.
 function! s:FirstDifference(old, new) abort
   let line_count = min([len(a:old), len(a:new)])
+  if line_count == 0 | return [0, 0] | endif
   if s:has_lua
     let l:eval = has('nvim') ? 'vim.api.nvim_eval' : 'vim.eval'
     let l:i = luaeval('lsc_first_difference('

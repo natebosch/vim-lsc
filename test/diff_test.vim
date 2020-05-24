@@ -178,13 +178,13 @@ function! TestDiff() abort
 
   " File becomes empty
   call s:TestDiff(
-      \ [0,0,0,4], 4, '',
+      \ [0,0,1,0], 5, '',
       \ 'line',
       \ '')
 
   " File Starts empty
   call s:TestDiff(
-      \ [0,0,0,0], 0, 'line',
+      \ [0,0,0,0], 0, "line\n",
       \ '',
       \ 'line')
 
@@ -194,13 +194,20 @@ function! TestDiff() abort
       \ [2,3,2,3], 0, '',
       \ "foo\nbar\nbaz",
       \ "foo\nbar\nbaz")
+
+  " Starts and ends empty
+  call s:TestDiff(
+      \ [0,0,0,0], 0, '',
+      \ '',
+      \ '')
 endfunction
 
 function! s:TestDiff(range, length, text, old, new) abort
   let start = {'line': a:range[0], 'character': a:range[1]}
   let end = {'line': a:range[2], 'character': a:range[3]}
-  let result = lsc#diff#compute(split(a:old, "\n", v:true),
-      \ split(a:new, "\n", v:true))
+  let l:old = empty(a:old) ? [] : split(a:old, "\n", v:true)
+  let l:new = empty(a:new) ? [] : split(a:new, "\n", v:true)
+  let result = lsc#diff#compute(l:old, l:new)
   call assert_equal({'start': start}, {'start': result.range.start})
   call assert_equal({'end': end}, {'end': result.range.end})
   call assert_equal({'length': a:length}, {'length': result.rangeLength})
