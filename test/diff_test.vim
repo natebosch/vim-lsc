@@ -8,11 +8,25 @@ function! TestDiff() abort
       \ "baz\nb╵r\nfoo"
       \ )
 
+  " First line changed
+  call s:TestDiff(
+      \ [0,1,0,2], 1, 'n',
+      \ "foo\nbar\nbaz",
+      \ "fno\nbar\nbaz"
+      \ )
+
   " Middle line changed
   call s:TestDiff(
       \ [1,0,1,3], 3, 'new',
       \ "foo\nb╵r\nbaz",
       \ "foo\nnew\nbaz"
+      \ )
+
+  " Last line changed
+  call s:TestDiff(
+      \ [2,1,2,2], 1, 'n',
+      \ "foo\nbar\nbaz",
+      \ "foo\nbar\nbnz"
       \ )
 
   " Middle characters changed
@@ -161,6 +175,25 @@ function! TestDiff() abort
       \ "\n\n\n\nfoo\nb╵r\nbaz",
       \ "\n\n\n\nfoo\nbxr\nbaz"
       \ )
+
+  " File becomes empty
+  call s:TestDiff(
+      \ [0,0,0,4], 4, '',
+      \ 'line',
+      \ '')
+
+  " File Starts empty
+  call s:TestDiff(
+      \ [0,0,0,0], 0, 'line',
+      \ '',
+      \ 'line')
+
+  " File is identical
+  " Would be better to not send a change, but an arbitrary empty change is OK
+  call s:TestDiff(
+      \ [2,3,2,3], 0, '',
+      \ "foo\nbar\nbaz",
+      \ "foo\nbar\nbaz")
 endfunction
 
 function! s:TestDiff(range, length, text, old, new) abort
