@@ -27,15 +27,47 @@ function! lsc#diff#compute(old, new) abort
   return result
 endfunction
 
+let s:has_lua = has('lua') || has('nvim-0.4.0')
+
+if s:has_lua && !exists('s:lua')
+  lua <<EOF
+  function lsc_last_difference(old, new, offset)
+    local length = math.min(#old, #new)
+    for i = 0, length - 1 do
+      if old[#old - i + offset] ~= new[#new - i + offset] then
+        return -1 * i
+      end
+    end
+    return -1 * length
+  end
+  function lsc_first_difference(old, new, offset)
+    local length = math.min(#old, #new)
+    for i = 1, length do
+      if old[i + offset] ~= new[i + offset] then
+        return i
+      end
+    end
+    return length - 1
+  end
+EOF
+endif
+let s:lua = 1
+
 " Finds the line and character of the first different character between two
 " list of Strings.
 function! s:FirstDifference(old, new) abort
   let line_count = min([len(a:old), len(a:new)])
-  let i = 0
-  while i < line_count
-    if a:old[i] !=# a:new[i] | break | endif
-    let i += 1
-  endwhile
+  if s:has_lua
+    let l:eval = has('nvim') ? 'vim.api.nvim_eval' : 'vim.eval'
+    let l:i = luaeval('lsc_first_difference('
+        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))')
+  else
+    let i = 0
+    while i < line_count
+      if a:old[i] !=# a:new[i] | break | endif
+      let i += 1
+    endwhile
+  endif
   if i >= line_count
     return [line_count - 1, strchars(a:old[line_count - 1])]
   endif
@@ -53,11 +85,17 @@ endfunction
 function! s:LastDifference(old, new, start_char) abort
   let line_count = min([len(a:old), len(a:new)])
   if line_count == 0 | return [0, 0] | endif
-  let i = -1
-  while i >= -1 * line_count
-    if a:old[i] !=# a:new[i] | break | endif
-    let i -= 1
-  endwhile
+  if s:has_lua
+    let l:eval = has('nvim') ? 'vim.api.nvim_eval' : 'vim.eval'
+    let l:i = luaeval('lsc_last_difference('
+        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))')
+  else
+    let i = -1
+    while i >= -1 * line_count
+      if a:old[i] !=# a:new[i] | break | endif
+      let i -= 1
+    endwhile
+  endif
   if i <= -1 * line_count
     let i = -1 * line_count
     let old_line = strcharpart(a:old[i], a:start_char)
