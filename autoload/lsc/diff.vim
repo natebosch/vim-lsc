@@ -69,11 +69,9 @@ function! s:FirstDifference(old, new) abort
     let l:i = float2nr(luaeval('lsc_first_difference('
         \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))'))
   else
-    let i = 0
-    while i < line_count
-      if a:old[i] !=# a:new[i] | break | endif
-      let i += 1
-    endwhile
+    for l:i in range(l:line_count)
+      if a:old[l:i] !=# a:new[l:i] | break | endif
+    endfor
   endif
   if i >= line_count
     return [line_count - 1, strchars(a:old[line_count - 1])]
@@ -97,11 +95,9 @@ function! s:LastDifference(old, new, start_char) abort
     let l:i = float2nr(luaeval('lsc_last_difference('
         \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))'))
   else
-    let i = -1
-    while i >= -1 * line_count
-      if a:old[i] !=# a:new[i] | break | endif
-      let i -= 1
-    endwhile
+    for l:i in range(-1, -1 * l:line_count, -1)
+      if a:old[l:i] !=# a:new[l:i] | break | endif
+    endfor
   endif
   if i <= -1 * line_count
     let i = -1 * line_count
@@ -156,11 +152,9 @@ function! s:Length(lines, start_line, start_char, end_line, end_char)
     return adj_end_char - a:start_char + 1
   endif
   let result = strchars(a:lines[a:start_line]) - a:start_char + 1
-  let line = a:start_line + 1
-  while line < adj_end_line
-    let result += strchars(a:lines[line]) + 1
-    let line += 1
-  endwhile
+  for l:line in range(a:start_line + 1, l:adj_end_line - 1)
+    let result += strchars(a:lines[l:line]) + 1
+  endfor
   let result += adj_end_char + 1
   return result
 endfunction
