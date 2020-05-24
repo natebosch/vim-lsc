@@ -31,6 +31,9 @@ let s:has_lua = has('lua') || has('nvim-0.4.0')
 
 if s:has_lua && !exists('s:lua')
   lua <<EOF
+  -- Returns a zero-based index of the last line that is different between
+  -- old and new. If old and new are not zero indexed, pass offset to indicate
+  -- the index base.
   function lsc_last_difference(old, new, offset)
     local length = math.min(#old, #new)
     for i = 0, length - 1 do
@@ -40,9 +43,12 @@ if s:has_lua && !exists('s:lua')
     end
     return -1 * length
   end
+  -- Returns a zero-based index of the first line that is different between
+  -- old and new. If old and new are not zero indexed, pass offset to indicate
+  -- the index base.
   function lsc_first_difference(old, new, offset)
     local length = math.min(#old, #new)
-    for i = 1, length do
+    for i = 0, length - 1 do
       if old[i + offset] ~= new[i + offset] then
         return i
       end
