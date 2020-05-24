@@ -66,8 +66,8 @@ function! s:FirstDifference(old, new) abort
   if line_count == 0 | return [0, 0] | endif
   if s:has_lua
     let l:eval = has('nvim') ? 'vim.api.nvim_eval' : 'vim.eval'
-    let l:i = luaeval('lsc_first_difference('
-        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))')
+    let l:i = float2nr(luaeval('lsc_first_difference('
+        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))'))
   else
     let i = 0
     while i < line_count
@@ -94,8 +94,8 @@ function! s:LastDifference(old, new, start_char) abort
   if line_count == 0 | return [0, 0] | endif
   if s:has_lua
     let l:eval = has('nvim') ? 'vim.api.nvim_eval' : 'vim.eval'
-    let l:i = luaeval('lsc_last_difference('
-        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))')
+    let l:i = float2nr(luaeval('lsc_last_difference('
+        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))'))
   else
     let i = -1
     while i >= -1 * line_count
