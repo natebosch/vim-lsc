@@ -43,8 +43,8 @@
   by substring.
 - Include Completion item `detail` field in the preview window.
 - Strikethrough deprecated completion options in the menu.
-- Improve performance of finding incremental changes for file syncing in very
-  large files when lua support is available.
+- Improve performance of finding incremental changes for file syncing in large
+  files.
 
 # 0.3.2
 
