@@ -187,7 +187,7 @@ function! s:GoToChar(pos) abort
   let l:cmd = ''
   let l:cmd .= printf('%dG', a:pos.line + 1)
   if a:pos.character == 0
-    let l:cmd .= printf('0')
+    let l:cmd .= '0'
   else
     let l:cmd .= printf('0%dl', a:pos.character)
   endif
