@@ -29,7 +29,6 @@ function! lsc#server#start(filetype) abort
 endfunction
 
 function! lsc#server#status(filetype) abort
-  if !has_key(g:lsc_servers_by_filetype, a:filetype) | return '' | endif
   return s:servers[g:lsc_servers_by_filetype[a:filetype]].status
 endfunction
 

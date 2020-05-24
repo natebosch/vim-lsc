@@ -50,6 +50,7 @@ endif
 " Returns the status of the language server for the current filetype or empty
 " string if it is not configured.
 function! LSCServerStatus() abort
+  if !has_key(g:lsc_servers_by_filetype, &filetype) | return '' | endif
   return lsc#server#status(&filetype)
 endfunction
 
