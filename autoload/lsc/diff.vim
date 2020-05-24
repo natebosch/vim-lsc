@@ -27,21 +27,21 @@ function! lsc#diff#compute(old, new) abort
   return result
 endfunction
 
-if has('lua') && !exists('s:lua')
+if (has('lua') || has('nvim')) && !exists('s:lua')
   lua <<EOF
-  function lsc_last_difference(old, new)
+  function lsc_last_difference(old, new, offset)
     local length = math.min(#old, #new)
     for i = 0, length - 1 do
-      if old[#old-i] ~= new[#new-i] then
+      if old[#old - i + offset] ~= new[#new - i + offset] then
         return -1 * i
       end
     end
     return -1 * length
   end
-  function lsc_first_difference(old, new)
+  function lsc_first_difference(old, new, offset)
     local length = math.min(#old, #new)
     for i = 1, length do
-      if old[i] ~= new[i] then
+      if old[i + offset] ~= new[i + offset] then
         return i
       end
     end
@@ -55,9 +55,10 @@ let s:lua = 1
 " list of Strings.
 function! s:FirstDifference(old, new) abort
   let line_count = min([len(a:old), len(a:new)])
-  if has('lua')
-    let l:i =
-        \ luaeval('lsc_first_difference(vim.eval("a:old"), vim.eval("a:new"))')
+  if has('lua') || has('nvim')
+    let l:eval = has('nvim') ? 'vim.api.nvim_eval' : 'vim.eval'
+    let l:i = luaeval('lsc_first_difference('
+        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))')
   else
     let i = 0
     while i < line_count
@@ -82,9 +83,10 @@ endfunction
 function! s:LastDifference(old, new, start_char) abort
   let line_count = min([len(a:old), len(a:new)])
   if line_count == 0 | return [0, 0] | endif
-  if has('lua')
-    let l:i =
-        \ luaeval('lsc_last_difference(vim.eval("a:old"), vim.eval("a:new"))')
+  if has('lua') || has('nvim')
+    let l:eval = has('nvim') ? 'vim.api.nvim_eval' : 'vim.eval'
+    let l:i = luaeval('lsc_last_difference('
+        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))')
   else
     let i = -1
     while i >= -1 * line_count
