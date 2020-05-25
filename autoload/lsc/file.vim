@@ -4,8 +4,6 @@ if !exists('s:initialized')
   let s:file_versions = {}
   " file path -> file content
   let s:file_content = {}
-  " file path -> flush timer
-  let s:flush_timers = {}
   " full file path -> buffer name
   let s:normalized_paths = {}
 endif
@@ -106,21 +104,13 @@ function! lsc#file#onChange(...) abort
     let file_path = lsc#file#fullPath()
     let filetype = &filetype
   endif
-  if has_key(s:flush_timers, file_path)
-    call timer_stop(s:flush_timers[file_path])
-  endif
-  let s:flush_timers[file_path] =
-      \ timer_start(500,
-      \   {_->s:FlushIfChanged(file_path, filetype)},
-      \   {'repeat': 1})
+  call s:FlushChanges(file_path, filetype)
 endfunction
 
 " Flushes only if `onChange` had previously been called for the file and the
 " changes aren't yet flusehd.
 function! s:FlushIfChanged(file_path, filetype) abort
-  if has_key(s:flush_timers, a:file_path)
-    call s:FlushChanges(a:file_path, a:filetype)
-  endif
+  " Nothing
 endfunction
 
 " Changes are flushed after 500ms of inactivity or before leaving the buffer.
@@ -130,10 +120,6 @@ function! s:FlushChanges(file_path, filetype) abort
     return
   endif
   let s:file_versions[a:file_path] += 1
-  if has_key(s:flush_timers, a:file_path)
-    call timer_stop(s:flush_timers[a:file_path])
-    unlet s:flush_timers[a:file_path]
-  endif
   let buffer_content = getbufline(lsc#file#bufnr(a:file_path), 1, '$')
   let allow_incremental = s:AllowIncrementalSync(a:filetype)
   if allow_incremental
