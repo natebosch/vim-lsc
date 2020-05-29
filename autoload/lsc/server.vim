@@ -266,6 +266,7 @@ function! lsc#server#register(filetype, config) abort
     call self._channel.respond(a:id, a:result)
   endfunction
   function! server._initialize(params, callback) abort
+    let self.status = 'starting'
     let l:params = lsc#config#messageHook(self, 'initialize', a:params)
     call self._channel.request('initialize', l:params, a:callback)
   endfunction
