@@ -117,6 +117,7 @@ function! s:Start(server) abort
     return
   endif
   let l:command = a:server.config.command
+  let a:server.status = 'starting'
   let a:server._channel = lsc#protocol#open(l:command,
       \ function('<SID>Dispatch', [a:server]),
       \ a:server.on_err, a:server.on_exit)
@@ -266,7 +267,6 @@ function! lsc#server#register(filetype, config) abort
     call self._channel.respond(a:id, a:result)
   endfunction
   function! server._initialize(params, callback) abort
-    let self.status = 'starting'
     let l:params = lsc#config#messageHook(self, 'initialize', a:params)
     call self._channel.request('initialize', l:params, a:callback)
   endfunction
