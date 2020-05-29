@@ -54,6 +54,15 @@ class Vim {
     assert(openFile == fileName);
   }
 
+  /// Returns the last [count] messages from `:messages`.
+  Future<List<String>> messages(int count) async {
+    await sendKeys(':redir => vim_remote_messages<cr>');
+    await sendKeys(':${count}messages<cr>');
+    await sendKeys(':redir END<cr>');
+    final output = await expr('vim_remote_messages');
+    return output.split('\n').skip(2).toList();
+  }
+
   /// The full content of the currently active buffer.
   Future<String> get currentBufferContent async => expr(r'getline(1, "$")');
 
