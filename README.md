@@ -7,9 +7,6 @@ following the [language server protocol][]. For more information see
 [language server protocol]: https://github.com/Microsoft/language-server-protocol
 [langserver.org]: http://langserver.org/
 
-This client has not been tested against a wide range of servers so there may be
-protocol bugs.
-
 ## Installation
 
 Install with your plugin management method of choice. If you don't have a
