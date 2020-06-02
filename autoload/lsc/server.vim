@@ -229,7 +229,7 @@ function! lsc#server#register(filetype, config) abort
       throw 'Server configuration must have a "command" key'
     endif
     if !has_key(config, 'name')
-      let config.name = config.command
+      let config.name = string(config.command)
     endif
   endif
   let g:lsc_servers_by_filetype[a:filetype] = config.name
