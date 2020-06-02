@@ -199,25 +199,7 @@ endfunction
 function! s:FindSuggestions(base, completion) abort
   let items = copy(a:completion.items)
   if len(a:base) == 0 | return items | endif
-  return s:FilterAndSort(a:base, l:items)
-endfunction
-
-function! s:FilterAndSort(base, items) abort
-  let l:prefix_case_matches = []
-  let l:prefix_matches = []
-  let l:substring_matches = []
-  let l:prefix_base = '^'.a:base
-  for l:item in a:items
-    let l:word = type(l:item) == type({}) ? l:item.word : l:item
-    if l:word =~# l:prefix_base
-      call add(l:prefix_case_matches, l:item)
-    elseif l:word =~? l:prefix_base
-      call add(l:prefix_matches, l:item)
-    elseif l:word =~? a:base
-      call add(l:substring_matches, l:item)
-    endif
-  endfor
-  return l:prefix_case_matches + l:prefix_matches + l:substring_matches
+  return l:items
 endfunction
 
 " Normalize LSP completion suggestions to the format used by vim.
