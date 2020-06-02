@@ -271,11 +271,8 @@ function! lsc#server#register(filetype, config) abort
     call self._channel.request('initialize', l:params, a:callback)
   endfunction
   function! server.on_err(message) abort
-    if self.status ==# 'starting'
-        \ || !has_key(self.config, 'suppress_stderr')
-        \ || !self.config.suppress_stderr
-      call lsc#message#error('StdErr from '.self.config.name.': '.a:message)
-    endif
+    if get(self.config, 'suppress_stderr', v:false) | return | endif
+    call lsc#message#error('StdErr from '.self.config.name.': '.a:message)
   endfunction
   function! server.on_exit() abort
     unlet self._channel
