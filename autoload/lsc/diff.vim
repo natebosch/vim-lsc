@@ -58,7 +58,7 @@ if s:has_lua && !exists('s:lua')
     end
 EOF
   endfunction
-  call DefLua()
+  call s:DefLua()
 endif
 let s:lua = 1
 
