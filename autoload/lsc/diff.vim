@@ -30,7 +30,7 @@ endfunction
 let s:has_lua = has('lua') || has('nvim-0.4.0')
 
 if s:has_lua && !exists('s:lua')
-  function! s:DefLua()
+  function! s:DefLua() abort
     lua <<EOF
     -- Returns a zero-based index of the last line that is different between
     -- old and new. If old and new are not zero indexed, pass offset to indicate
