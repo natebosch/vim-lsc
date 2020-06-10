@@ -72,10 +72,15 @@ function! s:Consume(server) abort
   let remaining_message = message[l:message_end : ]
   let a:server._buffer = remaining_message
   try
-    let content = json_decode(payload)
-    if type(content) != type({}) | throw 1 | endif
+    if len(l:payload) > 0
+      let l:content = json_decode(l:payload)
+      if type(l:content) != type({})
+        unlet l:content
+        throw 1
+      endif
+    endif
   catch
-    call lsc#message#error('Could not decode message: '.payload)
+    call lsc#message#error('Could not decode message: ['.payload.']')
   endtry
   if exists('l:content')
     call lsc#util#shift(a:server._out, 10, content)

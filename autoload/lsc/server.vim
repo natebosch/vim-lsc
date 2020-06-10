@@ -117,6 +117,7 @@ function! s:Start(server) abort
     return
   endif
   let l:command = a:server.config.command
+  let a:server.status = 'starting'
   let a:server._channel = lsc#protocol#open(l:command,
       \ function('<SID>Dispatch', [a:server]),
       \ a:server.on_err, a:server.on_exit)
@@ -228,7 +229,7 @@ function! lsc#server#register(filetype, config) abort
       throw 'Server configuration must have a "command" key'
     endif
     if !has_key(config, 'name')
-      let config.name = config.command
+      let config.name = string(config.command)
     endif
   endif
   let g:lsc_servers_by_filetype[a:filetype] = config.name
@@ -270,11 +271,8 @@ function! lsc#server#register(filetype, config) abort
     call self._channel.request('initialize', l:params, a:callback)
   endfunction
   function! server.on_err(message) abort
-    if self.status ==# 'starting'
-        \ || !has_key(self.config, 'suppress_stderr')
-        \ || !self.config.suppress_stderr
-      call lsc#message#error('StdErr from '.self.config.name.': '.a:message)
-    endif
+    if get(self.config, 'suppress_stderr', v:false) | return | endif
+    call lsc#message#error('StdErr from '.self.config.name.': '.a:message)
   endfunction
   function! server.on_exit() abort
     unlet self._channel
