@@ -103,11 +103,16 @@ function! s:OnResult(isAuto, completion) abort
   if s:completion_canceled
     let b:lsc_is_completing = v:false
   endif
-  let completions = s:CompletionItems(a:completion)
+  let l:items = []
+  if type(a:completion) == type([])
+    let l:items = a:completion
+  elseif type(a:completion) == type({})
+    let l:items = a:completion.items
+  endif
   if (a:isAuto)
-    call s:SuggestCompletions(completions)
+    call s:SuggestCompletions(l:items)
   else
-    let b:lsc_completion = completions
+    let b:lsc_completion = l:items
   endif
 endfunction
 
@@ -117,22 +122,21 @@ function! s:OnSkip(completion) abort
   let b:lsc_is_completing = v:false
 endfunction
 
-function! s:SuggestCompletions(completion) abort
-  if mode() !=# 'i' || len(a:completion.items) == 0
+function! s:SuggestCompletions(items) abort
+  if mode() !=# 'i' || len(a:items) == 0
     let b:lsc_is_completing = v:false
     return
   endif
-  let start = s:FindStart(a:completion)
-  let suggestions = a:completion.items
-  if start != col('.')
-    let base = getline('.')[start - 1:col('.') - 2]
-    let suggestions = s:FindSuggestions(base, a:completion)
-  endif
+  let l:start = s:FindStart(a:items)
+  let l:base = l:start != col('.')
+      \ ? getline('.')[start - 1:col('.') - 2]
+      \ : ''
+  let l:completion_items = s:CompletionItems(l:base, a:items)
   call s:SetCompleteOpt()
   if exists('#User#LSCAutocomplete')
     doautocmd <nomodeline> User LSCAutocomplete
   endif
-  call complete(start, suggestions)
+  call complete(start, l:completion_items)
 endfunction
 
 function! s:SetCompleteOpt() abort
@@ -163,21 +167,24 @@ function! lsc#complete#complete(findstart, base) abort
     endif
   endif
   if a:findstart
-    if len(b:lsc_completion.items) == 0
+    if len(b:lsc_completion) == 0
       unlet b:lsc_completion
       return -3
     endif
     return  s:FindStart(b:lsc_completion) - 1
   else
-    return s:FindSuggestions(a:base, b:lsc_completion)
+    return s:CompletionItems(a:base, b:lsc_completion)
   endif
 endfunction
 
 " Finds the 1-based index of the first character in the completion.
-function! s:FindStart(completion) abort
-  if has_key(a:completion, 'start_col')
-    return a:completion.start_col
-  endif
+function! s:FindStart(completion_items) abort
+  for l:item in a:completion_items
+    if has_key(l:item, 'textEdit')
+        \ && type(l:item.textEdit) == type({})
+      return l:item.textEdit.range.start.character + 1
+    endif
+  endfor
   return s:GuessCompletionStart()
 endfunction
 
@@ -196,112 +203,99 @@ function! s:GuessCompletionStart() abort
   return 1
 endfunction
 
-function! s:FindSuggestions(base, completion) abort
-  let items = copy(a:completion.items)
-  if len(a:base) == 0 | return items | endif
-  return s:FilterAndSort(a:base, l:items)
-endfunction
-
-function! s:FilterAndSort(base, items) abort
+" Filter and convert LSP completion items into the format used by vim.
+"
+" a:base is the portion of the portion of the word typed so far, matching the
+" argument to `completefunc` the second time it is called.
+"
+" If a non-empty base is passed, only the items which contain the base somewhere
+" whithin the completion will be used. Preference is given first to the
+" completions which match by a case-sensitive prefix, then by case-insensitive
+" prefix, then case-insensitive substring.
+function! s:CompletionItems(base, lsp_items) abort
   let l:prefix_case_matches = []
   let l:prefix_matches = []
   let l:substring_matches = []
+
   let l:prefix_base = '^'.a:base
-  for l:item in a:items
-    let l:word = type(l:item) == type({}) ? l:item.word : l:item
-    if l:word =~# l:prefix_base
-      call add(l:prefix_case_matches, l:item)
-    elseif l:word =~? l:prefix_base
-      call add(l:prefix_matches, l:item)
-    elseif l:word =~? a:base
-      call add(l:substring_matches, l:item)
+
+  for l:lsp_item in a:lsp_items
+    let l:vim_item = s:CompletionItemWord(l:lsp_item)
+    if l:vim_item.word =~# l:prefix_base
+      call add(l:prefix_case_matches, l:vim_item)
+    elseif l:vim_item.word =~? l:prefix_base
+      call add(l:prefix_matches, l:vim_item)
+    elseif l:vim_item.word =~? a:base
+      call add(l:substring_matches, l:vim_item)
+    else
+      continue
     endif
+    call s:FinishItem(l:lsp_item, l:vim_item)
   endfor
+
   return l:prefix_case_matches + l:prefix_matches + l:substring_matches
 endfunction
 
-" Normalize LSP completion suggestions to the format used by vim.
-"
-" Returns a dict with:
-" `items`: The vim complete-item values
-" `start_col`: The start of the first range found, if any, in the suggestions
-"
-" Since different suggestions could, in theory, specify different ranges
-" autocomplete behavior could be incorrect since vim `complete` only allows a
-" single start columns for every suggestion.
-function! s:CompletionItems(completion_result) abort
-  let completion_items = []
-  if type(a:completion_result) == type([])
-    let completion_items = a:completion_result
-  elseif type(a:completion_result) == type({})
-    let completion_items = a:completion_result.items
+" Normalize the multiple potential fields which may convey the text to insert
+" from the LSP item into a vim formatted completion.
+function! s:CompletionItemWord(lsp_item) abort
+  let l:item = {'abbr': a:lsp_item.label, 'icase': 1, 'dup': 1}
+  if has_key(a:lsp_item, 'textEdit')
+      \ && type(a:lsp_item.textEdit) == type({})
+      \ && has_key(a:lsp_item.textEdit, 'newText')
+    let l:item.word = a:lsp_item.textEdit.newText
+  elseif has_key(a:lsp_item, 'insertText')
+      \ && !empty(a:lsp_item.insertText)
+    let l:item.word = a:lsp_item.insertText
+  else
+    let l:item.word = a:lsp_item.label
   endif
-  call map(completion_items, {_, item -> s:CompletionItem(item)})
-  let completion = {'items' : completion_items}
-  for item in completion_items
-    if has_key(item, 'start_col')
-      let completion.start_col = item.start_col
-      break
-    endif
-  endfor
-  return completion
+  if has_key(a:lsp_item, 'insertTextFormat') && a:lsp_item.insertTextFormat == 2
+    let l:item.user_data = json_encode({
+          \ 'snippet': l:item.word,
+          \ 'snippet_trigger': l:item.word
+          \ })
+    let l:item.word = a:lsp_item.label
+  endif
+  return l:item
 endfunction
 
-" Translate from the LSP representation to the Vim representation of a
-" completion item.
+" Fill out the non-word fields of the vim completion item from an LSP item.
 "
-" `word` suggestions are taken from the highest priority field according to
-" order `textEdit` > `insertText` > `label`.
-" `label` is always expected to be set and is used as the `abbr` shown in the
-" popupmenu. This may be different from the inserted text.
-function! s:CompletionItem(completion_item) abort
-  let item = {'abbr': a:completion_item.label, 'icase': 1, 'dup': 1}
-  if has_key(a:completion_item, 'textEdit')
-      \ && type(a:completion_item.textEdit) == type({})
-      \ && has_key(a:completion_item.textEdit, 'newText')
-    let item.word = a:completion_item.textEdit.newText
-    let item.start_col = a:completion_item.textEdit.range.start.character + 1
-  elseif has_key(a:completion_item, 'insertText')
-      \ && !empty(a:completion_item.insertText)
-    let item.word = a:completion_item.insertText
-  else
-    let item.word = a:completion_item.label
+" Deprecated suggestions get a strike-through on their `abbr`.
+" The `kind` field is translated from LSP numeric values into a single letter
+" vim kind identifier.
+" The `menu` and `info` vim fields are normalized from the `detail` and
+" `documentation` LSP fields.
+function! s:FinishItem(lsp_item, vim_item) abort
+  if get(a:lsp_item, 'deprecated', v:false) ||
+      \ index(get(a:lsp_item, 'tags', []), 1) >=0
+    let a:vim_item.abbr =
+        \ substitute(a:vim_item.word, '.', "\\0\<char-0x0336>", 'g')
   endif
-  if has_key(a:completion_item, 'insertTextFormat') && a:completion_item.insertTextFormat == 2
-    let item.user_data = json_encode({
-          \ 'snippet': item.word,
-          \ 'snippet_trigger': item.word
-          \ })
-    let l:item.word = a:completion_item.label
+  if has_key(a:lsp_item, 'kind')
+    let a:vim_item.kind = s:CompletionItemKind(a:lsp_item.kind)
   endif
-  if get(a:completion_item, 'deprecated', v:false) ||
-      \ index(get(a:completion_item, 'tags', []), 1) >=0
-    let l:item.abbr = substitute(l:item.word, '.', "\\0\<char-0x0336>", 'g')
-  endif
-  if has_key(a:completion_item, 'kind')
-    let item.kind = s:CompletionItemKind(a:completion_item.kind)
-  endif
-  if has_key(a:completion_item, 'detail') && a:completion_item.detail != v:null
-    let detail_lines = split(a:completion_item.detail, "\n")
+  if has_key(a:lsp_item, 'detail') && a:lsp_item.detail != v:null
+    let detail_lines = split(a:lsp_item.detail, "\n")
     if len(detail_lines) > 0
-      let item.menu = detail_lines[0]
-      let l:item.info = a:completion_item.detail
+      let a:vim_item.menu = detail_lines[0]
+      let a:vim_item.info = a:lsp_item.detail
     endif
   endif
-  if has_key(a:completion_item, 'documentation')
-    let documentation = a:completion_item.documentation
-    if has_key(l:item, 'info')
-      let l:item.info .= "\n\n"
+  if has_key(a:lsp_item, 'documentation')
+    let documentation = a:lsp_item.documentation
+    if has_key(a:vim_item, 'info')
+      let a:vim_item.info .= "\n\n"
     else
-      let l:item.info = ''
+      let a:vim_item.info = ''
     endif
     if type(documentation) == type('')
-      let l:item.info .= documentation
+      let a:vim_item.info .= documentation
     elseif type(documentation) == type({}) && has_key(documentation, 'value')
-      let l:item.info .= documentation.value
+      let a:vim_item.info .= documentation.value
     endif
   endif
-  return item
 endfunction
 
 function! s:CompletionItemKind(completion_kind) abort
