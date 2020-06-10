@@ -1,4 +1,4 @@
-@Timeout(Duration(seconds: 30))
+@Skip('https://github.com/dart-lang/json_rpc_2/issues/55')
 
 import 'dart:io';
 
