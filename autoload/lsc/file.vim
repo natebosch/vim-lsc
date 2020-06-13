@@ -109,8 +109,10 @@ function! lsc#file#onChange(...) abort
   if has_key(s:flush_timers, file_path)
     call timer_stop(s:flush_timers[file_path])
   endif
+  let l:mode = mode()[0]
+  let l:delay = l:mode ==? 'i' || l:mode ==? 'R' ? 2000 : 500
   let s:flush_timers[file_path] =
-      \ timer_start(500,
+      \ timer_start(l:delay,
       \   {_->s:FlushIfChanged(file_path, filetype)},
       \   {'repeat': 1})
 endfunction
