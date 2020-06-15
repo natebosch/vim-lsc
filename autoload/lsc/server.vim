@@ -54,19 +54,24 @@ endfunction
 " Wait for all running servers to shut down with a 5 second timeout.
 function! lsc#server#exit() abort
   let l:exit_start = reltime()
-  let l:pending = 0
-  function! OnExit() closure abort
-    let l:pending -= 1
+  let l:pending = []
+  function! OnExit(server_name) closure abort
+    call remove(l:pending, index(l:pending, a:server_name))
   endfunction
   for l:server in values(s:servers)
-    if s:Kill(l:server, 'exiting', funcref('OnExit'))
-      let l:pending += 1
+    if s:Kill(l:server, 'exiting', funcref('OnExit', [ l:server.config.name ]))
+      call add(l:pending, l:server.config.name)
     endif
   endfor
-  while l:pending > 0 && reltimefloat(reltime(l:exit_start)) <= 5.0
+  let l:reported = []
+  while len(l:pending) > 0 && reltimefloat(reltime(l:exit_start)) <= 5.0
+     if reltimefloat(reltime(l:exit_start)) >= 1.0 && l:pending != l:reported
+      echo 'Waiting for language server exit: '.join(l:pending, ', ')
+      let l:reported = copy(l:pending)
+     endif
     sleep 100m
   endwhile
-  return l:pending <= 0
+  return len(l:pending) == 0
 endfunction
 
 " Request a 'shutdown' then 'exit'.
