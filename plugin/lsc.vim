@@ -93,7 +93,7 @@ augroup LSC
   autocmd BufNewFile,BufReadPost * call <SID>OnOpen()
   autocmd TextChanged,TextChangedI,CompleteDone *
       \ call <SID>IfEnabled('lsc#file#onChange')
-  autocmd BufLeave * call <SID>IfEnabled('lsc#file#flushChanges')
+  autocmd InsertLeave,BufLeave * call <SID>IfEnabled('lsc#file#flushChanges')
   autocmd BufUnload * call <SID>OnClose()
   autocmd BufWritePost * call <SID>OnWrite()
 
