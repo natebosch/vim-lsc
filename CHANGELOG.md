@@ -47,6 +47,7 @@
   large files when lua support is available.
 - Send `hover.contentFormat` to prefer plaintext content which should be more
   readable for most users.
+- Use full words for completion item kinds instead of single letters.
 
 # 0.3.2
 

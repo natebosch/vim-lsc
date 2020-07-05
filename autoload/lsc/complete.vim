@@ -298,29 +298,58 @@ function! s:FinishItem(lsp_item, vim_item) abort
   endif
 endfunction
 
-function! s:CompletionItemKind(completion_kind) abort
-  if a:completion_kind ==  2
-      \ || a:completion_kind == 3
-      \ || a:completion_kind == 4
-    " Method, Function, Constructor
-    return 'f'
-  elseif a:completion_kind == 5 " Field
-    return 'm'
-  elseif a:completion_kind == 6 " Variable
-    return 'v'
-  elseif a:completion_kind == 7
-      \ || a:completion_kind == 8
-      \ || a:completion_kind == 13
-    " Class, Interface, Enum
-    return 't'
-  elseif a:completion_kind == 14
-      \ || a:completion_kind == 11
-      \ || a:completion_kind == 12
-      \ || a:completion_kind == 1
-      \ || a:completion_kind == 16
-    " Keyword, Unit, Value, Text, Color
-    return 'd'
+function! s:CompletionItemKind(lsp_kind) abort
+  if a:lsp_kind == 1
+    return 'Text'
+  elseif a:lsp_kind == 2
+    return 'Method'
+  elseif a:lsp_kind == 3
+    return 'Function'
+  elseif a:lsp_kind == 4
+    return 'Constructor'
+  elseif a:lsp_kind == 5
+    return 'Field'
+  elseif a:lsp_kind == 6
+    return 'Variable'
+  elseif a:lsp_kind == 7
+    return 'Class'
+  elseif a:lsp_kind == 8
+    return 'Interface'
+  elseif a:lsp_kind == 9
+    return 'Module'
+  elseif a:lsp_kind == 10
+    return 'Property'
+  elseif a:lsp_kind == 11
+    return 'Unit'
+  elseif a:lsp_kind == 12
+    return 'Value'
+  elseif a:lsp_kind == 13
+    return 'Enum'
+  elseif a:lsp_kind == 14
+    return 'Keyword'
+  elseif a:lsp_kind == 15
+    return 'Snippet'
+  elseif a:lsp_kind == 16
+    return 'Color'
+  elseif a:lsp_kind == 17
+    return 'File'
+  elseif a:lsp_kind == 18
+    return 'Reference'
+  elseif a:lsp_kind == 19
+    return 'Folder'
+  elseif a:lsp_kind == 20
+    return 'EnumMember'
+  elseif a:lsp_kind == 21
+    return 'Constant'
+  elseif a:lsp_kind == 22
+    return 'Struct'
+  elseif a:lsp_kind == 23
+    return 'Event'
+  elseif a:lsp_kind == 24
+    return 'Operator'
+  elseif a:lsp_kind == 25
+    return 'TypeParameter'
+  else
+    return ''
   endif
-  " Many kinds are unmapped
-  return ''
 endfunction
