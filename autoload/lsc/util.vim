@@ -169,10 +169,10 @@ function! s:Gated(name, gate, old_pos, on_call, on_skip, ...) abort
   if s:callback_gates[a:name] != a:gate ||
       \ a:old_pos != getcurpos()
     if type(a:on_skip) == type({_->_})
-      call call(a:on_skip, args)
+      call call(a:on_skip, a:000)
     endif
   else
-    call call(a:on_call, args)
+    call call(a:on_call, a:000)
   endif
 endfunction
 
