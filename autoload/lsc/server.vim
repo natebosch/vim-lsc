@@ -284,9 +284,11 @@ function! lsc#server#register(filetype, config) abort
     let l:old_status = self.status
     if l:old_status ==# 'starting'
       let self.status= 'failed'
-      call lsc#message#error(
-          \ 'Failed to initialize server "'.self.config.name
-          \ .'". Failing command is: '.string(self.config.command))
+      let l:message = 'Failed to initialize server "'.self.config.name.'".'
+      if self.config.name != string(self.config.command)
+        let l:message .= ' Failing command is: '.string(self.config.command)
+      endif
+      call lsc#message#error(l:message)
     elseif l:old_status ==# 'exiting'
       let self.status= 'exited'
     elseif l:old_status ==# 'running'
