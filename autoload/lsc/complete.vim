@@ -21,8 +21,7 @@ function! lsc#complete#textChanged() abort
 endfunction
 
 function! s:typedCharacter() abort
-  if s:isTrigger(s:next_char)
-      \ || (s:isCompletable() && !has_key(s:completion_waiting, &filetype))
+  if s:isTrigger(s:next_char) || s:isCompletable()
     call s:startCompletion(v:true)
   else
     let s:completion_canceled = v:true
@@ -31,25 +30,16 @@ endfunction
 
 if !exists('s:initialized')
   let s:next_char = ''
-  " filetype -> ?, used as a Set
-  let s:completion_waiting = {}
   let s:completion_canceled = v:false
   let s:initialized = v:true
 endif
 
 " Clean state associated with a server.
 function! lsc#complete#clean(filetype) abort
-  call s:MarkNotCompleting(a:filetype)
-endfunction
-
-function! s:MarkCompleting(filetype) abort
-  let s:completion_waiting[a:filetype] = v:true
-endfunction
-
-function! s:MarkNotCompleting(filetype) abort
-  if has_key(s:completion_waiting, a:filetype)
-    unlet s:completion_waiting[a:filetype]
-  endif
+  for buffer in getbufinfo({'bufloaded': v:true})
+    if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
+    call setbufvar(buffer.bufnr, 'lsc_is_completing', v:false)
+  endfor
 endfunction
 
 function! s:isTrigger(char) abort
@@ -88,18 +78,17 @@ endfunction
 function! s:startCompletion(isAuto) abort
   let b:lsc_is_completing = v:true
   let s:completion_canceled = v:false
-  call s:MarkCompleting(&filetype)
   call lsc#file#flushChanges()
   let l:params = lsc#params#documentPosition()
   " TODO handle multiple servers
   let l:server = lsc#server#forFileType(&filetype)[0]
   call l:server.request('textDocument/completion', l:params,
       \ lsc#util#gateResult('Complete',
-      \     function('<SID>OnResult', [a:isAuto]), function('<SID>OnSkip')))
+      \     function('<SID>OnResult', [a:isAuto]),
+      \     function('<SID>OnSkip', [bufnr()])))
 endfunction
 
 function! s:OnResult(isAuto, completion) abort
-  call s:MarkNotCompleting(&filetype)
   if s:completion_canceled
     let b:lsc_is_completing = v:false
   endif
@@ -116,10 +105,8 @@ function! s:OnResult(isAuto, completion) abort
   endif
 endfunction
 
-" TODO this could be the wrong buffer?
-function! s:OnSkip(completion) abort
-  call s:MarkNotCompleting(&filetype)
-  let b:lsc_is_completing = v:false
+function! s:OnSkip(bufnr, completion) abort
+  call setbufvar(a:bufnr, 'lsc_is_completing', v:false)
 endfunction
 
 function! s:SuggestCompletions(items) abort
