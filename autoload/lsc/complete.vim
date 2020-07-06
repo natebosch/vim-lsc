@@ -23,14 +23,11 @@ endfunction
 function! s:typedCharacter() abort
   if s:isTrigger(s:next_char) || s:isCompletable()
     call s:startCompletion(v:true)
-  else
-    let s:completion_canceled = v:true
   endif
 endfunction
 
 if !exists('s:initialized')
   let s:next_char = ''
-  let s:completion_canceled = v:false
   let s:initialized = v:true
 endif
 
@@ -77,7 +74,6 @@ endfunction
 
 function! s:startCompletion(isAuto) abort
   let b:lsc_is_completing = v:true
-  let s:completion_canceled = v:false
   call lsc#file#flushChanges()
   let l:params = lsc#params#documentPosition()
   " TODO handle multiple servers
@@ -89,9 +85,6 @@ function! s:startCompletion(isAuto) abort
 endfunction
 
 function! s:OnResult(isAuto, completion) abort
-  if s:completion_canceled
-    let b:lsc_is_completing = v:false
-  endif
   let l:items = []
   if type(a:completion) == type([])
     let l:items = a:completion
