@@ -28,6 +28,9 @@ function! lsc#diff#compute(old, new) abort
 endfunction
 
 let s:has_lua = has('lua') || has('nvim-0.4.0')
+" lua array and neovim vim list index starts with 1 while vim lists starts with 0.
+" starting patch-8.2.1066 vim lists array index was changed to start with 1.
+let s:lua_array_start_index = has('nvim-0.4.0') || has('patch-8.2.1066')
 
 if s:has_lua && !exists('s:lua')
   function! s:DefLua() abort
@@ -70,7 +73,7 @@ function! s:FirstDifference(old, new) abort
   if s:has_lua
     let l:eval = has('nvim') ? 'vim.api.nvim_eval' : 'vim.eval'
     let l:i = float2nr(luaeval('lsc_first_difference('
-        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.l:eval.'("has(\"nvim\")"))'))
+        \.l:eval.'("a:old"),'.l:eval.'("a:new"),'.s:lua_array_start_index.')'))
   else
     for l:i in range(l:line_count)
       if a:old[l:i] !=# a:new[l:i] | break | endif
