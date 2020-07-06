@@ -162,21 +162,10 @@ function! lsc#util#gateResult(name, callback, ...) abort
   else
     let OnSkip = v:false
   endif
-  if a:0 >= 2 && type(a:2) == type([])
-    let extra_args = a:2
-  else
-    let extra_args = []
-  endif
-  return function('<SID>Gated',
-      \ [a:name, gate, old_pos, a:callback, OnSkip, extra_args])
+  return function('<SID>Gated', [a:name, gate, old_pos, a:callback, OnSkip])
 endfunction
 
-function! s:Gated(name, gate, old_pos, on_call, on_skip, extra_args, ...) abort
-  if !empty('a:extra_args')
-    let args = extend(deepcopy(a:000), a:extra_args)
-  else
-    let args = a:000
-  endif
+function! s:Gated(name, gate, old_pos, on_call, on_skip, ...) abort
   if s:callback_gates[a:name] != a:gate ||
       \ a:old_pos != getcurpos()
     if type(a:on_skip) == type({_->_})
