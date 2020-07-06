@@ -9,16 +9,16 @@ function! lsc#edit#findCodeActions(...) abort
   let params.context = {'diagnostics':
       \ lsc#diagnostics#forLine(lsc#file#fullPath(), line('.') - 1)}
   call lsc#server#userCall('textDocument/codeAction', params,
-      \ lsc#util#gateResult('CodeActions', function('<SID>SelectAction'),
-      \     v:null, [ActionFilter]))
+      \ lsc#util#gateResult('CodeActions',
+      \     function('<SID>SelectAction', [ActionFilter])))
 endfunction
 
-function! s:SelectAction(result, action_filter) abort
+function! s:SelectAction(ActionFilter, result) abort
   if type(a:result) != type([]) || len(a:result) == 0
     call lsc#message#show('No actions available')
     return
   endif
-  call a:action_filter(a:result, function('<SID>ExecuteCommand'))
+  call a:ActionFilter(a:result, function('<SID>ExecuteCommand'))
 endfunction
 
 function! s:ExecuteCommand(choice) abort
