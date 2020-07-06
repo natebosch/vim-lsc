@@ -22,6 +22,6 @@ void main() {
   test('reports a failure to start', () async {
     await vim.edit('foo.txt');
     final messages = await vim.messages(1);
-    expect(messages, ['[lsc:Error] Failed to initialize server: \'false\'']);
+    expect(messages, ['[lsc:Error] Failed to initialize server "\'false\'".']);
   });
 }
