@@ -325,7 +325,8 @@ function! s:Dispatch(server, method, params, id) abort
     call lsc#util#shift(a:server.logs, 100,
         \ {'message': a:params.message, 'type': a:params.type})
   elseif a:method ==? 'window/progress'
-    if lsc#config#shouldEcho(a:server, 4)
+    let a:params.type = lsc#config#messageType('Log')
+    if lsc#config#shouldEcho(a:server, a:params.type)
       if has_key(a:params, 'message')
         let l:full = a:params['title'] . a:params['message']
         call lsc#message#show('Progress ' . l:full)
