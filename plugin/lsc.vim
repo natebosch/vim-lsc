@@ -159,7 +159,6 @@ endfunction
 
 function! s:OnOpen() abort
   if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
-  call lsc#config#mapKeys()
   if !lsc#server#filetypeActive(&filetype) | return | endif
   call lsc#file#onOpen()
 endfunction
