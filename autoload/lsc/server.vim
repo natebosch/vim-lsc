@@ -119,6 +119,7 @@ endfunction
 function! s:Start(server) abort
   if has_key(a:server, '_channel')
     " Server is already running
+    call lsc#config#mapKeys()
     return
   endif
   let l:command = a:server.config.command
@@ -145,6 +146,7 @@ function! s:Start(server) abort
     for filetype in a:server.filetypes
       call lsc#file#trackAll(filetype)
     endfor
+    call lsc#config#mapKeys()
   endfunction
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
