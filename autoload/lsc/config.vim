@@ -39,19 +39,8 @@ function! s:ApplyDefaults(config) abort
   return l:merged
 endfunction
 
-function! lsc#config#mapKeys() abort
-  if !exists('g:lsc_auto_map')
-      \ || (type(g:lsc_auto_map) == type(v:true) && !g:lsc_auto_map)
-      \ || (type(g:lsc_auto_map) == type(0) && !g:lsc_auto_map)
-    return
-  endif
-  let l:maps = s:ApplyDefaults(g:lsc_auto_map)
-  if type(l:maps) != type({})
-    call lsc#message#error('g:lsc_auto_map must be a bool or dict')
-    return
-  endif
-
-  for command in [
+function! s:CommandList() abort
+  return [
       \ 'GoToDefinition',
       \ 'GoToDefinitionSplit',
       \ 'FindReferences',
@@ -64,6 +53,22 @@ function! lsc#config#mapKeys() abort
       \ 'WorkspaceSymbol',
       \ 'SignatureHelp',
       \] + (get(g:, 'lsc_enable_apply_edit', 1) ? ['Rename'] : [])
+endfunction
+
+function! lsc#config#mapKeys() abort
+  if !exists('g:lsc_auto_map')
+      \ || (type(g:lsc_auto_map) == type(v:true) && !g:lsc_auto_map)
+      \ || (type(g:lsc_auto_map) == type(0) && !g:lsc_auto_map)
+    return
+  endif
+  let l:maps = s:ApplyDefaults(g:lsc_auto_map)
+  if type(l:maps) != type({})
+    call lsc#message#error('g:lsc_auto_map must be a bool or dict')
+    return
+  endif
+
+  let b:lsc_save = {}
+  for command in s:CommandList()
     let lhs = get(l:maps, command, [])
     if type(lhs) != type('') && type(lhs) != type([])
       continue
@@ -75,16 +80,46 @@ function! lsc#config#mapKeys() abort
   if has_key(l:maps, 'Completion') &&
       \ type(l:maps['Completion']) == type('') &&
       \ len(l:maps['Completion']) > 0
+    let b:lsc_save[l:maps['Completion']] = getbufvar('', l:maps['Completion'])
     execute 'setlocal '.l:maps['Completion'].'=lsc#complete#complete'
   endif
   if has_key(l:maps, 'ShowHover')
     let l:show_hover = l:maps['ShowHover']
     if type(l:show_hover) == type(v:true) || type(l:show_hover) == type(0)
       if l:show_hover
+        let b:lsc_save.keywordprg = &l:keywordprg
         setlocal keywordprg=:LSClientShowHover
       endif
     endif
   endif
+endfunction
+
+function! lsc#config#unmapKeys() abort
+  if exists('b:lsc_save')
+    for opt in keys(b:lsc_save)
+      execute 'setlocal '.opt.'='.b:lsc_save[opt]
+    endfor
+    unlet b:lsc_save
+  endif
+
+  if !exists('g:lsc_auto_map')
+      \ || (type(g:lsc_auto_map) == type(v:true) && !g:lsc_auto_map)
+      \ || (type(g:lsc_auto_map) == type(0) && !g:lsc_auto_map)
+    return
+  endif
+  let l:maps = s:ApplyDefaults(g:lsc_auto_map)
+
+  for command in s:CommandList()
+    let lhs = get(l:maps, command, [])
+    if type(lhs) != type('') && type(lhs) != type([])
+      continue
+    endif
+    for m in type(lhs) == type([]) ? lhs : [lhs]
+      if get(maparg(m, 'n', v:false, v:true), 'buffer')
+        execute 'nunmap <buffer>'.m
+      endif
+    endfor
+  endfor
 endfunction
 
 " Wraps [Callback] with a function that will first translate a result through a
