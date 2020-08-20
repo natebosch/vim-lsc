@@ -81,7 +81,7 @@ function! s:startCompletion(isAuto) abort
   call l:server.request('textDocument/completion', l:params,
       \ lsc#util#gateResult('Complete',
       \     function('<SID>OnResult', [a:isAuto]),
-      \     function('<SID>OnSkip', [bufnr()])))
+      \     function('<SID>OnSkip', [bufnr('%')])))
 endfunction
 
 function! s:OnResult(isAuto, completion) abort
