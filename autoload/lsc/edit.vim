@@ -142,6 +142,7 @@ function! s:ApplyAll(changes) abort
     else
       let l:cmd .= ' edit '.l:file_path
     endif
+    let l:cmd .= ' | silent execute "set fdl=99"'
     call sort(l:edits, '<SID>CompareEdits')
     for l:idx in range(0, len(l:edits) - 1)
       let l:cmd .= ' | silent execute "keepjumps normal! '
