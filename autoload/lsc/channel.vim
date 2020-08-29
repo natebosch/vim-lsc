@@ -1,15 +1,22 @@
 function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
   let l:c = s:Channel()
   if type(a:command) == type('') && a:command =~# '[^:]\+:\d\+'
-    if !exists('*ch_open')
+    if exists('*ch_open')
+      let l:channel_options = {'mode': 'raw',
+          \ 'callback': {_, message -> a:Callback(message)},
+          \ 'close_cb': {_ -> a:OnExit()}}
+      call s:WrapVim(ch_open(a:command, l:channel_options), l:c)
+      return l:c
+    elseif exists('*sockconnect')
+      let l:channel_options = {
+            \ 'on_data': {_, data, __ -> a:Callback(join(data, "\n"))}}
+      let l:channel = sockconnect('tcp', a:command, l:channel_options)
+      call s:WrapNeovim(l:channel, l:c)
+      return l:c
+    else
       call lsc#message#error('No support for sockets for '.a:command)
       return v:null
     endif
-    let l:channel_options = {'mode': 'raw',
-        \ 'callback': {_, message -> a:Callback(message)},
-        \ 'close_cb': {_ -> a:OnExit()}}
-    call s:WrapVim(ch_open(a:command, l:channel_options), l:c)
-    return l:c
   endif
   if exists('*job_start')
     let l:job_options = {'in_io': 'pipe', 'in_mode': 'raw',
