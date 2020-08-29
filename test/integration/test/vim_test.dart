@@ -1,5 +1,3 @@
-@Skip('https://github.com/dart-lang/json_rpc_2/issues/55')
-
 import 'dart:io';
 
 import 'package:_test/vim_remote.dart';
