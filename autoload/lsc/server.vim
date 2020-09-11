@@ -169,7 +169,8 @@ function! s:ClientCapabilities() abort
   return {
     \ 'workspace': {
     \   'applyEdit': applyEdit,
-    \   },
+    \   'configuration': v:true,
+    \ },
     \ 'textDocument': {
     \   'synchronization': {
     \     'willSave': v:false,
@@ -337,6 +338,16 @@ function! s:Dispatch(server, method, params, id) abort
     let l:applied = lsc#edit#apply(a:params.edit)
     let l:response = {'applied': l:applied}
     call a:server.respond(a:id, l:response)
+  elseif a:method ==? 'workspace/configuration'
+    " TODO: Properly handle the configuration request parameters.  For now we
+    " just assume that workspace_config is one for every scopeURI and every
+    " configuration section.
+    if has_key(a:server.config, 'workspace_config')
+      let l:response = [a:server.config.workspace_config]
+      call a:server.respond(a:id, l:response)
+    else
+      call a:server.respond(a:id, [])
+    endif
   elseif a:method =~? '\v^\$'
     call lsc#config#handleNotification(a:server, a:method, a:params)
   endif
