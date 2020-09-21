@@ -151,7 +151,7 @@ function! lsc#diagnostics#showLocationList() abort
     endif
   endif
   let l:list_id = gettabwinvar(0, l:window_id, 'lsc_location_list_id', -1)
-  if !s:SurfaceLocationList(l:list_id)
+  if l:list_id != -1 && !s:SurfaceLocationList(l:list_id)
     let l:path = lsc#file#normalize(bufname(winbufnr(l:window_id)))
     let l:items = lsc#diagnostics#forFile(l:path).ListItems()
     call s:CreateLocationList(l:window_id, l:items)
@@ -162,22 +162,19 @@ endfunction
 " If the LSC maintained location list exists in the location list stack, switch
 " to it and return true, otherwise return false.
 function! s:SurfaceLocationList(list_id) abort
-  if a:list_id != -1
-    let l:list_info = getloclist(0, {'nr': 0, 'id': a:list_id})
-    let l:nr = get(l:list_info, 'nr', -1)
-    if l:nr > 0
-      let l:diff = getloclist(0, {'nr': 0}).nr - l:nr
-      if l:diff == 0
-        " already there
-      elseif l:diff > 0
-        execute 'lolder '.string(l:diff)
-      else
-        execute 'lnewer '.string(abs(l:diff))
-      endif
-      return v:true
-    endif
+  let l:list_info = getloclist(0, {'nr': 0, 'id': a:list_id})
+  let l:nr = get(l:list_info, 'nr', -1)
+  if l:nr <= 0 | return v:false | endif
+
+  let l:diff = getloclist(0, {'nr': 0}).nr - l:nr
+  if l:diff == 0
+    " already there
+  elseif l:diff > 0
+    execute 'lolder '.string(l:diff)
+  else
+    execute 'lnewer '.string(abs(l:diff))
   endif
-  return v:false
+  return v:true
 endfunction
 
 " Returns the total number of diagnostics in all files.
