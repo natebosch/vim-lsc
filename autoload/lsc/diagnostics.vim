@@ -152,8 +152,9 @@ function! lsc#diagnostics#showLocationList() abort
   endif
   let l:list_id = gettabwinvar(0, l:window_id, 'lsc_location_list_id', -1)
   if !s:SurfaceLocationList(l:list_id)
-    let l:items = lsc#diagnostics#forFile(lsc#file#fullPath()).ListItems()
-    call s:CreateLocationList(win_getid(), l:items)
+    let l:path = lsc#file#normalize(bufname(winbufnr(l:window_id)))
+    let l:items = lsc#diagnostics#forFile(l:path).ListItems()
+    call s:CreateLocationList(l:window_id, l:items)
   endif
   lopen
 endfunction
