@@ -108,7 +108,7 @@ endfunction
 function! lsc#diagnostics#updateLocationList(file_path) abort
   if lsc#file#bufnr(a:file_path) == -1 | return | endif
   let diagnostics_version = s:DiagnosticsVersion(a:file_path)
-  for window_id in lsc#util#windowsForFile(a:file_path)
+  for window_id in win_findbuf(lsc#file#bufnr(a:file_path))
     if !s:WindowIsCurrent(window_id, a:file_path, diagnostics_version)
       if !exists('l:items')
         let items = lsc#diagnostics#forFile(a:file_path).ListItems()
