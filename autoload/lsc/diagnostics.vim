@@ -12,9 +12,6 @@ if !exists('s:file_diagnostics')
   "     }
   " 'ListItems()': QuickFix or Location list items
   let s:file_diagnostics = {}
-
-  " file path -> incrementing version number
-  let s:diagnostic_versions = {}
 endif
 
 function! lsc#diagnostics#clean(filetype) abort
@@ -64,13 +61,6 @@ function! lsc#diagnostics#forFile(file_path) abort
   return s:file_diagnostics[a:file_path]
 endfunction
 
-function! s:DiagnosticsVersion(file_path) abort
-  if !has_key(s:diagnostic_versions, a:file_path)
-    return 0
-  endif
-  return s:diagnostic_versions[a:file_path]
-endfunction
-
 function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   if exists('g:lsc_enable_diagnostics') && !g:lsc_enable_diagnostics
     return
@@ -88,12 +78,7 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   else
     unlet s:file_diagnostics[a:file_path]
   endif
-  if has_key(s:diagnostic_versions, a:file_path)
-    let s:diagnostic_versions[a:file_path] += 1
-  else
-    let s:diagnostic_versions[a:file_path] = 1
-  endif
-  call lsc#diagnostics#updateLocationList(a:file_path)
+  call s:UpdateWindowStates(a:file_path)
   call lsc#highlights#updateDisplayed()
   call s:UpdateQuickFix()
   if exists('#User#LSCDiagnosticsChange')
@@ -105,27 +90,93 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
 endfunction
 
 " Updates location list for all windows showing [file_path].
-function! lsc#diagnostics#updateLocationList(file_path) abort
+"
+" If a window already has a location list which aren't LSC owned diagnostics
+" the list is left as is. If there is no location list or the list is LSC owned
+" diagnostics, check if it is stale and update it to the new diagnostics.
+function! s:UpdateWindowStates(file_path) abort
   if lsc#file#bufnr(a:file_path) == -1 | return | endif
-  let diagnostics_version = s:DiagnosticsVersion(a:file_path)
-  for window_id in lsc#util#windowsForFile(a:file_path)
-    if !s:WindowIsCurrent(window_id, a:file_path, diagnostics_version)
-      if !exists('l:items')
-        let items = lsc#diagnostics#forFile(a:file_path).ListItems()
-      endif
-      call setloclist(window_id, items)
-      call s:MarkManagingLocList(window_id, a:file_path, diagnostics_version)
-    else
-    endif
+  let l:diagnostics = lsc#diagnostics#forFile(a:file_path)
+  for l:window_id in lsc#util#windowsForFile(a:file_path)
+    call s:UpdateWindowState(l:window_id, l:diagnostics)
   endfor
 endfunction
 
-function! s:MarkManagingLocList(window_id, file_path, version) abort
-  let window_info = getwininfo(a:window_id)[0]
-  let tabnr = window_info.tabnr
-  let winnr = window_info.winnr
-  call settabwinvar(tabnr, winnr, 'lsc_diagnostics_file', a:file_path)
-  call settabwinvar(tabnr, winnr, 'lsc_diagnostics_version', a:version)
+function! lsc#diagnostics#updateCurrentWindow() abort
+  let l:diagnostics = lsc#diagnostics#forFile(lsc#file#fullPath())
+  if exists('w:lsc_diagnostics') && w:lsc_diagnostics is l:diagnostics
+    return
+  endif
+  call s:UpdateWindowState(win_getid(), l:diagnostics)
+endfunction
+
+function! s:UpdateWindowState(window_id, diagnostics) abort
+  call settabwinvar(0, a:window_id, 'lsc_diagnostics', a:diagnostics)
+  let l:list_info = getloclist(a:window_id, {'changedtick': 1})
+  let l:new_list = get(l:list_info, 'changedtick', 0) == 0
+  if l:new_list
+    call s:CreateLocationList(a:window_id, a:diagnostics.ListItems())
+  else
+    call s:UpdateLocationList(a:window_id, a:diagnostics.ListItems())
+  endif
+endfunction
+
+function! s:CreateLocationList(window_id, items) abort
+  call setloclist(a:window_id, [], ' ', {
+      \ 'title': 'LSC Diagnostics',
+      \ 'items': a:items,
+      \})
+  let l:new_id = getloclist(a:window_id, {'id': 0}).id
+  call settabwinvar(0, a:window_id, 'lsc_location_list_id', l:new_id)
+endfunction
+
+" Update an existing location list to contain new items.
+"
+" If the LSC diagnostics location list is not reachable with `lolder` or
+" `lhistory` the update will silently fail.
+function! s:UpdateLocationList(window_id, items) abort
+  let l:list_id = gettabwinvar(0, a:window_id, 'lsc_location_list_id', -1)
+  call setloclist(a:window_id, [], 'r', {
+      \ 'id': l:list_id,
+      \ 'items': a:items,
+      \})
+endfunction
+
+function! lsc#diagnostics#showLocationList() abort
+  let l:window_id = win_getid()
+  if &filetype ==# 'qf'
+    let l:list_window = get(getloclist(0, {'filewinid': 0}), 'filewinid', 0)
+    if l:list_window != 0
+      let l:window_id = l:list_window
+    endif
+  endif
+  let l:list_id = gettabwinvar(0, l:window_id, 'lsc_location_list_id', -1)
+  if !s:SurfaceLocationList(l:list_id)
+    let l:items = lsc#diagnostics#forFile(lsc#file#fullPath()).ListItems()
+    call s:CreateLocationList(win_getid(), l:items)
+  endif
+  lopen
+endfunction
+
+" If the LSC maintained location list exists in the location list stack, switch
+" to it and return true, otherwise return false.
+function! s:SurfaceLocationList(list_id) abort
+  if a:list_id != -1
+    let l:list_info = getloclist(0, {'nr': 0, 'id': a:list_id})
+    let l:nr = get(l:list_info, 'nr', -1)
+    if l:nr > 0
+      let l:diff = getloclist(0, {'nr': 0}).nr - l:nr
+      if l:diff == 0
+        " already there
+      elseif l:diff > 0
+        execute 'lolder '.string(l:diff)
+      else
+        execute 'lnewer '.string(abs(l:diff))
+      endif
+      return v:true
+    endif
+  endif
+  return v:false
 endfunction
 
 " Returns the total number of diagnostics in all files.
@@ -194,25 +245,12 @@ function! s:AllDiagnostics() abort
   return l:all_diagnostics
 endfunction
 
-" Whether the location list has the most up to date diagnostics.
-"
-" Multiple events can cause the location list for a window to get updated. Track
-" the currently held file and version for diagnostics and block updates if they
-" are already current.
-function! s:WindowIsCurrent(window_id, file_path, version) abort
-  let window_info = getwininfo(a:window_id)[0]
-  let tabnr = window_info.tabnr
-  let winnr = window_info.winnr
-  return gettabwinvar(tabnr, winnr, 'lsc_diagnostics_version', -1) == a:version
-      \ && gettabwinvar(tabnr, winnr, 'lsc_diagnostics_file', '') == a:file_path
-endfunction
-
-
-" Remove the LSC controlled location list for the current window.
+" Clear the LSC controlled location list for the current window.
 function! lsc#diagnostics#clear() abort
-  call setloclist(0, [])
-  unlet w:lsc_diagnostics_version
-  unlet w:lsc_diagnostics_file
+  if !empty(w:lsc_diagnostics.lsp_diagnostics)
+    call s:UpdateLocationList(win_getid(), [])
+  endif
+  unlet w:lsc_diagnostics
 endfunction
 
 " Finds the first diagnostic which is under the cursor on the current line. If
