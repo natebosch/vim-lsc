@@ -294,8 +294,8 @@ The server may communicate diagnostics but they will be ignored. Changing this
 configuration while a server is running may have unexpected results, if it is
 changed use |:LSClientRestartServer|.
 
-If the locatio list is in use by a list other than the LSC diagnostics you won't
-see updates as diagnostics change. Call |:LSClientWindowDiagnostics| to
+If the location list is in use by a list other than the LSC diagnostics you
+won't see updates as diagnostics change. Call |:LSClientWindowDiagnostics| to
 restore the LSC diagnostics list.
 
                                                 *lsc-configure-hover*
