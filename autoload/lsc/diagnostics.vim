@@ -97,7 +97,7 @@ endfunction
 function! s:UpdateWindowStates(file_path) abort
   if lsc#file#bufnr(a:file_path) == -1 | return | endif
   let l:diagnostics = lsc#diagnostics#forFile(a:file_path)
-  for l:window_id in lsc#util#windowsForFile(a:file_path)
+  for l:window_id in win_findbuf(lsc#file#bufnr(a:file_path))
     call s:UpdateWindowState(l:window_id, l:diagnostics)
   endfor
 endfunction
