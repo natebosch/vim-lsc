@@ -142,12 +142,19 @@ function! s:ApplyAll(changes) abort
     else
       let l:cmd .= ' edit '.l:file_path
     endif
+    let l:foldenable = &foldenable
+    if l:foldenable
+      let l:cmd .= ' | set nofoldenable'
+    endif
     call sort(l:edits, '<SID>CompareEdits')
     for l:idx in range(0, len(l:edits) - 1)
       let l:cmd .= ' | silent execute "keepjumps normal! '
       let l:cmd .= s:Apply(l:edits[l:idx])
       let l:cmd .= '\<C-r>=l:edits['.string(l:idx).'].newText\<cr>"'
     endfor
+    if l:foldenable
+      let l:cmd .= ' | set foldenable'
+    endif
     execute l:cmd
     if !&hidden | update | endif
     call lsc#file#onChange(l:file_path)
