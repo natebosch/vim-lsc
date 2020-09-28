@@ -11,6 +11,7 @@
 - Normalize windows file path separators to create valid URIs.
 - Don't send `textDocument/didSave` notifications if the server does not
   advertise it as a capability.
+- Fix edits when there are folds in the buffer.
 
 **Minor breaking changes**
 - Server dictionaries no longer expose their full `init_results`, or their call
