@@ -48,6 +48,8 @@
 - Send `hover.contentFormat` to prefer plaintext content which should be more
   readable for most users.
 - Use full words for completion item kinds instead of single letters.
+- Avoid overwriting location list if it is in use for something other than LSC
+  diagnostics.
 
 # 0.3.2
 
