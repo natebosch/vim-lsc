@@ -134,25 +134,23 @@ function! s:SetCompleteOpt() abort
 endfunction
 
 function! lsc#complete#complete(findstart, base) abort
-  if !exists('b:lsc_completion')
-    let l:searchStart = reltime()
-    call s:startCompletion(v:false)
-    let l:timeout = get(g:, 'lsc_complete_timeout', 5)
-    while !exists('b:lsc_completion')
-        \ && reltimefloat(reltime(l:searchStart)) <= l:timeout
-      sleep 100m
-    endwhile
-    if !exists('b:lsc_completion')
-      return -1
-    endif
-  endif
   if a:findstart
-    if len(b:lsc_completion) == 0
-      unlet b:lsc_completion
-      return -3
+    if !exists('b:lsc_completion')
+      let l:searchStart = reltime()
+      call s:startCompletion(v:false)
+      let l:timeout = get(g:, 'lsc_complete_timeout', 5)
+      while !exists('b:lsc_completion')
+            \ && reltimefloat(reltime(l:searchStart)) <= l:timeout
+        sleep 100m
+      endwhile
+      if !exists('b:lsc_completion') || len(b:lsc_completion) == 0
+        return -3
+      endif
+      return  s:FindStart(b:lsc_completion) - 1
     endif
-    return  s:FindStart(b:lsc_completion) - 1
   else
+    " We'll get an error if b:lsc_completion doesn't exist, which is good,
+    " we want to be vocal about such failures.
     return s:CompletionItems(a:base, b:lsc_completion)
   endif
 endfunction
