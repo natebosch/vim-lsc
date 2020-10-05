@@ -145,6 +145,7 @@ function! LSCEnsureCurrentWindowState() abort
   call lsc#diagnostics#updateLocationList(lsc#file#fullPath())
   call lsc#highlights#update()
   call lsc#cursor#onWinEnter()
+  call lsc#config#checkKeys()
 endfunction
 
 " Run `function` if LSC is enabled for the current filetype.

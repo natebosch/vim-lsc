@@ -106,7 +106,13 @@ function! lsc#config#unmapKeys() abort
     endfor
     unlet b:lsc_maps
   endif
+endfunction
 
+" Unmap buffer-local keys if the associated language server is not running
+function! lsc#config#checkKeys() abort
+  if lsc#server#status(&filetype) !=# 'running'
+    call lsc#config#unmapKeys()
+  endif
 endfunction
 
 " Wraps [Callback] with a function that will first translate a result through a
