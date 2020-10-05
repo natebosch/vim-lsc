@@ -87,7 +87,11 @@ function! s:Kill(server, status, OnExit) abort
       call a:server._channel.notify('exit', v:null)
     endif
     if a:OnExit != v:null | call a:OnExit() | endif
-    call lsc#config#unmapKeys()
+
+    " Unmap keys if the language server is used in the current buffer
+    if index(a:server.filetypes, &filetype) >= 0
+      call lsc#config#unmapKeys()
+    endif
   endfunction
   return a:server.request('shutdown', v:null, funcref('Exit'))
 endfunction
