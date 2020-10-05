@@ -39,22 +39,6 @@ function! s:ApplyDefaults(config) abort
   return l:merged
 endfunction
 
-function! s:CommandList() abort
-  return [
-      \ 'GoToDefinition',
-      \ 'GoToDefinitionSplit',
-      \ 'FindReferences',
-      \ 'NextReference',
-      \ 'PreviousReference',
-      \ 'FindImplementations',
-      \ 'FindCodeActions',
-      \ 'ShowHover',
-      \ 'DocumentSymbol',
-      \ 'WorkspaceSymbol',
-      \ 'SignatureHelp',
-      \] + (get(g:, 'lsc_enable_apply_edit', 1) ? ['Rename'] : [])
-endfunction
-
 function! lsc#config#mapKeys() abort
   if !exists('g:lsc_auto_map')
       \ || (type(g:lsc_auto_map) == type(v:true) && !g:lsc_auto_map)
@@ -68,12 +52,26 @@ function! lsc#config#mapKeys() abort
   endif
 
   let b:lsc_save = {}
-  for command in s:CommandList()
+  let b:lsc_maps = []
+  for command in [
+      \ 'GoToDefinition',
+      \ 'GoToDefinitionSplit',
+      \ 'FindReferences',
+      \ 'NextReference',
+      \ 'PreviousReference',
+      \ 'FindImplementations',
+      \ 'FindCodeActions',
+      \ 'ShowHover',
+      \ 'DocumentSymbol',
+      \ 'WorkspaceSymbol',
+      \ 'SignatureHelp',
+      \] + (get(g:, 'lsc_enable_apply_edit', 1) ? ['Rename'] : [])
     let lhs = get(l:maps, command, [])
     if type(lhs) != type('') && type(lhs) != type([])
       continue
     endif
     for m in type(lhs) == type([]) ? lhs : [lhs]
+      call add(b:lsc_maps, m)
       execute 'nnoremap <buffer>'.m.' :LSClient'.command.'<CR>'
     endfor
   endfor
@@ -102,24 +100,13 @@ function! lsc#config#unmapKeys() abort
     unlet b:lsc_save
   endif
 
-  if !exists('g:lsc_auto_map')
-      \ || (type(g:lsc_auto_map) == type(v:true) && !g:lsc_auto_map)
-      \ || (type(g:lsc_auto_map) == type(0) && !g:lsc_auto_map)
-    return
-  endif
-  let l:maps = s:ApplyDefaults(g:lsc_auto_map)
-
-  for command in s:CommandList()
-    let lhs = get(l:maps, command, [])
-    if type(lhs) != type('') && type(lhs) != type([])
-      continue
-    endif
-    for m in type(lhs) == type([]) ? lhs : [lhs]
-      if get(maparg(m, 'n', v:false, v:true), 'buffer')
-        execute 'nunmap <buffer>'.m
-      endif
+  if exists('b:lsc_maps')
+    for m in b:lsc_maps
+      silent! execute 'nunmap <buffer>'.m
     endfor
-  endfor
+    unlet b:lsc_maps
+  endif
+
 endfunction
 
 " Wraps [Callback] with a function that will first translate a result through a
