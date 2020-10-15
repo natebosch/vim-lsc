@@ -466,6 +466,11 @@ are configured with the same name use the same server.
 `'enabled'`: Set to `v:false` to avoid starting the server until
 |:LSClientEnable| is called.
 
+                                                *lsc-server-languageId*
+`'languageId'`: Defaults to `&filetype`. Change if your server expects a
+languageId that is not the current filetype.
+Use this if you use a subfiletype like `framework.language`.
+
                                                 *lsc-server-log_level*
 `'log_level'`: May be one of `'Error'`, `'Warning'`, `'Info'`, or `'Log'`.
 Default `'Info'`. Messages through `window/logMessage` will only be echoed
