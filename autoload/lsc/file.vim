@@ -66,7 +66,6 @@ function! s:DidOpen(file_path) abort
   let filetype = getbufvar(l:bufnr, '&filetype')
   let l:params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
-      \    'languageId': filetype,
       \    'version': 1,
       \    'text': join(buffer_content, "\n")
       \   }
@@ -74,6 +73,7 @@ function! s:DidOpen(file_path) abort
   " TODO handle multiple servers
   let l:success = v:false
   for l:server in lsc#server#forFileType(l:filetype)
+    let l:params.textDocument.languageId = l:server.languageId[l:filetype]
     let l:success = l:server.notify('textDocument/didOpen', l:params)
   endfor
   if l:success
