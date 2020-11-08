@@ -67,7 +67,7 @@ function! s:DidOpen(file_path) abort
   let l:params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'version': 1,
-      \    'text': join(buffer_content, "\n")
+      \    'text': join(buffer_content, "\n")."\n"
       \   }
       \ }
   " TODO handle multiple servers
@@ -139,7 +139,7 @@ function! s:FlushChanges(file_path, filetype) abort
   if allow_incremental
     let change = lsc#diff#compute(s:file_content[a:file_path], buffer_content)
   else
-    let change = {'text': join(buffer_content, "\n")}
+    let change = {'text': join(buffer_content, "\n")."\n"}
   endif
   let l:params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
