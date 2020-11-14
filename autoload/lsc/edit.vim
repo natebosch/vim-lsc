@@ -191,6 +191,13 @@ endfunction
 
 " Find the normal mode commands to go to [pos]
 function! s:GoToChar(pos) abort
+  " In case the position is beyond the end of the buffer, we assume the range
+  " goes till the end of the buffer. We change pos to last line/last
+  " character.
+  if a:pos.line > line('$') - 1
+    let a:pos.line = line('$') - 1
+    let a:pos.character = strchars(getline('$'))
+  endif
   let l:cmd = ''
   let l:cmd .= printf('%dG', a:pos.line + 1)
   if a:pos.character == 0
