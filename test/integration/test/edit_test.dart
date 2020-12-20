@@ -79,8 +79,8 @@ void main() {
     await vim.sendKeys(':LSClientRename \'bar\'<cr>');
     await renameDone;
     await Future.delayed(const Duration(milliseconds: 100));
-    expect(await vim.expr(r'getline(1, "$")'), 'bar\nbar');
-  }, skip: 'https://github.com/natebosch/vim-lsc/issues/317');
+    expect(await vim.expr(r'getline(1, "$")'), 'bar\nbar\n');
+  });
 }
 
 extension LSP on Peer {
