@@ -11,6 +11,7 @@ extension LSP on Peer {
       return {'capabilities': capabilities};
     });
     registerMethod('initialized', (_) {});
+    registerMethod('workspace/didChangeConfiguration', (_) {});
     registerMethod('textDocument/didOpen', _cast(didOpen) ?? _ignore);
     registerMethod('textDocument/didChange', _cast(didChange) ?? _ignore);
     registerMethod('textDocument/didSave', _cast(didSave) ?? _ignore);
