@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:_test/stub_lsp.dart';
 import 'package:_test/vim_remote.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:lsp/lsp.dart' show lspChannel;
@@ -59,13 +60,10 @@ void main() {
       });
     final didChange = Completer<Parameters>();
     client
-      ..registerLifecycleMethods(capabilities)
-      ..registerMethod(
-          'textDocument/didOpen', (params) => didOpen.complete(params))
-      ..registerMethod(
-          'textDocument/didSave', (params) => didSave.complete(params))
-      ..registerMethod(
-          'textDocument/didChange', (params) => didChange.complete(params))
+      ..registerLifecycleMethods(capabilities,
+          didOpen: didOpen.complete,
+          didChange: didChange.complete,
+          didSave: didSave.complete)
       ..listen();
 
     await didOpen.future;
@@ -92,11 +90,7 @@ void main() {
     client
       ..registerLifecycleMethods({
         'textDocumentSync': {'openClose': true, 'save': {}}
-      })
-      ..registerMethod(
-          'textDocument/didOpen', (params) => didOpen.complete(params))
-      ..registerMethod(
-          'textDocument/didSave', (params) => didSave.complete(params))
+      }, didOpen: didOpen.complete, didSave: didSave.complete)
       ..listen();
 
     await didOpen.future;
@@ -105,17 +99,4 @@ void main() {
 
     await didSave.future;
   });
-}
-
-extension LSP on Peer {
-  void registerLifecycleMethods(Map<String, dynamic> capabilities) {
-    registerMethod('initialize', (params) {
-      return {'capabilities': capabilities};
-    });
-    registerMethod('initialized', (_) {});
-    registerMethod('shutdown', (_) {});
-    registerMethod('exit', (_) {
-      close();
-    });
-  }
 }

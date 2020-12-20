@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:_test/stub_lsp.dart';
 import 'package:_test/vim_remote.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:lsp/lsp.dart' show lspChannel, CompletionItem;
@@ -58,8 +59,6 @@ void main() {
           'triggerCharacters': ['.']
         },
       })
-      ..registerMethod('textDocument/didOpen', (_) {})
-      ..registerMethod('textDocument/didChange', (_) {})
       ..registerMethod('textDocument/completion', (Parameters params) {
         return [
           CompletionItem((b) => b..label = 'abcd'),
@@ -78,8 +77,6 @@ void main() {
       ..registerLifecycleMethods({
         'completionProvider': {'triggerCharacters': []},
       })
-      ..registerMethod('textDocument/didOpen', (_) {})
-      ..registerMethod('textDocument/didChange', (_) {})
       ..registerMethod('textDocument/completion', (Parameters params) {
         return [
           CompletionItem((b) => b..label = 'foobar'),
@@ -98,8 +95,6 @@ void main() {
       ..registerLifecycleMethods({
         'completionProvider': {'triggerCharacters': []},
       })
-      ..registerMethod('textDocument/didOpen', (_) {})
-      ..registerMethod('textDocument/didChange', (_) {})
       ..registerMethod('textDocument/completion', (Parameters params) {
         return [
           CompletionItem((b) => b..label = 'foobar'),
@@ -123,18 +118,5 @@ extension PopUp on Vim {
         throw StateError('Pop up menu is not visible');
       }
     }
-  }
-}
-
-extension LSP on Peer {
-  void registerLifecycleMethods(Map<String, dynamic> capabilities) {
-    registerMethod('initialize', (_) {
-      return {'capabilities': capabilities};
-    });
-    registerMethod('initialized', (_) {});
-    registerMethod('shutdown', (_) {});
-    registerMethod('exit', (_) {
-      close();
-    });
   }
 }
