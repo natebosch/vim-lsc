@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:_test/stub_lsp.dart';
 import 'package:_test/vim_remote.dart';
 import 'package:test/test.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
@@ -79,21 +80,6 @@ void main() {
     await vim.sendKeys(':LSClientRename \'bar\'<cr>');
     await renameDone;
     await Future.delayed(const Duration(milliseconds: 100));
-    expect(await vim.expr(r'getline(1, "$")'), 'bar\nbar');
-  }, skip: 'https://github.com/natebosch/vim-lsc/issues/317');
-}
-
-extension LSP on Peer {
-  void registerLifecycleMethods(Map<String, dynamic> capabilities) {
-    registerMethod('initialize', (_) {
-      return {'capabilities': capabilities};
-    });
-    registerMethod('initialized', (_) {});
-    registerMethod('textDocument/didOpen', (_) {});
-    registerMethod('textDocument/didChange', (_) {});
-    registerMethod('shutdown', (_) {});
-    registerMethod('exit', (_) {
-      close();
-    });
-  }
+    expect(await vim.expr(r'getline(1, "$")'), 'bar\nbar\n');
+  });
 }

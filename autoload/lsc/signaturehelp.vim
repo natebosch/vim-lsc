@@ -47,7 +47,7 @@ function! s:ShowHelp(signatureHelp) abort
   endif
 
   if !has_key(signature, 'parameters')
-    call lsc#util#displayAsPreview([signature.label], 'text',
+    call lsc#util#displayAsPreview([signature.label], &filetype,
         \ function('<SID>HighlightCurrentParameter'))
     return
   endif
@@ -60,7 +60,7 @@ function! s:ShowHelp(signatureHelp) abort
     endif
   endif
 
-  call lsc#util#displayAsPreview([signature.label], 'text',
+  call lsc#util#displayAsPreview([signature.label], &filetype,
       \ function('<SID>HighlightCurrentParameter'))
 
 endfunction

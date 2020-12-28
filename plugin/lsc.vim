@@ -36,6 +36,7 @@ command! -nargs=? LSClientWorkspaceSymbol
 command! -nargs=? LSClientFindCodeActions
     \ call lsc#edit#findCodeActions(lsc#edit#filterActions(<args>))
 command! LSClientAllDiagnostics call lsc#diagnostics#showInQuickFix()
+command! LSClientWindowDiagnostics call lsc#diagnostics#showLocationList()
 command! LSClientLineDiagnostics call lsc#diagnostics#echoForLine()
 command! LSClientSignatureHelp call lsc#signaturehelp#getSignatureHelp()
 command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
@@ -134,7 +135,7 @@ function! LSCEnsureCurrentWindowState() abort
     if exists('w:lsc_diagnostic_matches')
       call lsc#highlights#clear()
     endif
-    if exists('w:lsc_diagnostics_version')
+    if exists('w:lsc_diagnostics')
       call lsc#diagnostics#clear()
     endif
     if exists('w:lsc_reference_matches')
@@ -142,7 +143,7 @@ function! LSCEnsureCurrentWindowState() abort
     endif
     return
   endif
-  call lsc#diagnostics#updateLocationList(lsc#file#fullPath())
+  call lsc#diagnostics#updateCurrentWindow()
   call lsc#highlights#update()
   call lsc#cursor#onWinEnter()
 endfunction

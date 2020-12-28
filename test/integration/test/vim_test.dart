@@ -9,7 +9,7 @@ void main() {
     Vim vim;
     setUpAll(() async {
       vim = await Vim.start();
-      final serverPath = p.absolute('bin', 'mock_server.dart');
+      final serverPath = p.absolute('bin', 'stub_server.dart');
       await vim.expr('RegisterLanguageServer("text","dart $serverPath")');
     });
 

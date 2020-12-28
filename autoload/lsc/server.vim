@@ -222,6 +222,7 @@ function! lsc#server#enable() abort
 endfunction
 
 function! lsc#server#register(filetype, config) abort
+  let languageId = a:filetype
   if type(a:config) == type('')
     let config = {'command': a:config, 'name': a:config}
   elseif type(a:config) == type([])
@@ -237,10 +238,14 @@ function! lsc#server#register(filetype, config) abort
     if !has_key(config, 'name')
       let config.name = string(config.command)
     endif
+    if has_key(config, 'languageId')
+      let languageId = config.languageId
+    endif
   endif
   let g:lsc_servers_by_filetype[a:filetype] = config.name
   if has_key(s:servers, config.name)
     call add(s:servers[config.name].filetypes, a:filetype)
+    let s:servers[config.name].languageId[a:filetype] = languageId
     return
   endif
   let initial_status = 'not started'
@@ -251,9 +256,11 @@ function! lsc#server#register(filetype, config) abort
       \ 'status': initial_status,
       \ 'logs': [],
       \ 'filetypes': [a:filetype],
+      \ 'languageId': {},
       \ 'config': config,
       \ 'capabilities': lsc#capabilities#defaults()
       \}
+  let server.languageId[a:filetype] = languageId
   function! server.request(method, params, callback) abort
     if self.status !=# 'running' | return v:false | endif
     let l:params = lsc#config#messageHook(self, a:method, a:params)

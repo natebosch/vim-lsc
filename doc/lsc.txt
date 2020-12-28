@@ -152,12 +152,29 @@ With |lsc-default-map| this command is bount to "gR". This comand will not
 exist if |g:lsc_enable_apply_edit| is set to `v:false`.
 
                                                 *:LSClientAllDiagnostics*
-Popupate the quickfix list with all diagnostics that have been sent by the
+Populate the |quickfix| list with all diagnostics that have been sent by the
 server, spanning all files. Depending on the server implementation this may
 show all diagnostics for open files, or also diagnostics for files that have
 not yet been opened. After running this command the quickfix list will be
 updated any time diagnostics change, until the quickfix list is set by some
 other command.
+
+                                                *:LSClientWindowDiagnostics*
+By default vim-lsc will create a location list for every window with an LSC
+tracked buffer open. In the typical case |:lopen| is sufficient to see a
+continuously updated list of diagnostics for the current buffer.
+
+If the current location list for a window is in use for another list it will not
+be overwritten. The `:LSClientWindowDiagnostics` command will restore the LSC
+diagnostics to the location list.
+
+The LSC diagnostics list is always kept up to day as long as it still exists on
+the location list stack. Use |:lolder|, |:lnewer|, or |:lhistory| to switch
+between the LSC diagnostics list and other lists. If the LSC list leaves the
+stack because there are 10 other lists that replaced it, it can be restored on
+the top of the stack with `:LSClientWindowDiagnostics`. If the command is
+invoked while the list is still on the stack it will be chosen as the current
+list.
 
                                                 *:LSClientLineDiagnostics*
 Echo the full text of all diagnostics on the current line. Useful when a
@@ -276,6 +293,10 @@ diagnostics disabled |:LSClientAllDiagnostics| will never surface any results.
 The server may communicate diagnostics but they will be ignored. Changing this
 configuration while a server is running may have unexpected results, if it is
 changed use |:LSClientRestartServer|.
+
+If the location list is in use by a list other than the LSC diagnostics you
+won't see updates as diagnostics change. Call |:LSClientWindowDiagnostics| to
+restore the LSC diagnostics list.
 
                                                 *lsc-configure-hover*
                                                 *g:lsc_preview_split_direction*
@@ -444,6 +465,11 @@ are configured with the same name use the same server.
                                                 *lsc-server-enabled*
 `'enabled'`: Set to `v:false` to avoid starting the server until
 |:LSClientEnable| is called.
+
+                                                *lsc-server-languageId*
+`'languageId'`: Defaults to `&filetype`. Change if your server expects a
+languageId that is not the current filetype.
+Use this if you use a subfiletype like `framework.language`.
 
                                                 *lsc-server-log_level*
 `'log_level'`: May be one of `'Error'`, `'Warning'`, `'Info'`, or `'Log'`.

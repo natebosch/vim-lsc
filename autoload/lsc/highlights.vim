@@ -39,8 +39,8 @@ function! lsc#highlights#clear() abort
     endfor
   endif
   let w:lsc_diagnostic_matches = []
-  if exists('w:lsc_highlights_version')
-    unlet w:lsc_highlights_version
+  if exists('w:lsc_highlights_source')
+    unlet w:lsc_highlights_source
   endif
 endfunction
 
@@ -60,13 +60,11 @@ endfunction
 
 " Whether the diagnostic highlights for the current window are up to date.
 function! s:CurrentWindowIsFresh() abort
-  if !exists('w:lsc_diagnostics_version') | return v:true | endif
-  if !exists('w:lsc_highlights_version') | return v:false | endif
-  return w:lsc_highlights_version == w:lsc_diagnostics_version &&
-      \ w:lsc_highlights_file == w:lsc_diagnostics_file
+  if !exists('w:lsc_diagnostics') | return v:true | endif
+  if !exists('w:lsc_highlights_source') | return v:false | endif
+  return w:lsc_highlights_source is w:lsc_diagnostics
 endfunction
 
 function! s:MarkCurrentWindowFresh() abort
-  let w:lsc_highlights_version = w:lsc_diagnostics_version
-  let w:lsc_highlights_file = w:lsc_diagnostics_file
+  let w:lsc_highlight_source = w:lsc_diagnostics
 endfunction

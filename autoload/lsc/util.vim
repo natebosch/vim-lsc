@@ -30,15 +30,6 @@ function! s:Callback(group) abort
   unlet s:callbacks[a:group]
 endfunction
 
-" Returns the window IDs of the windows showing the buffer opened for
-" [file_path].
-function! lsc#util#windowsForFile(file_path) abort
-  let l:bufnr = lsc#file#bufnr(a:file_path)
-  if l:bufnr == -1 | return [] | endif
-  let bufinfo = getbufinfo(l:bufnr)
-  return copy(bufinfo[0].windows)
-endfunction
-
 " Compare two quickfix or location list items.
 "
 " Items are compared with priority order:
