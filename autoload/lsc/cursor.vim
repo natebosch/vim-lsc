@@ -28,13 +28,13 @@ function! lsc#cursor#showDiagnostic() abort
     let l:max_width -= 19 " Default ruler width (18) plus 1 character buffer
     let l:message = strtrans(l:diagnostic.message)
     if strdisplaywidth(l:message) > l:max_width
-      let l:max_width -= 3 " 3 chars for '...'
+      let l:max_width -= 1 " 1 character for ellipsis
       let l:truncated = strcharpart(l:message, 0, l:max_width)
       " Trim by character until a satisfactory display width.
       while strdisplaywidth(l:truncated) > l:max_width
         let l:truncated = strcharpart(l:truncated, 0, strchars(l:truncated) - 1)
       endwhile
-      echo l:truncated.'...'
+      echo l:truncated."\u2026"
     else
       echo l:message
     endif
