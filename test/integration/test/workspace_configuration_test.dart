@@ -1,9 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:_test/stub_lsp.dart';
 import 'package:_test/vim_remote.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:lsp/lsp.dart' show lspChannel;
+import 'package:stream_transform/stream_transform.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -16,7 +18,10 @@ void main() {
     addTearDown(serverSocket.close);
 
     clients = serverSocket.map((socket) {
-      return Peer(lspChannel(socket, socket), onUnhandledError: (error, _) {
+      return Peer(
+          lspChannel(socket.tap((l) {
+            print('From Vim: ' + utf8.decode(l));
+          }), socket), onUnhandledError: (error, _) {
         fail('Unhandled server error: $error');
       });
     }).asBroadcastStream();
