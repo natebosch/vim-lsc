@@ -5,6 +5,7 @@ import 'package:_test/stub_lsp.dart';
 import 'package:_test/vim_remote.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:lsp/lsp.dart' show lspChannel;
+import 'package:stream_channel/stream_channel.dart';
 import 'package:stream_transform/stream_transform.dart';
 import 'package:test/test.dart';
 
@@ -18,10 +19,13 @@ void main() {
     addTearDown(serverSocket.close);
 
     clients = serverSocket.map((socket) {
+      final channel = lspChannel(socket.tap((l) {
+        print('From Vim: ' + utf8.decode(l));
+      }), socket);
       return Peer(
-          lspChannel(socket.tap((l) {
-            print('From Vim: ' + utf8.decode(l));
-          }), socket), onUnhandledError: (error, _) {
+          StreamChannel(channel.stream.tap((m) {
+            print('LSP from Vim: $m');
+          }), channel.sink), onUnhandledError: (error, _) {
         fail('Unhandled server error: $error');
       });
     }).asBroadcastStream();
@@ -78,12 +82,10 @@ void main() {
   });
 
   test('can send multiple configurations', () async {
-    client
-      ..registerLifecycleMethods({})
-      ..listen();
-
+    final server = StubServer(client);
+    await server.initialized;
     print('Waiting for response');
-    final response = await client.sendRequest('workspace/configuration', {
+    final response = await server.peer.sendRequest('workspace/configuration', {
       'items': [
         {'section': 'foo'},
         {'section': 'other'}
