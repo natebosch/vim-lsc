@@ -56,7 +56,9 @@ void main() {
       ..registerLifecycleMethods({})
       ..listen();
 
-    final response = await client.sendRequest('workspace/configuration', [{}]);
+    final response = await client.sendRequest('workspace/configuration', {
+      'items': [{}]
+    });
     expect(response, [
       {
         'foo': {'baz': 'bar'},
@@ -70,10 +72,12 @@ void main() {
       ..registerLifecycleMethods({})
       ..listen();
 
-    final response = await client.sendRequest('workspace/configuration', [
-      {'section': 'foo'},
-      {'section': 'other'}
-    ]);
+    final response = await client.sendRequest('workspace/configuration', {
+      'items': [
+        {'section': 'foo'},
+        {'section': 'other'}
+      ]
+    });
     expect(response, [
       {'baz': 'bar'},
       'something'
@@ -85,9 +89,11 @@ void main() {
       ..registerLifecycleMethods({})
       ..listen();
 
-    final response = await client.sendRequest('workspace/configuration', [
-      {'section': 'foo.baz'},
-    ]);
+    final response = await client.sendRequest('workspace/configuration', {
+      'items': [
+        {'section': 'foo.baz'},
+      ]
+    });
     expect(response, ['bar']);
   });
 
@@ -96,10 +102,12 @@ void main() {
       ..registerLifecycleMethods({})
       ..listen();
 
-    final response = await client.sendRequest('workspace/configuration', [
-      {'section': 'foo.missing'},
-      {'section': 'missing'}
-    ]);
+    final response = await client.sendRequest('workspace/configuration', {
+      'items': [
+        {'section': 'foo.missing'},
+        {'section': 'missing'}
+      ]
+    });
     expect(response, [null, null]);
   });
 }

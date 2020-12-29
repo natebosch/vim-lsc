@@ -361,7 +361,8 @@ function! s:Dispatch(server, method, params, id) abort
     let l:response = {'applied': l:applied}
     call a:server.respond(a:id, l:response)
   elseif a:method ==? 'workspace/configuration'
-    let l:response = map(a:params, {_, item -> a:server.find_config(item)})
+    let l:items = a:params.items
+    let l:response = map(l:items, {_, item -> a:server.find_config(item)})
     call a:server.respond(a:id, l:response)
   elseif a:method =~? '\v^\$'
     call lsc#config#handleNotification(a:server, a:method, a:params)
