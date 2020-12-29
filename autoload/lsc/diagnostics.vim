@@ -331,6 +331,7 @@ function! s:Diagnostics(file_path, lsp_diagnostics) abort
       for l:diagnostic in self.lsp_diagnostics
         call add(self._highlights, {
             \ 'group': s:SeverityGroup(l:diagnostic.severity),
+            \ 'severity': l:diagnostic.severity,
             \ 'ranges': lsc#convert#rangeToHighlights(l:diagnostic.range),
             \})
       endfor
