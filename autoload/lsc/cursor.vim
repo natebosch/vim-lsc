@@ -25,7 +25,7 @@ function! lsc#cursor#showDiagnostic() abort
   let l:diagnostic = lsc#diagnostics#underCursor()
   if has_key(l:diagnostic, 'message')
     let l:max_width = &columns
-    let l:max_width -= 19 " Default ruler width (18) plus 1 character buffer
+    let l:max_width -= 29 " Default ruler width (18) plus showcmd width (10) plus 1 character buffer
     let l:message = strtrans(l:diagnostic.message)
     if strdisplaywidth(l:message) > l:max_width
       let l:max_width -= 3 " 3 chars for '...'
