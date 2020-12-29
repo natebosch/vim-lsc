@@ -6,4 +6,4 @@ pushd test/integration
 
 pub get
 
-pub run test
+pub run test test/workspace_configuration_test.dart

@@ -82,7 +82,7 @@ void main() {
       {'baz': 'bar'},
       'something'
     ]);
-  });
+  }, solo: true);
 
   test('can send nested config with dotted keys', () async {
     client
