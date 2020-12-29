@@ -576,8 +576,9 @@ For example:
                                                 *lsc-server-workspace_config*
 `workspace_config`: Set to any json encodable value which will be sent to the
 server after startup as the `settings` in a `workspace/didChangeConfiguration`
-notificaiton. See the documentation for your server for what values are accepted
-in this notification.
+notification. See the documentation for your server for what values are accepted
+in this notification. The configuration here is also used to respond to
+`workspace/configuration` requests from the server. All `scopeUri` are ignored.
 
 For example:
 >
