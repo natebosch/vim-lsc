@@ -24,8 +24,11 @@ endfunction
 function! lsc#cursor#showDiagnostic() abort
   let l:diagnostic = lsc#diagnostics#underCursor()
   if has_key(l:diagnostic, 'message')
-    let l:max_width = &columns
-    let l:max_width -= 19 " Default ruler width (18) plus 1 character buffer
+    let l:max_width = &columns - 1 " Avoid edge of terminal
+    let l:has_ruler = &ruler &&
+        \ (&laststatus == 0 || (&laststatus == 1 && winnr('$') < 2))
+    if l:has_ruler | let l:max_width -= 18 | endif
+    if &showcmd | let l:max_width -= 11 | endif
     let l:message = strtrans(l:diagnostic.message)
     if strdisplaywidth(l:message) > l:max_width
       let l:max_width -= 1 " 1 character for ellipsis
