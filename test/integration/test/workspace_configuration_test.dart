@@ -23,7 +23,7 @@ void main() {
     vim = await Vim.start();
     await vim.expr('RegisterLanguageServer("text", {'
         '"command":"localhost:${serverSocket.port}",'
-        '"workspace_config":{"foo":{"baz":"bar"}},'
+        '"workspace_config":{"foo":{"baz":"bar"},"other":"something"},'
         '"enabled":v:false,'
         '})');
   });
@@ -59,8 +59,47 @@ void main() {
     final response = await client.sendRequest('workspace/configuration', [{}]);
     expect(response, [
       {
-        'foo': {'baz': 'bar'}
+        'foo': {'baz': 'bar'},
+        'other': 'something',
       }
     ]);
+  });
+
+  test('can send multiple configurations', () async {
+    client
+      ..registerLifecycleMethods({})
+      ..listen();
+
+    final response = await client.sendRequest('workspace/configuration', [
+      {'section': 'foo'},
+      {'section': 'other'}
+    ]);
+    expect(response, [
+      {'baz': 'bar'},
+      'something'
+    ]);
+  });
+
+  test('can send nested config with dotted keys', () async {
+    client
+      ..registerLifecycleMethods({})
+      ..listen();
+
+    final response = await client.sendRequest('workspace/configuration', [
+      {'section': 'foo.baz'},
+    ]);
+    expect(response, ['bar']);
+  });
+
+  test('handles missing keys', () async {
+    client
+      ..registerLifecycleMethods({})
+      ..listen();
+
+    final response = await client.sendRequest('workspace/configuration', [
+      {'section': 'foo.missing'},
+      {'section': 'missing'}
+    ]);
+    expect(response, [null, null]);
   });
 }

@@ -313,6 +313,21 @@ function! lsc#server#register(filetype, config) abort
       call s:Start(self)
     endif
   endfunction
+  function! server.find_config(item) abort
+    if !has_key(self.config, 'workspace_config') | return v:none | endif
+    if !has_key(a:item, 'section') || empty(a:item.section)
+      return self.config.workspace_config
+    endif
+    let l:config = self.config.workspace_config
+    for l:part in split(a:item.section, '\.')
+      if !has_key(l:config, l:part)
+        return v:none
+      else
+        let l:config = l:config[l:part]
+      endif
+    endfor
+    return l:config
+  endfunction
   let s:servers[config.name] = server
 endfunction
 
@@ -346,15 +361,8 @@ function! s:Dispatch(server, method, params, id) abort
     let l:response = {'applied': l:applied}
     call a:server.respond(a:id, l:response)
   elseif a:method ==? 'workspace/configuration'
-    " TODO: Properly handle the configuration request parameters.  For now we
-    " just assume that workspace_config is one for every scopeURI and every
-    " configuration section.
-    if has_key(a:server.config, 'workspace_config')
-      let l:response = [a:server.config.workspace_config]
-      call a:server.respond(a:id, l:response)
-    else
-      call a:server.respond(a:id, [])
-    endif
+    let l:response = map(a:params, {_, item -> a:server.find_config(item)})
+    call a:server.respond(a:id, l:response)
   elseif a:method =~? '\v^\$'
     call lsc#config#handleNotification(a:server, a:method, a:params)
   endif
