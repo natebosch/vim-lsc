@@ -52,11 +52,10 @@ void main() {
   });
 
   test('can send workspace configuration', () async {
-    client
-      ..registerLifecycleMethods({})
-      ..listen();
+    final server = StubServer(client);
+    await server.initialized;
 
-    final response = await client.sendRequest('workspace/configuration', {
+    final response = await server.peer.sendRequest('workspace/configuration', {
       'items': [{}]
     });
     expect(response, [
@@ -68,11 +67,10 @@ void main() {
   });
 
   test('can send multiple configurations', () async {
-    client
-      ..registerLifecycleMethods({})
-      ..listen();
+    final server = StubServer(client);
+    await server.initialized;
 
-    final response = await client.sendRequest('workspace/configuration', {
+    final response = await server.peer.sendRequest('workspace/configuration', {
       'items': [
         {'section': 'foo'},
         {'section': 'other'}
@@ -85,11 +83,10 @@ void main() {
   });
 
   test('can send nested config with dotted keys', () async {
-    client
-      ..registerLifecycleMethods({})
-      ..listen();
+    final server = StubServer(client);
+    await server.initialized;
 
-    final response = await client.sendRequest('workspace/configuration', {
+    final response = await server.peer.sendRequest('workspace/configuration', {
       'items': [
         {'section': 'foo.baz'},
       ]
@@ -98,9 +95,8 @@ void main() {
   });
 
   test('handles missing keys', () async {
-    client
-      ..registerLifecycleMethods({})
-      ..listen();
+    final server = StubServer(client);
+    await server.initialized;
 
     final response = await client.sendRequest('workspace/configuration', {
       'items': [

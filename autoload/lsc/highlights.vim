@@ -15,16 +15,18 @@ function! lsc#highlights#update() abort
   call lsc#highlights#clear()
   if &diff | return | endif
   for l:highlight in lsc#diagnostics#forFile(lsc#file#fullPath()).Highlights()
+    let l:priority = -1 * l:highlight.severity
+    let l:group = l:highlight.group
     if l:highlight.ranges[0][0] > line('$')
       " Diagnostic starts after end of file
-      let l:match = matchadd(l:highlight.group, '\%'.line('$').'l$')
+      let l:match = matchadd(l:group, '\%'.line('$').'l$', l:priority)
     elseif len(l:highlight.ranges) == 1 &&
         \ l:highlight.ranges[0][1] > len(getline(l:highlight.ranges[0][0]))
       " Diagnostic starts after end of line
-      let l:match =
-          \ matchadd(l:highlight.group, '\%'.l:highlight.ranges[0][0].'l$')
+      let l:line_range = '\%'.l:highlight.ranges[0][0].'l$'
+      let l:match = matchadd(l:group, l:line_range, l:priority)
     else
-      let l:match = matchaddpos(l:highlight.group, l:highlight.ranges, -1)
+      let l:match = matchaddpos(l:group, l:highlight.ranges, l:priority)
     endif
     call add(w:lsc_diagnostic_matches, l:match)
   endfor

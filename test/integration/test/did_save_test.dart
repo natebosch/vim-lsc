@@ -53,25 +53,19 @@ void main() {
   });
 
   Future<void> testNoDidSave(Map<String, dynamic> capabilities) async {
-    final didOpen = Completer<Parameters>();
-    final didSave = Completer<Parameters>()
-      ..future.then((_) {
+    final server = StubServer(client, capabilities: capabilities)
+      ..didSave.listen((_) {
         fail('Unexpected didSave');
       });
-    final didChange = Completer<Parameters>();
-    client
-      ..registerLifecycleMethods(capabilities,
-          didOpen: didOpen.complete,
-          didChange: didChange.complete,
-          didSave: didSave.complete)
-      ..listen();
 
-    await didOpen.future;
+    await server.initialized;
+
+    await server.didOpen.first;
 
     await vim.sendKeys(':w<cr>');
 
     await vim.sendKeys('iHello<esc>');
-    await didChange.future;
+    await await server.didChange.first;
   }
 
   test('TextDocumentSyncKind instead of TextDocumentSyncOptions', () async {
@@ -85,18 +79,16 @@ void main() {
   });
 
   test('include sync key', () async {
-    final didOpen = Completer<Parameters>();
-    final didSave = Completer<Parameters>();
-    client
-      ..registerLifecycleMethods({
-        'textDocumentSync': {'openClose': true, 'save': {}}
-      }, didOpen: didOpen.complete, didSave: didSave.complete)
-      ..listen();
+    final server = StubServer(client, capabilities: {
+      'textDocumentSync': {'openClose': true, 'save': {}}
+    });
 
-    await didOpen.future;
+    await server.initialized;
+
+    await server.didOpen.first;
 
     await vim.sendKeys(':w<cr>');
 
-    await didSave.future;
+    await server.didSave.first;
   });
 }

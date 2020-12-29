@@ -55,27 +55,26 @@ void main() {
 
   test('edit of entire file', () async {
     final renameDone = Completer<void>();
-    client
-      ..registerLifecycleMethods({})
-      ..registerMethod('textDocument/rename', (Parameters params) {
-        renameDone.complete();
-        final uri = params['textDocument']['uri'].asString;
-        return WorkspaceEdit((b) => b
-          ..changes = {
-            uri: [
-              TextEdit((b) => b
-                ..newText = 'bar\nbar\n'
-                ..range = Range((b) => b
-                  ..start = Position((b) => b
-                    ..line = 0
-                    ..character = 0)
-                  ..end = Position((b) => b
-                    ..line = 2
-                    ..character = 0)))
-            ]
-          });
-      })
-      ..listen();
+    final server = StubServer(client);
+    server.peer.registerMethod('textDocument/rename', (Parameters params) {
+      renameDone.complete();
+      final uri = params['textDocument']['uri'].asString;
+      return WorkspaceEdit((b) => b
+        ..changes = {
+          uri: [
+            TextEdit((b) => b
+              ..newText = 'bar\nbar\n'
+              ..range = Range((b) => b
+                ..start = Position((b) => b
+                  ..line = 0
+                  ..character = 0)
+                ..end = Position((b) => b
+                  ..line = 2
+                  ..character = 0)))
+          ]
+        });
+    });
+    await server.initialized;
     await vim.sendKeys('ifoo<cr>foo<esc>');
     await vim.sendKeys(':LSClientRename \'bar\'<cr>');
     await renameDone;
