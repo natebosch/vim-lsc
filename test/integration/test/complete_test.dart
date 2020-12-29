@@ -53,19 +53,18 @@ void main() {
   });
 
   test('autocomplete on trigger', () async {
-    client
-      ..registerLifecycleMethods({
-        'completionProvider': {
-          'triggerCharacters': ['.']
-        },
-      })
-      ..registerMethod('textDocument/completion', (Parameters params) {
-        return [
-          CompletionItem((b) => b..label = 'abcd'),
-          CompletionItem((b) => b..label = 'foo')
-        ];
-      })
-      ..listen();
+    final server = StubServer(client, capabilities: {
+      'completionProvider': {
+        'triggerCharacters': ['.']
+      },
+    });
+    server.peer.registerMethod('textDocument/completion', (Parameters params) {
+      return [
+        CompletionItem((b) => b..label = 'abcd'),
+        CompletionItem((b) => b..label = 'foo')
+      ];
+    });
+    await server.initialized;
     await vim.sendKeys('ifoo.');
     await vim.waitForPopUpMenu();
     await vim.sendKeys('a<c-n><esc><esc>');
@@ -73,17 +72,16 @@ void main() {
   });
 
   test('autocomplete on 3 word characters', () async {
-    client
-      ..registerLifecycleMethods({
-        'completionProvider': {'triggerCharacters': []},
-      })
-      ..registerMethod('textDocument/completion', (Parameters params) {
-        return [
-          CompletionItem((b) => b..label = 'foobar'),
-          CompletionItem((b) => b..label = 'fooother')
-        ];
-      })
-      ..listen();
+    final server = StubServer(client, capabilities: {
+      'completionProvider': {'triggerCharacters': []},
+    });
+    server.peer.registerMethod('textDocument/completion', (Parameters params) {
+      return [
+        CompletionItem((b) => b..label = 'foobar'),
+        CompletionItem((b) => b..label = 'fooother')
+      ];
+    });
+    await server.initialized;
     await vim.sendKeys('ifoo');
     await vim.waitForPopUpMenu();
     await vim.sendKeys('b<c-n><esc><esc>');
@@ -91,17 +89,16 @@ void main() {
   });
 
   test('manual completion', () async {
-    client
-      ..registerLifecycleMethods({
-        'completionProvider': {'triggerCharacters': []},
-      })
-      ..registerMethod('textDocument/completion', (Parameters params) {
-        return [
-          CompletionItem((b) => b..label = 'foobar'),
-          CompletionItem((b) => b..label = 'fooother')
-        ];
-      })
-      ..listen();
+    final server = StubServer(client, capabilities: {
+      'completionProvider': {'triggerCharacters': []},
+    });
+    server.peer.registerMethod('textDocument/completion', (Parameters params) {
+      return [
+        CompletionItem((b) => b..label = 'foobar'),
+        CompletionItem((b) => b..label = 'fooother')
+      ];
+    });
+    await server.initialized;
     await vim.sendKeys('if<c-x><c-u>');
     await vim.waitForPopUpMenu();
     await vim.sendKeys('<c-n><esc><esc>');
