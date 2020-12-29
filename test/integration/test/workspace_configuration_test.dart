@@ -41,11 +41,16 @@ void main() {
   });
 
   tearDown(() async {
+    print('Tearing down. Disabling LSC');
     await vim.sendKeys(':LSClientDisable<cr>');
+    print('wiping out buffers');
     await vim.sendKeys(':%bwipeout!<cr>');
     final file = File('foo.txt');
+    print('Checking for file to delete');
     if (await file.exists()) await file.delete();
+    print('Waiting for client to close');
     await client.done;
+    print('Done');
     client = null;
   });
 
@@ -77,12 +82,14 @@ void main() {
       ..registerLifecycleMethods({})
       ..listen();
 
+    print('Waiting for response');
     final response = await client.sendRequest('workspace/configuration', {
       'items': [
         {'section': 'foo'},
         {'section': 'other'}
       ]
     });
+    print('Got response: $response');
     expect(response, [
       {'baz': 'bar'},
       'something'
