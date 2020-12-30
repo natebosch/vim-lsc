@@ -169,7 +169,8 @@ function! s:ClientCapabilities() abort
   return {
     \ 'workspace': {
     \   'applyEdit': applyEdit,
-    \   },
+    \   'configuration': v:true,
+    \ },
     \ 'textDocument': {
     \   'synchronization': {
     \     'willSave': v:false,
@@ -312,6 +313,21 @@ function! lsc#server#register(filetype, config) abort
       call s:Start(self)
     endif
   endfunction
+  function! server.find_config(item) abort
+    if !has_key(self.config, 'workspace_config') | return v:none | endif
+    if !has_key(a:item, 'section') || empty(a:item.section)
+      return self.config.workspace_config
+    endif
+    let l:config = self.config.workspace_config
+    for l:part in split(a:item.section, '\.')
+      if !has_key(l:config, l:part)
+        return v:none
+      else
+        let l:config = l:config[l:part]
+      endif
+    endfor
+    return l:config
+  endfunction
   let s:servers[config.name] = server
 endfunction
 
@@ -343,6 +359,10 @@ function! s:Dispatch(server, method, params, id) abort
   elseif a:method ==? 'workspace/applyEdit'
     let l:applied = lsc#edit#apply(a:params.edit)
     let l:response = {'applied': l:applied}
+    call a:server.respond(a:id, l:response)
+  elseif a:method ==? 'workspace/configuration'
+    let l:items = a:params.items
+    let l:response = map(l:items, {_, item -> a:server.find_config(item)})
     call a:server.respond(a:id, l:response)
   elseif a:method =~? '\v^\$'
     call lsc#config#handleNotification(a:server, a:method, a:params)
