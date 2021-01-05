@@ -51,6 +51,8 @@ function! lsc#config#mapKeys() abort
     return
   endif
 
+  let b:lsc_save = {}
+  let b:lsc_maps = []
   for command in [
       \ 'GoToDefinition',
       \ 'GoToDefinitionSplit',
@@ -69,21 +71,47 @@ function! lsc#config#mapKeys() abort
       continue
     endif
     for m in type(lhs) == type([]) ? lhs : [lhs]
+      call add(b:lsc_maps, m)
       execute 'nnoremap <buffer>'.m.' :LSClient'.command.'<CR>'
     endfor
   endfor
   if has_key(l:maps, 'Completion') &&
       \ type(l:maps['Completion']) == type('') &&
       \ len(l:maps['Completion']) > 0
+    let b:lsc_save[l:maps['Completion']] = getbufvar('', l:maps['Completion'])
     execute 'setlocal '.l:maps['Completion'].'=lsc#complete#complete'
   endif
   if has_key(l:maps, 'ShowHover')
     let l:show_hover = l:maps['ShowHover']
     if type(l:show_hover) == type(v:true) || type(l:show_hover) == type(0)
       if l:show_hover
+        let b:lsc_save.keywordprg = &l:keywordprg
         setlocal keywordprg=:LSClientShowHover
       endif
     endif
+  endif
+endfunction
+
+function! lsc#config#unmapKeys() abort
+  if exists('b:lsc_save')
+    for opt in keys(b:lsc_save)
+      execute 'setlocal '.opt.'='.b:lsc_save[opt]
+    endfor
+    unlet b:lsc_save
+  endif
+
+  if exists('b:lsc_maps')
+    for m in b:lsc_maps
+      silent! execute 'nunmap <buffer>'.m
+    endfor
+    unlet b:lsc_maps
+  endif
+endfunction
+
+" Unmap buffer-local keys if the associated language server is not running
+function! lsc#config#checkKeys() abort
+  if lsc#server#status(&filetype) !=# 'running'
+    call lsc#config#unmapKeys()
   endif
 endfunction
 

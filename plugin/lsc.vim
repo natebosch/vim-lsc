@@ -146,6 +146,7 @@ function! LSCEnsureCurrentWindowState() abort
   call lsc#diagnostics#updateCurrentWindow()
   call lsc#highlights#update()
   call lsc#cursor#onWinEnter()
+  call lsc#config#checkKeys()
 endfunction
 
 " Run `function` if LSC is enabled for the current filetype.
@@ -160,7 +161,6 @@ endfunction
 
 function! s:OnOpen() abort
   if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
-  call lsc#config#mapKeys()
   if !lsc#server#filetypeActive(&filetype) | return | endif
   call lsc#file#onOpen()
 endfunction

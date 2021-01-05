@@ -87,6 +87,11 @@ function! s:Kill(server, status, OnExit) abort
       call a:server._channel.notify('exit', v:null)
     endif
     if a:OnExit != v:null | call a:OnExit() | endif
+
+    " Unmap keys if the language server is used in the current buffer
+    if index(a:server.filetypes, &filetype) >= 0
+      call lsc#config#unmapKeys()
+    endif
   endfunction
   return a:server.request('shutdown', v:null, funcref('Exit'))
 endfunction
@@ -119,6 +124,7 @@ endfunction
 function! s:Start(server) abort
   if has_key(a:server, '_channel')
     " Server is already running
+    call lsc#config#mapKeys()
     return
   endif
   let l:command = a:server.config.command
@@ -145,6 +151,7 @@ function! s:Start(server) abort
     for filetype in a:server.filetypes
       call lsc#file#trackAll(filetype)
     endfor
+    call lsc#config#mapKeys()
   endfunction
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
