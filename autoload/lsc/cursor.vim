@@ -5,6 +5,7 @@ if !exists('s:initialized')
 endif
 
 function! lsc#cursor#onMove() abort
+  if !&modifiable | return | endif
   call lsc#cursor#showDiagnostic()
   call s:HighlightReferences(v:false)
 endfunction
@@ -14,6 +15,7 @@ function! lsc#cursor#onWinLeave() abort
 endfunction
 
 function! lsc#cursor#onWinEnter() abort
+  if !&modifiable | return | endif
   call s:HighlightReferences(v:false)
 endfunction
 
