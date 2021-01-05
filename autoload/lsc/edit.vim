@@ -5,7 +5,8 @@ function! lsc#edit#findCodeActions(...) abort
     let ActionFilter = function('<SID>ActionMenu')
   endif
   call lsc#file#flushChanges()
-  let params = lsc#params#documentRange()
+  let l:usingRange = a:0 > 2 && (a:2 != 1 || a:3 != line('$'))
+  let params = lsc#params#documentRange(l:usingRange)
   let params.context = {'diagnostics':
       \ lsc#diagnostics#forLine(lsc#file#fullPath(), line('.') - 1)}
   call lsc#server#userCall('textDocument/codeAction', params,

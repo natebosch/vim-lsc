@@ -33,8 +33,9 @@ command! -nargs=? LSClientShowHover call lsc#reference#hover()
 command! LSClientDocumentSymbol call lsc#reference#documentSymbols()
 command! -nargs=? LSClientWorkspaceSymbol
     \ call lsc#search#workspaceSymbol(<args>)
-command! -nargs=? LSClientFindCodeActions
-    \ call lsc#edit#findCodeActions(lsc#edit#filterActions(<args>))
+command! -nargs=? -range=% LSClientFindCodeActions
+    \ call lsc#edit#findCodeActions(
+    \   lsc#edit#filterActions(<args>), <line1>, <line2>)
 command! LSClientAllDiagnostics call lsc#diagnostics#showInQuickFix()
 command! LSClientWindowDiagnostics call lsc#diagnostics#showLocationList()
 command! LSClientLineDiagnostics call lsc#diagnostics#echoForLine()
