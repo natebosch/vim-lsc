@@ -63,10 +63,8 @@ function! s:ActionMenu(actions, OnSelected) abort
     return
   endif
   let l:choices = ['Choose an action:']
-  let l:idx = 0
-  while l:idx < len(a:actions)
-    call add(l:choices, string(l:idx+1).' - '.a:actions[l:idx]['title'])
-    let l:idx += 1
+  for l:index in range(a:actions)
+    call add(l:choices, string(l:index + 1).' - '.a:actions[l:index]['title'])
   endwhile
   let l:choice = inputlist(l:choices)
   if l:choice > 0
