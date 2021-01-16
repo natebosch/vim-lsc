@@ -314,14 +314,14 @@ function! lsc#server#register(filetype, config) abort
     endif
   endfunction
   function! server.find_config(item) abort
-    if !has_key(self.config, 'workspace_config') | return [] | endif
+    if !has_key(self.config, 'workspace_config') | return v:null | endif
     if !has_key(a:item, 'section') || empty(a:item.section)
       return self.config.workspace_config
     endif
     let l:config = self.config.workspace_config
     for l:part in split(a:item.section, '\.')
       if !has_key(l:config, l:part)
-        return []
+        return v:null
       else
         let l:config = l:config[l:part]
       endif
