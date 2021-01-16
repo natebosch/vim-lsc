@@ -63,10 +63,10 @@ endfunction
 " restarted the next time a window or tab is entered with this file type.
 function! RegisterLanguageServer(filetype, config) abort
   call lsc#server#register(a:filetype, a:config)
-  for buffer in getbufinfo({'bufloaded': v:true})
-    if getbufvar(buffer.bufnr, '&filetype') == a:filetype &&
-        \ getbufvar(buffer.bufnr, '&modifiable') &&
-        \ buffer.name !~# '\v^fugitive:///'
+  for l:buffer in getbufinfo({'bufloaded': v:true})
+    if getbufvar(l:buffer.bufnr, '&filetype') == a:filetype &&
+        \ getbufvar(l:buffer.bufnr, '&modifiable') &&
+        \ l:buffer.name !~# '\v^fugitive:///'
       call lsc#server#start(a:filetype)
       return
     endif

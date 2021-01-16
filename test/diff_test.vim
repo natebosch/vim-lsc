@@ -203,15 +203,15 @@ function! TestDiff() abort
 endfunction
 
 function! s:TestDiff(range, length, text, old, new) abort
-  let start = {'line': a:range[0], 'character': a:range[1]}
-  let end = {'line': a:range[2], 'character': a:range[3]}
+  let l:start = {'line': a:range[0], 'character': a:range[1]}
+  let l:end = {'line': a:range[2], 'character': a:range[3]}
   let l:old = empty(a:old) ? [] : split(a:old, "\n", v:true)
   let l:new = empty(a:new) ? [] : split(a:new, "\n", v:true)
-  let result = lsc#diff#compute(l:old, l:new)
-  call assert_equal({'start': start}, {'start': result.range.start})
-  call assert_equal({'end': end}, {'end': result.range.end})
-  call assert_equal({'length': a:length}, {'length': result.rangeLength})
-  call assert_equal({'text': a:text}, {'text': result.text})
+  let l:result = lsc#diff#compute(l:old, l:new)
+  call assert_equal({'start': l:start}, {'start': l:result.range.start})
+  call assert_equal({'end': l:end}, {'end': l:result.range.end})
+  call assert_equal({'length': a:length}, {'length': l:result.rangeLength})
+  call assert_equal({'text': a:text}, {'text': l:result.text})
 endfunction
 
 function! s:RunTest(test)
@@ -221,8 +221,8 @@ function! s:RunTest(test)
   call function(a:test)()
 
   if len(v:errors) > 0
-    for error in v:errors
-      echoerr error
+    for l:error in v:errors
+      echoerr l:error
     endfor
   else
     echom 'No errors in: '.a:test
@@ -230,8 +230,8 @@ function! s:RunTest(test)
 endfunction
 
 function! s:RunTests(...)
-  for test in a:000
-    call s:RunTest(test)
+  for l:test in a:000
+    call s:RunTest(l:test)
   endfor
 endfunction
 

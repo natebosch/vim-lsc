@@ -7,19 +7,19 @@ endif
 
 " Run `command` in all windows, keeping old open window.
 function! lsc#util#winDo(command) abort
-  let current_window = winnr()
+  let l:current_window = winnr()
   execute 'keepjumps noautocmd windo '.a:command
-  execute 'keepjumps noautocmd '.current_window.'wincmd w'
+  execute 'keepjumps noautocmd '.l:current_window.'wincmd w'
 endfunction
 
 " Schedule [function] to be called once for [event]. The function will only be
 " called if [event] fires for the current buffer. Callbacks cannot be canceled.
 function! lsc#util#once(event, function) abort
   let s:au_group_id += 1
-  let au_group = 'LSC_'.string(s:au_group_id)
-  let s:callbacks[au_group] = [a:function]
-  exec 'augroup '.au_group
-  exec 'autocmd '.a:event.' <buffer> call <SID>Callback("'.au_group.'")'
+  let l:au_group = 'LSC_'.string(s:au_group_id)
+  let s:callbacks[l:au_group] = [a:function]
+  exec 'augroup '.l:au_group
+  exec 'autocmd '.a:event.' <buffer> call <SID>Callback("'.l:au_group.'")'
   exec 'augroup END'
 endfunction
 
@@ -37,9 +37,9 @@ endfunction
 "
 " filenames within cwd are always considered to have a lower sort than others.
 function! lsc#util#compareQuickFixItems(i1, i2) abort
-  let file_1 = s:QuickFixFilename(a:i1)
-  let file_2 = s:QuickFixFilename(a:i2)
-  if file_1 != file_2
+  let l:file_1 = s:QuickFixFilename(a:i1)
+  let l:file_2 = s:QuickFixFilename(a:i2)
+  if l:file_1 != l:file_2
     return lsc#file#compare(l:file_1, l:file_2)
   endif
   if a:i1.lnum != a:i2.lnum | return a:i1.lnum - a:i2.lnum | endif
@@ -74,8 +74,8 @@ endfunction
 " After the content of the content of the preview window is set,
 " `function` is called (the buffer is still the preview).
 function! lsc#util#displayAsPreview(lines, filetype, function) abort
-  let view = winsaveview()
-  let alternate=@#
+  let l:view = winsaveview()
+  let l:alternate=@#
   call s:createOrJumpToPreview(s:countDisplayLines(a:lines, &previewheight))
   setlocal modifiable
   setlocal noreadonly
@@ -86,8 +86,8 @@ function! lsc#util#displayAsPreview(lines, filetype, function) abort
   setlocal nomodifiable
   setlocal readonly
   wincmd p
-  call winrestview(view)
-  let @#=alternate
+  call winrestview(l:view)
+  let @#=l:alternate
 endfunction
 
 " Approximates the number of lines it will take to display some text assuming an
@@ -106,21 +106,21 @@ function! s:countDisplayLines(lines, max) abort
 endfunction
 
 function! s:createOrJumpToPreview(want_height) abort
-  let windows = range(1, winnr('$'))
-  call filter(windows, {_, win -> getwinvar(win, "&previewwindow") == 1})
-  if len(windows) > 0
-    execute string(windows[0]).' wincmd W'
+  let l:windows = range(1, winnr('$'))
+  call filter(l:windows, {_, win -> getwinvar(win, "&previewwindow") == 1})
+  if len(l:windows) > 0
+    execute string(l:windows[0]).' wincmd W'
     edit __lsc_preview__
-    if winheight(windows[0]) < a:want_height
+    if winheight(l:windows[0]) < a:want_height
       execute 'resize '.a:want_height
     endif
   else
     if exists('g:lsc_preview_split_direction')
-      let direction = g:lsc_preview_split_direction
+      let l:direction = g:lsc_preview_split_direction
     else
-      let direction = ''
+      let l:direction = ''
     endif
-    execute direction.' '.string(a:want_height).'split __lsc_preview__'
+    execute l:direction.' '.string(a:want_height).'split __lsc_preview__'
     if exists('#User#LSCShowPreview')
       doautocmd <nomodeline> User LSCShowPreview
     endif
@@ -146,14 +146,15 @@ function! lsc#util#gateResult(name, callback, ...) abort
   else
     let s:callback_gates[a:name] += 1
   endif
-  let gate = s:callback_gates[a:name]
-  let old_pos = getcurpos()
+  let l:gate = s:callback_gates[a:name]
+  let l:old_pos = getcurpos()
   if a:0 >= 1 && type(a:1) == type({_->_})
-    let OnSkip = a:1
+    let l:OnSkip = a:1
   else
-    let OnSkip = v:false
+    let l:OnSkip = v:false
   endif
-  return function('<SID>Gated', [a:name, gate, old_pos, a:callback, OnSkip])
+  return function('<SID>Gated',
+      \ [a:name, l:gate, l:old_pos, a:callback, l:OnSkip])
 endfunction
 
 function! s:Gated(name, gate, old_pos, on_call, on_skip, ...) abort

@@ -8,26 +8,26 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
       \ '_callbacks': {},
       \}
   function! l:c.request(method, params, callback) abort
-    let self._call_id += 1
-    let l:message = s:Format(a:method, a:params, self._call_id)
-    let self._callbacks[self._call_id] = [a:callback]
-    call self._send(l:message)
+    let l:self._call_id += 1
+    let l:message = s:Format(a:method, a:params, l:self._call_id)
+    let l:self._callbacks[l:self._call_id] = [a:callback]
+    call l:self._send(l:message)
   endfunction
   function! l:c.notify(method, params) abort
     let l:message = s:Format(a:method, a:params, v:null)
-    cal lsc#util#shift(self._in, 10, l:message)
-    call self._send(l:message)
+    cal lsc#util#shift(l:self._in, 10, l:message)
+    call l:self._send(l:message)
   endfunction
   function! l:c.respond(id, result) abort
-    call self._send({'id': a:id, 'result': a:result})
+    call l:self._send({'id': a:id, 'result': a:result})
   endfunction
   function! l:c._send(message) abort
-    call lsc#util#shift(self._in, 10, a:message)
-    call self._channel.send(s:Encode(a:message))
+    call lsc#util#shift(l:self._in, 10, a:message)
+    call l:self._channel.send(s:Encode(a:message))
   endfunction
   function! l:c._recieve(message) abort
-    let self._buffer .= a:message
-    while s:Consume(self) | endwhile
+    let l:self._buffer .= a:message
+    while s:Consume(l:self) | endwhile
   endfunction
   let l:channel = lsc#channel#open(a:command, l:c._recieve, a:on_err, a:on_exit)
   if type(l:channel) == type(v:null)
@@ -38,39 +38,39 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
 endfunction
 
 function! s:Format(method, params, id) abort
-  let message = {'method': a:method}
-  if type(a:params) != type(v:null) | let message['params'] = a:params | endif
-  if type(a:id) != type(v:null) | let message['id'] = a:id | endif
-  return message
+  let l:message = {'method': a:method}
+  if type(a:params) != type(v:null) | let l:message['params'] = a:params | endif
+  if type(a:id) != type(v:null) | let l:message['id'] = a:id | endif
+  return l:message
 endfunction
 
 " Prepend the JSON RPC headers and serialize to JSON.
 function! s:Encode(message) abort
   let a:message['jsonrpc'] = '2.0'
-  let encoded = json_encode(a:message)
-  let length = len(encoded)
-  return 'Content-Length: '.length."\r\n\r\n".encoded
+  let l:encoded = json_encode(a:message)
+  let l:length = len(l:encoded)
+  return 'Content-Length: '.l:length."\r\n\r\n".l:encoded
 endfunction
 
 " Reads from the buffer for server_name and processes the message. Continues to
 " process messages until the buffer is empty. Does nothing if a complete message
 " is not available.
 function! s:Consume(server) abort
-  let message = a:server._buffer
-  let end_of_header = stridx(message, "\r\n\r\n")
-  if end_of_header < 0
+  let l:message = a:server._buffer
+  let l:end_of_header = stridx(l:message, "\r\n\r\n")
+  if l:end_of_header < 0
     return v:false
   endif
-  let headers = split(message[:end_of_header - 1], "\r\n")
-  let l:message_start = end_of_header + len("\r\n\r\n")
-  let l:message_end = l:message_start + s:ContentLength(headers)
-  if len(message) < l:message_end
+  let l:headers = split(l:message[:l:end_of_header - 1], "\r\n")
+  let l:message_start = l:end_of_header + len("\r\n\r\n")
+  let l:message_end = l:message_start + s:ContentLength(l:headers)
+  if len(l:message) < l:message_end
     " Wait for the rest of the message to get buffered
     return v:false
   endif
-  let payload = message[l:message_start : l:message_end-1]
-  let remaining_message = message[l:message_end : ]
-  let a:server._buffer = remaining_message
+  let l:payload = l:message[l:message_start : l:message_end-1]
+  let l:remaining_message = l:message[l:message_end : ]
+  let a:server._buffer = l:remaining_message
   try
     if len(l:payload) > 0
       let l:content = json_decode(l:payload)
@@ -80,30 +80,30 @@ function! s:Consume(server) abort
       endif
     endif
   catch
-    call lsc#message#error('Could not decode message: ['.payload.']')
+    call lsc#message#error('Could not decode message: ['.l:payload.']')
   endtry
   if exists('l:content')
-    call lsc#util#shift(a:server._out, 10, content)
+    call lsc#util#shift(a:server._out, 10, l:content)
     try
-      call s:Dispatch(content, a:server._on_message, a:server._callbacks)
+      call s:Dispatch(l:content, a:server._on_message, a:server._callbacks)
     catch
       call lsc#message#error('Error dispatching message: '.string(v:exception))
       let g:lsc_last_error = v:exception
       let g:lsc_last_throwpoint = v:throwpoint
-      let g:lsc_last_error_message = content
+      let g:lsc_last_error_message = l:content
     endtry
   endif
-  return remaining_message !=# ''
+  return l:remaining_message !=# ''
 endfunction
 
 " Finds the header with 'Content-Length' and returns the integer value
 function! s:ContentLength(headers) abort
-  for header in a:headers
-    if header =~? '^Content-Length'
-      let parts = split(header, ':')
-      let length = parts[1]
-      if length[0] ==# ' ' | let length = length[1:] | endif
-      return length + 0
+  for l:header in a:headers
+    if l:header =~? '^Content-Length'
+      let l:parts = split(l:header, ':')
+      let l:length = l:parts[1]
+      if l:length[0] ==# ' ' | let l:length = l:length[1:] | endif
+      return l:length + 0
     endif
   endfor
   return -1

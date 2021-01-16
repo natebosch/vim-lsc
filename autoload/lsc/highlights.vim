@@ -36,8 +36,8 @@ endfunction
 " Remove all highlighted matches in the current window.
 function! lsc#highlights#clear() abort
   if exists('w:lsc_diagnostic_matches')
-    for current_match in w:lsc_diagnostic_matches
-      silent! call matchdelete(current_match)
+    for l:current_match in w:lsc_diagnostic_matches
+      silent! call matchdelete(l:current_match)
     endfor
   endif
   let w:lsc_diagnostic_matches = []
@@ -50,9 +50,9 @@ endfunction
 " update to highlights for after returning to normal mode. If vim enters insert
 " mode the text will be changed and highlights will update anyway.
 function! s:DeferForMode() abort
-  let mode = mode()
-  if mode ==# 's' || mode ==# 'S' || mode ==# "\<c-s>" ||
-      \ mode ==# 'v' || mode ==# 'V' || mode ==# "\<c-v>"
+  let l:mode = mode()
+  if l:mode ==# 's' || l:mode ==# 'S' || l:mode ==# "\<c-s>" ||
+      \ l:mode ==# 'v' || l:mode ==# 'V' || l:mode ==# "\<c-v>"
     call lsc#util#once('CursorHold,CursorMoved',
         \ function('lsc#highlights#updateDisplayed'))
     return v:true

@@ -21,46 +21,46 @@ function! s:ShowHelp(signatureHelp) abort
     call lsc#message#show('No signature help available')
     return
   endif
-  let signatures = []
+  let l:signatures = []
   if has_key(a:signatureHelp, 'signatures')
     if type(a:signatureHelp.signatures) == type([])
-      let signatures = a:signatureHelp.signatures
+      let l:signatures = a:signatureHelp.signatures
     endif
   endif
 
-  if len(signatures) == 0
+  if len(l:signatures) == 0
     return
   endif
 
-  let active_signature = 0
+  let l:active_signature = 0
   if has_key(a:signatureHelp, 'activeSignature')
-    let active_signature = a:signatureHelp.activeSignature
-    if active_signature >= len(signatures)
-      let active_signature = 0
+    let l:active_signature = a:signatureHelp.activeSignature
+    if l:active_signature >= len(l:signatures)
+      let l:active_signature = 0
     endif
   endif
 
-  let signature = get(signatures, active_signature)
+  let l:signature = get(l:signatures, l:active_signature)
 
-  if !has_key(signature, 'label')
+  if !has_key(l:signature, 'label')
     return
   endif
 
-  if !has_key(signature, 'parameters')
-    call lsc#util#displayAsPreview([signature.label], &filetype,
+  if !has_key(l:signature, 'parameters')
+    call lsc#util#displayAsPreview([l:signature.label], &filetype,
         \ function('<SID>HighlightCurrentParameter'))
     return
   endif
 
   if has_key(a:signatureHelp, 'activeParameter')
-    let active_parameter = a:signatureHelp.activeParameter
-    if active_parameter < len(signature.parameters)
-        \ && has_key(signature.parameters[active_parameter], 'label')
-      let s:current_parameter = signature.parameters[active_parameter].label
+    let l:active_parameter = a:signatureHelp.activeParameter
+    if l:active_parameter < len(l:signature.parameters)
+        \ && has_key(l:signature.parameters[l:active_parameter], 'label')
+      let s:current_parameter = l:signature.parameters[l:active_parameter].label
     endif
   endif
 
-  call lsc#util#displayAsPreview([signature.label], &filetype,
+  call lsc#util#displayAsPreview([l:signature.label], &filetype,
       \ function('<SID>HighlightCurrentParameter'))
 
 endfunction

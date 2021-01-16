@@ -15,8 +15,8 @@ function! s:RunTest(test)
   call function(a:test)()
 
   if len(v:errors) > 0
-    for error in v:errors
-      echoerr error
+    for l:error in v:errors
+      echoerr l:error
     endfor
   else
     echom 'No errors in: '.a:test
@@ -24,8 +24,8 @@ function! s:RunTest(test)
 endfunction
 
 function! s:RunTests(...)
-  for test in a:000
-    call s:RunTest(test)
+  for l:test in a:000
+    call s:RunTest(l:test)
   endfor
 endfunction
 

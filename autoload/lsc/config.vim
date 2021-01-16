@@ -51,7 +51,7 @@ function! lsc#config#mapKeys() abort
     return
   endif
 
-  for command in [
+  for l:command in [
       \ 'GoToDefinition',
       \ 'GoToDefinitionSplit',
       \ 'FindReferences',
@@ -64,12 +64,12 @@ function! lsc#config#mapKeys() abort
       \ 'WorkspaceSymbol',
       \ 'SignatureHelp',
       \] + (get(g:, 'lsc_enable_apply_edit', 1) ? ['Rename'] : [])
-    let lhs = get(l:maps, command, [])
-    if type(lhs) != type('') && type(lhs) != type([])
+    let l:lhs = get(l:maps, l:command, [])
+    if type(l:lhs) != type('') && type(l:lhs) != type([])
       continue
     endif
-    for m in type(lhs) == type([]) ? lhs : [lhs]
-      execute 'nnoremap <buffer>'.m.' :LSClient'.command.'<CR>'
+    for l:m in type(l:lhs) == type([]) ? l:lhs : [l:lhs]
+      execute 'nnoremap <buffer>'.l:m.' :LSClient'.l:command.'<CR>'
     endfor
   endfor
   if has_key(l:maps, 'Completion') &&
@@ -99,9 +99,9 @@ endfunction
 
 function! lsc#config#messageHook(server, method, params) abort
   if !has_key(a:server.config, 'message_hooks') | return a:params | endif
-  let hooks = a:server.config.message_hooks
-  if !has_key(hooks, a:method) | return a:params | endif
-  let l:Hook = hooks[a:method]
+  let l:hooks = a:server.config.message_hooks
+  if !has_key(l:hooks, a:method) | return a:params | endif
+  let l:Hook = l:hooks[a:method]
   if type(l:Hook) == type({_->_})
     return s:RunHookFunction(l:Hook, a:method, a:params)
   elseif type(l:Hook) == type({})
@@ -124,9 +124,9 @@ function! s:RunHookFunction(Hook, method, params) abort
 endfunction
 
 function! s:MergeHookDict(hook, method, params) abort
-  let resolved = s:ResolveHookDict(a:hook, a:method, a:params)
-  for key in keys(resolved)
-    let a:params[key] = resolved[key]
+  let l:resolved = s:ResolveHookDict(a:hook, a:method, a:params)
+  for l:key in keys(l:resolved)
+    let a:params[l:key] = l:resolved[l:key]
   endfor
   return a:params
 endfunction
@@ -135,23 +135,23 @@ endfunction
 " [params] as arguments.
 function! s:ResolveHookDict(hook, method, params) abort
   if !s:HasFunction(a:hook) | return a:hook | endif
-  let copied = deepcopy(a:hook)
-  for key in keys(a:hook)
-    if type(a:hook[key]) == type({})
-      let copied[key] = s:ResolveHookDict(a:hook[key], a:method, a:params)
-    elseif type(a:hook[key]) == type({_->_})
-      let Func = a:hook[key]
-      let copied[key] = Func(a:method, a:params)
+  let l:copied = deepcopy(a:hook)
+  for l:key in keys(a:hook)
+    if type(a:hook[l:key]) == type({})
+      let l:copied[l:key] = s:ResolveHookDict(a:hook[l:key], a:method, a:params)
+    elseif type(a:hook[l:key]) == type({_->_})
+      let l:Func = a:hook[l:key]
+      let l:copied[l:key] = Func(a:method, a:params)
     endif
   endfor
-  return copied
+  return l:copied
 endfunction
 
 function! s:HasFunction(hook) abort
-  for Value in values(a:hook)
-    if type(Value) == type({}) && s:HasFunction(Value)
+  for l:Value in values(a:hook)
+    if type(l:Value) == type({}) && s:HasFunction(l:Value)
       return v:true
-    elseif type(Value) == type({_->_})
+    elseif type(l:Value) == type({_->_})
       return v:true
     endif
   endfor
