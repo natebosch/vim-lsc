@@ -7,8 +7,8 @@ function! lsc#convert#rangeToHighlights(range) abort
         \ l:start.character + 1,
         \ 99]]
     " Matches render wrong until a `redraw!` if lines are mixed with ranges
-    let l:lineHacks = map(range(l:start.line + 2, l:end.line), {_, l->[l,0,99]})
-    call extend(l:ranges, l:lineHacks)
+    let l:line_hacks = map(range(l:start.line + 2, l:end.line), {_, l->[l,0,99]})
+    call extend(l:ranges, l:line_hacks)
     call add(l:ranges, [
         \ l:end.line + 1,
         \ 1,
