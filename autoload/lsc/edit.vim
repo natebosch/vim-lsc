@@ -1,16 +1,16 @@
 function! lsc#edit#findCodeActions(...) abort
   if a:0 > 0
-    let ActionFilter = a:1
+    let l:ActionFilter = a:1
   else
-    let ActionFilter = function('<SID>ActionMenu')
+    let l:ActionFilter = function('<SID>ActionMenu')
   endif
   call lsc#file#flushChanges()
-  let params = lsc#params#documentRange()
-  let params.context = {'diagnostics':
+  let l:params = lsc#params#documentRange()
+  let l:params.context = {'diagnostics':
       \ lsc#diagnostics#forLine(lsc#file#fullPath(), line('.') - 1)}
-  call lsc#server#userCall('textDocument/codeAction', params,
+  call lsc#server#userCall('textDocument/codeAction', l:params,
       \ lsc#util#gateResult('CodeActions',
-      \     function('<SID>SelectAction', [ActionFilter])))
+      \     function('<SID>SelectAction', [l:ActionFilter])))
 endfunction
 
 function! s:SelectAction(ActionFilter, result) abort
@@ -62,49 +62,49 @@ function! s:ActionMenu(actions, OnSelected) abort
     call g:LSC_action_menu(a:actions, a:OnSelected)
     return
   endif
-  let choices = ['Choose an action:']
-  let idx = 0
-  while idx < len(a:actions)
-    call add(choices, string(idx+1).' - '.a:actions[idx]['title'])
-    let idx += 1
+  let l:choices = ['Choose an action:']
+  let l:idx = 0
+  while l:idx < len(a:actions)
+    call add(l:choices, string(l:idx+1).' - '.a:actions[l:idx]['title'])
+    let l:idx += 1
   endwhile
-  let choice = inputlist(choices)
-  if choice > 0
-    call a:OnSelected(a:actions[choice - 1])
+  let l:choice = inputlist(l:choices)
+  if l:choice > 0
+    call a:OnSelected(a:actions[l:choice - 1])
   endif
 endfunction
 
 function! lsc#edit#rename(...) abort
   call lsc#file#flushChanges()
   if a:0 >= 1
-    let new_name = a:1
+    let l:new_name = a:1
   else
-    let new_name = input('Enter a new name: ')
+    let l:new_name = input('Enter a new name: ')
   endif
   if l:new_name =~# '\v^\s*$'
     echo "\n"
     call lsc#message#error('Name can not be blank')
     return
   endif
-  let params = lsc#params#documentPosition()
-  let params.newName = new_name
-  call lsc#server#userCall('textDocument/rename', params,
+  let l:params = lsc#params#documentPosition()
+  let l:params.newName = l:new_name
+  call lsc#server#userCall('textDocument/rename', l:params,
       \ lsc#util#gateResult('Rename', function('lsc#edit#apply')))
 endfunction
 
 " Applies a workspace edit and returns `v:true` if it was successful.
 function! lsc#edit#apply(workspace_edit) abort
-  if (exists('g:lsc_enable_apply_edit')
-      \ && !g:lsc_enable_apply_edit)
-      \ || (!has_key(a:workspace_edit, 'changes') && !has_key(a:workspace_edit, 'documentChanges'))
+  if !get(g:, 'lsc_enable_apply_edit', v:true) | return v:false | endif
+  if !has_key(a:workspace_edit, 'changes')
+      \ && !has_key(a:workspace_edit, 'documentChanges')
     return v:false
   endif
-  let view = winsaveview()
-  let alternate=@#
-  let old_buffer = bufnr('%')
-  let old_paste = &paste
-  let old_selection = &selection
-  let old_virtualedit = &virtualedit
+  let l:view = winsaveview()
+  let l:alternate=@#
+  let l:old_buffer = bufnr('%')
+  let l:old_paste = &paste
+  let l:old_selection = &selection
+  let l:old_virtualedit = &virtualedit
   set paste
   set selection=exclusive
   set virtualedit=onemore
@@ -115,26 +115,27 @@ function! lsc#edit#apply(workspace_edit) abort
   else
     let l:changes = {}
     for l:textDocumentEdit in a:workspace_edit.documentChanges
-      let l:changes[l:textDocumentEdit.textDocument.uri] = l:textDocumentEdit.edits
+      let l:uri = l:textDocumentEdit.textDocument.uri
+      let l:changes[l:uri] = l:textDocumentEdit.edits
     endfor
   endif
 
   try
     call s:ApplyAll(l:changes)
   finally
-    if len(alternate) > 0 | let @#=alternate | endif
-    if old_buffer != bufnr('%') | execute 'buffer' old_buffer | endif
-    let &paste = old_paste
-    let &selection = old_selection
-    let &virtualedit = old_virtualedit
-    call winrestview(view)
+    if len(l:alternate) > 0 | let @#=l:alternate | endif
+    if l:old_buffer != bufnr('%') | execute 'buffer' l:old_buffer | endif
+    let &paste = l:old_paste
+    let &selection = l:old_selection
+    let &virtualedit = l:old_virtualedit
+    call winrestview(l:view)
   endtry
   return v:true
 endfunction
 
 function! s:ApplyAll(changes) abort
-  for [uri, edits] in items(a:changes)
-    let l:file_path = lsc#uri#documentPath(uri)
+  for [l:uri, l:edits] in items(a:changes)
+    let l:file_path = lsc#uri#documentPath(l:uri)
     let l:bufnr = lsc#file#bufnr(l:file_path)
     let l:cmd = 'keepjumps keepalt'
     if l:bufnr !=# -1

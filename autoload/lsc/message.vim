@@ -3,17 +3,16 @@ function! lsc#message#show(message, ...) abort
 endfunction
 
 function! lsc#message#showRequest(message, actions) abort
-  let options = [a:message]
-  let index = 0
-  while index < len(a:actions)
-    call add(options, (index + 1) . ' - ' . get(a:actions, index)['title'])
-    let index += 1
-  endwhile
-  let result = inputlist(options)
-  if result <= 0 || result - 1 > len(a:actions)
+  let l:options = [a:message]
+  for l:index in range(a:actions)
+    let l:title = get(a:actions, l:index)['title']
+    call add(l:options, (l:index + 1) . ' - ' . l:title)
+  endfor
+  let l:result = inputlist(l:options)
+  if l:result <= 0 || l:result - 1 > len(a:actions)
     return v:null
   else
-    return get(a:actions, result - 1)
+    return get(a:actions, l:result - 1)
   endif
 endfunction
 
@@ -26,9 +25,9 @@ function! lsc#message#error(message) abort
 endfunction
 
 function! s:Echo(echo_cmd, message, level) abort
-  let [level, hl_group] = s:Level(a:level)
-  exec 'echohl '.hl_group
-  exec a:echo_cmd.' "[lsc:'.level.'] ".a:message'
+  let [l:level, l:hl_group] = s:Level(a:level)
+  exec 'echohl '.l:hl_group
+  exec a:echo_cmd.' "[lsc:'.l:level.'] ".a:message'
   echohl None
 endfunction
 

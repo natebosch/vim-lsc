@@ -13,9 +13,9 @@ endif
 " Send a 'didOpen' message for all open files of type `filetype` if they aren't
 " already tracked.
 function! lsc#file#trackAll(filetype) abort
-  for buffer in getbufinfo({'bufloaded': v:true})
-    if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    call s:FlushChanges(lsc#file#normalize(buffer.name), a:filetype)
+  for l:buffer in getbufinfo({'bufloaded': v:true})
+    if getbufvar(l:buffer.bufnr, '&filetype') != a:filetype | continue | endif
+    call s:FlushChanges(lsc#file#normalize(l:buffer.name), a:filetype)
   endfor
 endfunction
 
@@ -62,12 +62,12 @@ function! s:DidOpen(file_path) abort
   let l:bufnr = lsc#file#bufnr(a:file_path)
   if !bufloaded(l:bufnr) | return | endif
   if !getbufvar(l:bufnr, '&modifiable') | return | endif
-  let buffer_content = getbufline(l:bufnr, 1, '$')
-  let filetype = getbufvar(l:bufnr, '&filetype')
+  let l:buffer_content = getbufline(l:bufnr, 1, '$')
+  let l:filetype = getbufvar(l:bufnr, '&filetype')
   let l:params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'version': 1,
-      \    'text': join(buffer_content, "\n")."\n"
+      \    'text': join(l:buffer_content, "\n")."\n"
       \   }
       \ }
   " TODO handle multiple servers
@@ -78,8 +78,8 @@ function! s:DidOpen(file_path) abort
   endfor
   if l:success
     let s:file_versions[a:file_path] = 1
-    if s:AllowIncrementalSync(filetype)
-      let s:file_content[a:file_path] = buffer_content
+    if s:AllowIncrementalSync(l:filetype)
+      let s:file_content[a:file_path] = l:buffer_content
     endif
     doautocmd <nomodeline> User LSCOnChangesFlushed
   endif
@@ -87,12 +87,12 @@ endfunction
 
 " Mark all files of type `filetype` as untracked.
 function! lsc#file#clean(filetype) abort
-  for buffer in getbufinfo({'bufloaded': v:true})
-    if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    if has_key(s:file_versions, buffer.name)
-      unlet s:file_versions[buffer.name]
-      if has_key(s:file_content, buffer.name)
-        unlet s:file_content[buffer.name]
+  for l:buffer in getbufinfo({'bufloaded': v:true})
+    if getbufvar(l:buffer.bufnr, '&filetype') != a:filetype | continue | endif
+    if has_key(s:file_versions, l:buffer.name)
+      unlet s:file_versions[l:buffer.name]
+      if has_key(s:file_content, l:buffer.name)
+        unlet s:file_content[l:buffer.name]
       endif
     endif
   endfor
@@ -100,16 +100,16 @@ endfunction
 
 function! lsc#file#onChange(...) abort
   if a:0 >= 1
-    let file_path = a:1
-    let filetype = getbufvar(lsc#file#bufnr(file_path), '&filetype')
+    let l:file_path = a:1
+    let l:filetype = getbufvar(lsc#file#bufnr(l:file_path), '&filetype')
   else
-    let file_path = lsc#file#fullPath()
-    let filetype = &filetype
+    let l:file_path = lsc#file#fullPath()
+    let l:filetype = &filetype
   endif
-  if has_key(s:flush_timers, file_path)
-    call timer_stop(s:flush_timers[file_path])
+  if has_key(s:flush_timers, l:file_path)
+    call timer_stop(s:flush_timers[l:file_path])
   endif
-  let s:flush_timers[file_path] =
+  let s:flush_timers[l:file_path] =
       \ timer_start(500,
       \   {_->s:FlushIfChanged(file_path, filetype)},
       \   {'repeat': 1})
@@ -134,25 +134,26 @@ function! s:FlushChanges(file_path, filetype) abort
     call timer_stop(s:flush_timers[a:file_path])
     unlet s:flush_timers[a:file_path]
   endif
-  let buffer_content = getbufline(lsc#file#bufnr(a:file_path), 1, '$')
-  let allow_incremental = s:AllowIncrementalSync(a:filetype)
-  if allow_incremental
-    let change = lsc#diff#compute(s:file_content[a:file_path], buffer_content)
+  let l:current_content = getbufline(lsc#file#bufnr(a:file_path), 1, '$')
+  let l:allow_incremental = s:AllowIncrementalSync(a:filetype)
+  if l:allow_incremental
+    let l:old_content = s:file_content[a:file_path]
+    let l:change = lsc#diff#compute(l:old_content, l:current_content)
   else
-    let change = {'text': join(buffer_content, "\n")."\n"}
+    let l:change = {'text': join(l:current_content, "\n")."\n"}
   endif
   let l:params = {'textDocument':
       \   {'uri': lsc#uri#documentUri(a:file_path),
       \    'version': s:file_versions[a:file_path],
       \   },
-      \ 'contentChanges': [change],
+      \ 'contentChanges': [l:change],
       \ }
   " TODO handle multiple servers
   for l:server in lsc#server#forFileType(a:filetype)
     call l:server.notify('textDocument/didChange', l:params)
   endfor
-  if allow_incremental
-    let s:file_content[a:file_path] = buffer_content
+  if l:allow_incremental
+    let s:file_content[a:file_path] = l:current_content
   endif
   doautocmd <nomodeline> User LSCOnChangesFlushed
 endfunction

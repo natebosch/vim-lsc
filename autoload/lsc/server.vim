@@ -24,8 +24,8 @@ endif
 
 function! lsc#server#start(filetype) abort
   " Expect filetype is registered
-  let server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
-  call s:Start(server)
+  let l:server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
+  call s:Start(l:server)
 endfunction
 
 function! lsc#server#status(filetype) abort
@@ -98,7 +98,7 @@ function! lsc#server#restart() abort
   if l:old_status ==# 'starting' || l:old_status ==# 'running'
     call s:Kill(l:server, 'restarting', v:null)
   else
-    call s:Start(server)
+    call s:Start(l:server)
   endif
 endfunction
 
@@ -108,8 +108,8 @@ endfunction
 function! lsc#server#userCall(method, params, callback) abort
   " TODO handle multiple servers
   let l:server = lsc#server#forFileType(&filetype)[0]
-  let result = l:server.request(a:method, a:params, a:callback)
-  if !result
+  let l:result = l:server.request(a:method, a:params, a:callback)
+  if !l:result
     call lsc#message#error('Failed to call '.a:method)
     call lsc#message#error('Server status: '.lsc#server#status(&filetype))
   endif
@@ -142,33 +142,33 @@ function! s:Start(server) abort
           \ 'settings': a:server.config.workspace_config
           \})
     endif
-    for filetype in a:server.filetypes
-      call lsc#file#trackAll(filetype)
+    for l:filetype in a:server.filetypes
+      call lsc#file#trackAll(l:filetype)
     endfor
   endfunction
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
-    let trace_level = g:lsc_trace_level
+    let l:trace_level = g:lsc_trace_level
   else
-    let trace_level = 'off'
+    let l:trace_level = 'off'
   endif
   let l:params = {'processId': getpid(),
       \ 'rootUri': lsc#uri#documentUri(lsc#file#cwd()),
       \ 'capabilities': s:ClientCapabilities(),
-      \ 'trace': trace_level
+      \ 'trace': l:trace_level
       \}
   call a:server._initialize(l:params, funcref('OnInitialize'))
 endfunction
 
 " Missing value means no support
 function! s:ClientCapabilities() abort
-  let applyEdit = v:false
+  let l:applyEdit = v:false
   if !exists('g:lsc_enable_apply_edit') || g:lsc_enable_apply_edit
-    let applyEdit = v:true
+    let l:applyEdit = v:true
   endif
   return {
     \ 'workspace': {
-    \   'applyEdit': applyEdit,
+    \   'applyEdit': l:applyEdit,
     \   'configuration': v:true,
     \ },
     \ 'textDocument': {
@@ -199,8 +199,8 @@ function! s:ClientCapabilities() abort
 endfunction
 
 function! lsc#server#filetypeActive(filetype) abort
-  let server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
-  return !has_key(server.config, 'enabled') || server.config.enabled
+  let l:server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
+  return !has_key(l:server.config, 'enabled') || l:server.config.enabled
 endfunction
 
 function! lsc#server#disable() abort
@@ -216,109 +216,109 @@ function! lsc#server#enable() abort
   if !has_key(g:lsc_servers_by_filetype, &filetype)
     return v:false
   endif
-  let server = s:servers[g:lsc_servers_by_filetype[&filetype]]
-  let server.config.enabled = v:true
-  call s:Start(server)
+  let l:server = s:servers[g:lsc_servers_by_filetype[&filetype]]
+  let l:server.config.enabled = v:true
+  call s:Start(l:server)
 endfunction
 
 function! lsc#server#register(filetype, config) abort
-  let languageId = a:filetype
+  let l:languageId = a:filetype
   if type(a:config) == type('')
-    let config = {'command': a:config, 'name': a:config}
+    let l:config = {'command': a:config, 'name': a:config}
   elseif type(a:config) == type([])
-    let config = {'command': a:config, 'name': string(a:config)}
+    let l:config = {'command': a:config, 'name': string(a:config)}
   else
     if type(a:config) != type({})
       throw 'Server configuration must be an executable or a dict'
     endif
-    let config = a:config
-    if !has_key(config, 'command')
+    let l:config = a:config
+    if !has_key(l:config, 'command')
       throw 'Server configuration must have a "command" key'
     endif
-    if !has_key(config, 'name')
-      let config.name = string(config.command)
+    if !has_key(l:config, 'name')
+      let l:config.name = string(l:config.command)
     endif
-    if has_key(config, 'languageId')
-      let languageId = config.languageId
+    if has_key(l:config, 'languageId')
+      let l:languageId = l:config.languageId
     endif
   endif
-  let g:lsc_servers_by_filetype[a:filetype] = config.name
-  if has_key(s:servers, config.name)
-    call add(s:servers[config.name].filetypes, a:filetype)
-    let s:servers[config.name].languageId[a:filetype] = languageId
+  let g:lsc_servers_by_filetype[a:filetype] = l:config.name
+  if has_key(s:servers, l:config.name)
+    call add(s:servers[l:config.name].filetypes, a:filetype)
+    let s:servers[l:config.name].languageId[a:filetype] = l:languageId
     return
   endif
-  let initial_status = 'not started'
-  if has_key(config, 'enabled') && !config.enabled
-    let initial_status = 'disabled'
+  let l:initial_status = 'not started'
+  if has_key(l:config, 'enabled') && !l:config.enabled
+    let l:initial_status = 'disabled'
   endif
-  let server = {
-      \ 'status': initial_status,
+  let l:server = {
+      \ 'status': l:initial_status,
       \ 'logs': [],
       \ 'filetypes': [a:filetype],
       \ 'languageId': {},
-      \ 'config': config,
+      \ 'config': l:config,
       \ 'capabilities': lsc#capabilities#defaults()
       \}
-  let server.languageId[a:filetype] = languageId
-  function! server.request(method, params, callback) abort
-    if self.status !=# 'running' | return v:false | endif
-    let l:params = lsc#config#messageHook(self, a:method, a:params)
+  let l:server.languageId[a:filetype] = l:languageId
+  function! l:server.request(method, params, callback) abort
+    if l:self.status !=# 'running' | return v:false | endif
+    let l:params = lsc#config#messageHook(l:self, a:method, a:params)
     if l:params is lsc#config#skip() | return v:false | endif
-    let l:Callback = lsc#config#responseHook(self, a:method, a:callback)
-    call self._channel.request(a:method, l:params, l:Callback)
+    let l:Callback = lsc#config#responseHook(l:self, a:method, a:callback)
+    call l:self._channel.request(a:method, l:params, l:Callback)
     return v:true
   endfunction
-  function! server.notify(method, params) abort
-    if self.status !=# 'running' | return v:false | endif
-    let l:params = lsc#config#messageHook(self, a:method, a:params)
+  function! l:server.notify(method, params) abort
+    if l:self.status !=# 'running' | return v:false | endif
+    let l:params = lsc#config#messageHook(l:self, a:method, a:params)
     if l:params is lsc#config#skip() | return v:false | endif
-    call self._channel.notify(a:method, l:params)
+    call l:self._channel.notify(a:method, l:params)
     return v:true
   endfunction
-  function! server.respond(id, result) abort
-    call self._channel.respond(a:id, a:result)
+  function! l:server.respond(id, result) abort
+    call l:self._channel.respond(a:id, a:result)
   endfunction
-  function! server._initialize(params, callback) abort
-    let l:params = lsc#config#messageHook(self, 'initialize', a:params)
-    call self._channel.request('initialize', l:params, a:callback)
+  function! l:server._initialize(params, callback) abort
+    let l:params = lsc#config#messageHook(l:self, 'initialize', a:params)
+    call l:self._channel.request('initialize', l:params, a:callback)
   endfunction
-  function! server.on_err(message) abort
-    if get(self.config, 'suppress_stderr', v:false) | return | endif
-    call lsc#message#error('StdErr from '.self.config.name.': '.a:message)
+  function! l:server.on_err(message) abort
+    if get(l:self.config, 'suppress_stderr', v:false) | return | endif
+    call lsc#message#error('StdErr from '.l:self.config.name.': '.a:message)
   endfunction
-  function! server.on_exit() abort
-    unlet self._channel
-    let l:old_status = self.status
+  function! l:server.on_exit() abort
+    unlet l:self._channel
+    let l:old_status = l:self.status
     if l:old_status ==# 'starting'
-      let self.status= 'failed'
-      let l:message = 'Failed to initialize server "'.self.config.name.'".'
-      if self.config.name != string(self.config.command)
-        let l:message .= ' Failing command is: '.string(self.config.command)
+      let l:self.status= 'failed'
+      let l:message = 'Failed to initialize server "'.l:self.config.name.'".'
+      if l:self.config.name != string(l:self.config.command)
+        let l:message .= ' Failing command is: '.string(l:self.config.command)
       endif
       call lsc#message#error(l:message)
     elseif l:old_status ==# 'exiting'
-      let self.status= 'exited'
+      let l:self.status= 'exited'
     elseif l:old_status ==# 'running'
-      let self.status = 'unexpected exit'
-      call lsc#message#error('Command exited unexpectedly: '.self.config.name)
+      let l:self.status = 'unexpected exit'
+      call lsc#message#error('Command exited unexpectedly: '.l:self.config.name)
     endif
-    for filetype in self.filetypes
-      call lsc#complete#clean(filetype)
-      call lsc#diagnostics#clean(filetype)
-      call lsc#file#clean(filetype)
+    for l:filetype in l:self.filetypes
+      call lsc#complete#clean(l:filetype)
+      call lsc#diagnostics#clean(l:filetype)
+      call lsc#file#clean(l:filetype)
       call lsc#cursor#clean()
     endfor
     if l:old_status ==# 'restarting'
-      call s:Start(self)
+      call s:Start(l:self)
     endif
   endfunction
-  function! server.find_config(item) abort
-    if !has_key(self.config, 'workspace_config') | return v:null | endif
+  function! l:server.find_config(item) abort
+    if !has_key(l:self.config, 'workspace_config') | return v:null | endif
     if !has_key(a:item, 'section') || empty(a:item.section)
-      return self.config.workspace_config
+      return l:self.config.workspace_config
     endif
-    let l:config = self.config.workspace_config
+    let l:config = l:self.config.workspace_config
     for l:part in split(a:item.section, '\.')
       if !has_key(l:config, l:part)
         return v:null
@@ -328,13 +328,13 @@ function! lsc#server#register(filetype, config) abort
     endfor
     return l:config
   endfunction
-  let s:servers[config.name] = server
+  let s:servers[l:config.name] = l:server
 endfunction
 
 function! s:Dispatch(server, method, params, id) abort
   if a:method ==? 'textDocument/publishDiagnostics'
-    let file_path = lsc#uri#documentPath(a:params['uri'])
-    call lsc#diagnostics#setForFile(file_path, a:params['diagnostics'])
+    let l:file_path = lsc#uri#documentPath(a:params['uri'])
+    call lsc#diagnostics#setForFile(l:file_path, a:params['diagnostics'])
   elseif a:method ==? 'window/showMessage'
     call lsc#message#show(a:params['message'], a:params['type'])
   elseif a:method ==? 'window/showMessageRequest'

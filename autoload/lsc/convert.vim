@@ -1,24 +1,25 @@
 function! lsc#convert#rangeToHighlights(range) abort
-  let start = a:range.start
-  let end = a:range.end
-  if end.line > start.line
-    let ranges =[[
-        \ start.line + 1,
-        \ start.character + 1,
+  let l:start = a:range.start
+  let l:end = a:range.end
+  if l:end.line > l:start.line
+    let l:ranges =[[
+        \ l:start.line + 1,
+        \ l:start.character + 1,
         \ 99]]
     " Matches render wrong until a `redraw!` if lines are mixed with ranges
-    call extend(ranges, map(range(start.line + 2, end.line), {_, l->[l,0,99]}))
-    call add(ranges, [
-        \ end.line + 1,
+    let l:lineHacks = map(range(l:start.line + 2, l:end.line), {_, l->[l,0,99]})
+    call extend(l:ranges, l:lineHacks)
+    call add(l:ranges, [
+        \ l:end.line + 1,
         \ 1,
-        \ end.character])
+        \ l:end.character])
   else
-    let ranges = [[
-        \ start.line + 1,
-        \ start.character + 1,
-        \ end.character - start.character]]
+    let l:ranges = [[
+        \ l:start.line + 1,
+        \ l:start.character + 1,
+        \ l:end.character - l:start.character]]
   endif
-  return ranges
+  return l:ranges
 endfunction
 
 " Convert an LSP SymbolInformation to a quick fix item.
@@ -39,19 +40,19 @@ endfunction
 " 'col': column number
 " 'text': "SymbolName" [kind] (in containerName)?
 function! lsc#convert#quickFixSymbol(symbol) abort
-  let item = {'lnum': a:symbol.location.range.start.line + 1,
+  let l:item = {'lnum': a:symbol.location.range.start.line + 1,
       \ 'col': a:symbol.location.range.start.character + 1,
       \ 'filename': lsc#uri#documentPath(a:symbol.location.uri)}
-  let text = '"'.a:symbol.name.'"'
+  let l:text = '"'.a:symbol.name.'"'
   if !empty(a:symbol.kind)
-    let text .= ' ['.lsc#convert#symbolKind(a:symbol.kind).']'
+    let l:text .= ' ['.lsc#convert#symbolKind(a:symbol.kind).']'
   endif
-  let containerName = get(a:symbol, 'containerName', '')
-  if !empty(containerName)
-    let text .= ' in '.containerName
+  let l:containerName = get(a:symbol, 'containerName', '')
+  if !empty(l:containerName)
+    let l:text .= ' in '.l:containerName
   endif
-  let item.text = text
-  return item
+  let l:item.text = l:text
+  return l:item
 endfunction
 
 function! lsc#convert#symbolKind(kind) abort

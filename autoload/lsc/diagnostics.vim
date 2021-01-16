@@ -15,9 +15,9 @@ if !exists('s:file_diagnostics')
 endif
 
 function! lsc#diagnostics#clean(filetype) abort
-  for buffer in getbufinfo({'bufloaded': v:true})
-    if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    call lsc#diagnostics#setForFile(lsc#file#normalize(buffer.name), [])
+  for l:buffer in getbufinfo({'bufloaded': v:true})
+    if getbufvar(l:buffer.bufnr, '&filetype') != a:filetype | continue | endif
+    call lsc#diagnostics#setForFile(lsc#file#normalize(l:buffer.name), [])
   endfor
 endfunction
 
@@ -49,7 +49,7 @@ endfunction
 function! s:DiagnosticMessage(diagnostic) abort
   let l:message = a:diagnostic.message
   if has_key(a:diagnostic, 'code')
-    let l:message = message.' ['.a:diagnostic.code.']'
+    let l:message = l:message.' ['.a:diagnostic.code.']'
   endif
   return l:message
 endfunction
@@ -326,28 +326,28 @@ function! s:Diagnostics(file_path, lsp_diagnostics) abort
       \ 'lsp_diagnostics': a:lsp_diagnostics,
       \}
   function! l:diagnostics.Highlights() abort
-    if !has_key(self, '_highlights')
-      let self._highlights = []
-      for l:diagnostic in self.lsp_diagnostics
-        call add(self._highlights, {
+    if !has_key(l:self, '_highlights')
+      let l:self._highlights = []
+      for l:diagnostic in l:self.lsp_diagnostics
+        call add(l:self._highlights, {
             \ 'group': s:SeverityGroup(l:diagnostic.severity),
             \ 'severity': l:diagnostic.severity,
             \ 'ranges': lsc#convert#rangeToHighlights(l:diagnostic.range),
             \})
       endfor
     endif
-    return self._highlights
+    return l:self._highlights
   endfunction
   function! l:diagnostics.ListItems() abort
-    if !has_key(self, '_list_items')
-      let self._list_items = []
-      let l:bufnr = lsc#file#bufnr(self.file_path)
+    if !has_key(l:self, '_list_items')
+      let l:self._list_items = []
+      let l:bufnr = lsc#file#bufnr(l:self.file_path)
       if l:bufnr == -1
-        let l:file_ref = {'filename': fnamemodify(self.file_path, ':.')}
+        let l:file_ref = {'filename': fnamemodify(l:self.file_path, ':.')}
       else
         let l:file_ref = {'bufnr': l:bufnr}
       endif
-      for l:diagnostic in self.lsp_diagnostics
+      for l:diagnostic in l:self.lsp_diagnostics
         let l:item = {
             \ 'lnum': l:diagnostic.range.start.line + 1,
             \ 'col': l:diagnostic.range.start.character + 1,
@@ -355,22 +355,22 @@ function! s:Diagnostics(file_path, lsp_diagnostics) abort
             \ 'type': s:SeverityType(l:diagnostic.severity)
             \}
         call extend(l:item, l:file_ref)
-        call add(self._list_items, l:item)
+        call add(l:self._list_items, l:item)
       endfor
-      call sort(self._list_items, 'lsc#util#compareQuickFixItems')
+      call sort(l:self._list_items, 'lsc#util#compareQuickFixItems')
     endif
-    return self._list_items
+    return l:self._list_items
   endfunction
   function! l:diagnostics.ByLine() abort
-    if !has_key(self, '_by_line')
-      let self._by_line = {}
-      for l:diagnostic in self.lsp_diagnostics
+    if !has_key(l:self, '_by_line')
+      let l:self._by_line = {}
+      for l:diagnostic in l:self.lsp_diagnostics
         let l:start_line = string(l:diagnostic.range.start.line + 1)
-        if !has_key(self._by_line, l:start_line)
+        if !has_key(l:self._by_line, l:start_line)
           let l:line = []
-          let self._by_line[l:start_line] = l:line
+          let l:self._by_line[l:start_line] = l:line
         else
-          let l:line = self._by_line[l:start_line]
+          let l:line = l:self._by_line[l:start_line]
         endif
         let l:simple = {
             \ 'message': s:DiagnosticMessage(l:diagnostic),
@@ -379,11 +379,11 @@ function! s:Diagnostics(file_path, lsp_diagnostics) abort
             \}
         call add(l:line, l:simple)
       endfor
-      for l:line in values(self._by_line)
+      for l:line in values(l:self._by_line)
         call sort(l:line, function('<SID>CompareRanges'))
       endfor
     endif
-    return self._by_line
+    return l:self._by_line
   endfunction
   return l:diagnostics
 endfunction

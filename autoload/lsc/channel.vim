@@ -47,19 +47,19 @@ function! s:Channel() abort
   let l:c = {'send_buffer': ''}
 
   function! l:c.send(message) abort
-    let self.send_buffer .= a:message
-    call self.__flush()
+    let l:self.send_buffer .= a:message
+    call l:self.__flush()
   endfunction
 
   function! l:c.__flush(...) abort
-    if len(self.send_buffer) <= 1024
-      call self._send(self.send_buffer)
-      let self.send_buffer = ''
+    if len(l:self.send_buffer) <= 1024
+      call l:self._send(l:self.send_buffer)
+      let l:self.send_buffer = ''
     else
-      let l:to_send = self.send_buffer[:1023]
-      let self.send_buffer = self.send_buffer[1024:]
-      call self._send(l:to_send)
-      call timer_start(0, self.__flush)
+      let l:to_send = l:self.send_buffer[:1023]
+      let l:self.send_buffer = l:self.send_buffer[1024:]
+      call l:self._send(l:to_send)
+      call timer_start(0, l:self.__flush)
     endif
   endfunction
 
@@ -69,13 +69,13 @@ endfunction
 function! s:WrapVim(vim_channel, c) abort
   let a:c._channel = a:vim_channel
   function! a:c._send(data) abort
-    call ch_sendraw(self._channel, a:data)
+    call ch_sendraw(l:self._channel, a:data)
   endfunction
 endfunction
 
 function! s:WrapNeovim(nvim_job, c) abort
   let a:c['_job'] = a:nvim_job
   function! a:c._send(data) abort
-    call jobsend(self._job, a:data)
+    call jobsend(l:self._job, a:data)
   endfunction
 endfunction

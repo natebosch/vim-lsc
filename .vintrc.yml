@@ -1,3 +1,6 @@
 cmdargs:
   severity: style_problem
   color: true
+policies:
+  ProhibitImplicitScopeVariable:
+    enabled: true

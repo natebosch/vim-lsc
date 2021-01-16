@@ -33,9 +33,9 @@ endif
 
 " Clean state associated with a server.
 function! lsc#complete#clean(filetype) abort
-  for buffer in getbufinfo({'bufloaded': v:true})
-    if getbufvar(buffer.bufnr, '&filetype') != a:filetype | continue | endif
-    call setbufvar(buffer.bufnr, 'lsc_is_completing', v:false)
+  for l:buffer in getbufinfo({'bufloaded': v:true})
+    if getbufvar(l:buffer.bufnr, '&filetype') != a:filetype | continue | endif
+    call setbufvar(l:buffer.bufnr, 'lsc_is_completing', v:false)
   endfor
 endfunction
 
@@ -68,8 +68,8 @@ function! s:isCompletable() abort
       \ g:lsc_autocomplete_length : 3
   if l:min_length == v:false | return v:false | endif
   if l:cur_col < (l:min_length + 1) | return v:false | endif
-  let word = getline('.')[l:cur_col - (l:min_length + 1):l:cur_col - 2]
-  return word =~# '^\w*$'
+  let l:word = getline('.')[l:cur_col - (l:min_length + 1):l:cur_col - 2]
+  return l:word =~# '^\w*$'
 endfunction
 
 function! s:startCompletion(isAuto) abort
@@ -109,14 +109,14 @@ function! s:SuggestCompletions(items) abort
   endif
   let l:start = s:FindStart(a:items)
   let l:base = l:start != col('.')
-      \ ? getline('.')[start - 1:col('.') - 2]
+      \ ? getline('.')[l:start - 1:col('.') - 2]
       \ : ''
   let l:completion_items = s:CompletionItems(l:base, a:items)
   call s:SetCompleteOpt()
   if exists('#User#LSCAutocomplete')
     doautocmd <nomodeline> User LSCAutocomplete
   endif
-  call complete(start, l:completion_items)
+  call complete(l:start, l:completion_items)
 endfunction
 
 function! s:SetCompleteOpt() abort
@@ -169,14 +169,14 @@ endfunction
 " Finds the 1-based index of the character after the last non word character
 " behind the cursor.
 function! s:GuessCompletionStart() abort
-  let search = col('.') - 2
-  let line = getline('.')
-  while search > 0
-    let char = line[search]
-    if char !~# '\w'
-      return search + 2
+  let l:search = col('.') - 2
+  let l:line = getline('.')
+  while l:search > 0
+    let l:char = l:line[l:search]
+    if l:char !~# '\w'
+      return l:search + 2
     endif
-    let search -= 1
+    let l:search -= 1
   endwhile
   return 1
 endfunction
@@ -255,23 +255,24 @@ function! s:FinishItem(lsp_item, vim_item) abort
     let a:vim_item.kind = s:CompletionItemKind(a:lsp_item.kind)
   endif
   if has_key(a:lsp_item, 'detail') && a:lsp_item.detail != v:null
-    let detail_lines = split(a:lsp_item.detail, "\n")
-    if len(detail_lines) > 0
-      let a:vim_item.menu = detail_lines[0]
+    let l:detail_lines = split(a:lsp_item.detail, "\n")
+    if len(l:detail_lines) > 0
+      let a:vim_item.menu = l:detail_lines[0]
       let a:vim_item.info = a:lsp_item.detail
     endif
   endif
   if has_key(a:lsp_item, 'documentation')
-    let documentation = a:lsp_item.documentation
+    let l:documentation = a:lsp_item.documentation
     if has_key(a:vim_item, 'info')
       let a:vim_item.info .= "\n\n"
     else
       let a:vim_item.info = ''
     endif
-    if type(documentation) == type('')
-      let a:vim_item.info .= documentation
-    elseif type(documentation) == type({}) && has_key(documentation, 'value')
-      let a:vim_item.info .= documentation.value
+    if type(l:documentation) == type('')
+      let a:vim_item.info .= l:documentation
+    elseif type(l:documentation) == type({})
+        \ && has_key(l:documentation, 'value')
+      let a:vim_item.info .= l:documentation.value
     endif
   endif
 endfunction

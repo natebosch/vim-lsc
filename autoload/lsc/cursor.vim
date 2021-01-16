@@ -49,8 +49,8 @@ function! lsc#cursor#showDiagnostic() abort
 endfunction
 
 function! lsc#cursor#onChangesFlushed() abort
-  let mode = mode()
-  if mode ==# 'n' || mode ==# 'no'
+  let l:mode = mode()
+  if l:mode ==# 'n' || l:mode ==# 'no'
     call s:HighlightReferences(v:true)
   endif
 endfunction
@@ -108,17 +108,17 @@ function! s:HandleHighlights(request_number, old_pos, old_buf_nr,
 
   let w:lsc_references = a:highlights
   let w:lsc_reference_matches = []
-  for reference in a:highlights
-    let match = matchaddpos('lscReference', reference.ranges, -5)
-    call add(w:lsc_reference_matches, match)
+  for l:reference in a:highlights
+    let l:match = matchaddpos('lscReference', l:reference.ranges, -5)
+    call add(w:lsc_reference_matches, l:match)
   endfor
 endfunction
 
 function! lsc#cursor#clean() abort
   let s:pending[&filetype] = v:false
   if exists('w:lsc_reference_matches')
-    for current_match in w:lsc_reference_matches
-      silent! call matchdelete(current_match)
+    for l:current_match in w:lsc_reference_matches
+      silent! call matchdelete(l:current_match)
     endfor
     unlet w:lsc_reference_matches
     unlet w:lsc_references
@@ -128,16 +128,18 @@ endfunction
 " Returns the index of the reference the cursor is positioned in, or -1 if it is
 " not in any reference.
 function! lsc#cursor#isInReference(references) abort
-  let line = line('.')
-  let col = col('.')
-  let idx = 0
-  for reference in a:references
-    for range in reference.ranges
-      if line == range[0] && col >= range[1] && col < range[1] + range[2]
-        return idx
+  let l:line = line('.')
+  let l:col = col('.')
+  let l:idx = 0
+  for l:reference in a:references
+    for l:range in l:reference.ranges
+      if l:line == l:range[0]
+          \ && l:col >= l:range[1]
+          \ && l:col < l:range[1] + l:range[2]
+        return l:idx
       endif
     endfor
-    let idx += 1
+    let l:idx += 1
   endfor
   return -1
 endfunction
@@ -147,10 +149,10 @@ function! s:ConvertReference(reference) abort
 endfunction
 
 function! s:CompareRange(r1, r2) abort
-  let line_1 = a:r1.ranges[0][0]
-  let line_2 = a:r2.ranges[0][0]
-  if line_1 != line_2 | return line_1 > line_2 ? 1 : -1 | endif
-  let col_1 = a:r1.ranges[0][1]
-  let col_2 = a:r2.ranges[0][1]
-  return col_1 - col_2
+  let l:line_1 = a:r1.ranges[0][0]
+  let l:line_2 = a:r2.ranges[0][0]
+  if l:line_1 != l:line_2 | return l:line_1 > l:line_2 ? 1 : -1 | endif
+  let l:col_1 = a:r1.ranges[0][1]
+  let l:col_2 = a:r2.ranges[0][1]
+  return l:col_1 - l:col_2
 endfunction

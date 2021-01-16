@@ -17,8 +17,8 @@ function! s:EncodePath(value) abort
 endfunction
 
 function! s:EncodeChar(char) abort
-  let charcode = char2nr(a:char)
-  return printf('%%%02x', charcode)
+  let l:charcode = char2nr(a:char)
+  return printf('%%%02x', l:charcode)
 endfunction
 
 function! s:DecodePath(value) abort
@@ -27,8 +27,8 @@ function! s:DecodePath(value) abort
 endfunction
 
 function! s:DecodeChar(hexcode) abort
-  let charcode = str2nr(a:hexcode, 16)
-  return nr2char(charcode)
+  let l:charcode = str2nr(a:hexcode, 16)
+  return nr2char(l:charcode)
 endfunction
 
 function! s:filePrefix(...) abort
