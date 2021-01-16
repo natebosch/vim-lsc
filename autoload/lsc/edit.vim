@@ -65,7 +65,7 @@ function! s:ActionMenu(actions, OnSelected) abort
   let l:choices = ['Choose an action:']
   for l:index in range(a:actions)
     call add(l:choices, string(l:index + 1).' - '.a:actions[l:index]['title'])
-  endwhile
+  endfor
   let l:choice = inputlist(l:choices)
   if l:choice > 0
     call a:OnSelected(a:actions[l:choice - 1])
