@@ -7,6 +7,4 @@ environment:
 dependencies:
   lsp: ^0.1.1
   path: ^1.7.0
-
-dev_dependencies:
   test: ^1.13.0
