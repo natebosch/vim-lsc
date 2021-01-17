@@ -25,7 +25,7 @@ endif
 function! lsc#server#start(filetype) abort
   " Expect filetype is registered
   let l:server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
-  if !l:server.config.enabled | return | endif
+  if !get(l:server.config, 'enabled', v:true) | return | endif
   call s:Start(l:server)
 endfunction
 
@@ -201,7 +201,7 @@ endfunction
 
 function! lsc#server#filetypeActive(filetype) abort
   let l:server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
-  return !has_key(l:server.config, 'enabled') || l:server.config.enabled
+  return get(l:server.config, 'enabled', v:true)
 endfunction
 
 function! lsc#server#disable() abort
@@ -250,7 +250,7 @@ function! lsc#server#register(filetype, config) abort
     return
   endif
   let l:initial_status = 'not started'
-  if has_key(l:config, 'enabled') && !l:config.enabled
+  if !get(l:config, 'enabled', v:true)
     let l:initial_status = 'disabled'
   endif
   let l:server = {
