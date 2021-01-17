@@ -25,6 +25,7 @@ endif
 function! lsc#server#start(filetype) abort
   " Expect filetype is registered
   let l:server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
+  if !l:server.config.enabled | return | endif
   call s:Start(l:server)
 endfunction
 
