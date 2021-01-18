@@ -22,7 +22,6 @@ endfunction
 " Run language servers for this filetype if they aren't already running and
 " flush file changes.
 function! lsc#file#onOpen() abort
-  call lsc#config#mapKeys()
   if &modifiable && expand('%') !~# '\vfugitive:///'
     call lsc#server#start(&filetype)
     call s:FlushChanges(lsc#file#fullPath(), &filetype)
