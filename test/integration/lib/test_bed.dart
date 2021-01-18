@@ -13,21 +13,20 @@ class TestBed {
   TestBed._(this.vim, this.clients);
 
   static Future<TestBed> setup(
-      {Future<void> Function(Vim) beforeRegister}) async {
+      {Future<void> Function(Vim) beforeRegister, String config = ''}) async {
     final serverSocket = await ServerSocket.bind('localhost', 0);
 
-    final clients = serverSocket.map((socket) {
-      final client =
-          Peer(lspChannel(socket, socket), onUnhandledError: (error, stack) {
-        fail('Unhandled server error: $error');
-      });
-      addTearDown(() => client.done);
-    }).asBroadcastStream();
+    final clients = serverSocket
+        .map((socket) => Peer(lspChannel(socket, socket),
+            onUnhandledError: (error, stack) =>
+                fail('Unhandled server error: $error')))
+        .asBroadcastStream();
     final vim = await Vim.start();
     await beforeRegister?.call(vim);
     await vim.expr('RegisterLanguageServer("text", {'
         '"command":"localhost:${serverSocket.port}",'
         '"enabled":v:false,'
+        '$config'
         '})');
 
     addTearDown(() async {

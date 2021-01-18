@@ -10,7 +10,9 @@ void main() {
   Peer client;
 
   setUpAll(() async {
-    testBed = await TestBed.setup();
+    testBed = await TestBed.setup(
+        config:
+            '"workspace_config":{"foo":{"baz":"bar"},"other":"something"},');
   });
 
   setUp(() async {
@@ -25,6 +27,7 @@ void main() {
     await testBed.vim.sendKeys(':%bwipeout!<cr>');
     final file = File('foo.txt');
     if (await file.exists()) await file.delete();
+    await client.done;
     client = null;
   });
 

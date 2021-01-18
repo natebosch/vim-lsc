@@ -28,6 +28,7 @@ void main() {
     await testBed.vim.sendKeys(':%bwipeout!<cr>');
     final file = File('foo.txt');
     if (await file.exists()) await file.delete();
+    await client.done;
     client = null;
   });
 
