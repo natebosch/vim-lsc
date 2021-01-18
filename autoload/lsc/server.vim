@@ -154,6 +154,7 @@ function! s:Start(server) abort
     let l:trace_level = 'off'
   endif
   let l:params = {'processId': getpid(),
+      \ 'clientInfo': {'name': 'vim-lsc'},
       \ 'rootUri': lsc#uri#documentUri(lsc#file#cwd()),
       \ 'capabilities': s:ClientCapabilities(),
       \ 'trace': l:trace_level
