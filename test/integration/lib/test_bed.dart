@@ -25,6 +25,7 @@ class TestBed {
     await beforeRegister?.call(vim);
     await vim.expr('RegisterLanguageServer("text", {'
         '"command":"localhost:${serverSocket.port}",'
+        '"name":"Test Server",'
         '"enabled":v:false,'
         '$config'
         '})');

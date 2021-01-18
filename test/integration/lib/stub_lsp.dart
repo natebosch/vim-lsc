@@ -14,6 +14,7 @@ class StubServer {
         _initialized.complete();
       })
       ..registerMethod('workspace/didChangeConfiguration', (_) {})
+      ..registerMethod('textDocument/didClose', (_) {})
       ..registerMethod('textDocument/didOpen', _didOpen.add)
       ..registerMethod('textDocument/didChange', _didChange.add)
       ..registerMethod('textDocument/didSave', _didSave.add)
