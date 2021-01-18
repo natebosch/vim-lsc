@@ -99,9 +99,8 @@ augroup LSC
   autocmd BufWritePost * call <SID>OnWrite()
 
   autocmd CursorMoved * call <SID>IfEnabled('lsc#cursor#onMove')
-  autocmd WinLeave * call <SID>IfEnabled('lsc#cursor#onWinLeave')
   autocmd WinEnter * call <SID>IfEnabled('lsc#cursor#onWinEnter')
-  autocmd InsertEnter * call <SID>IfEnabled('lsc#cursor#insertEnter')
+  autocmd WinLeave,InsertEnter * call <SID>IfEnabled('lsc#cursor#clean')
   autocmd User LSCOnChangesFlushed
       \ call <SID>IfEnabled('lsc#cursor#onChangesFlushed')
 
@@ -154,6 +153,7 @@ endfunction
 " the current buffer where '&filetype' can be trusted.
 function! s:IfEnabled(function, ...) abort
   if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
+  if !&modifiable | return | endif
   if !lsc#server#filetypeActive(&filetype) | return | endif
   call call(a:function, a:000)
 endfunction

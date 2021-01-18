@@ -5,22 +5,12 @@ if !exists('s:initialized')
 endif
 
 function! lsc#cursor#onMove() abort
-  if !&modifiable | return | endif
   call lsc#cursor#showDiagnostic()
   call s:HighlightReferences(v:false)
 endfunction
 
-function! lsc#cursor#onWinLeave() abort
-  call lsc#cursor#clean()
-endfunction
-
 function! lsc#cursor#onWinEnter() abort
-  if !&modifiable | return | endif
   call s:HighlightReferences(v:false)
-endfunction
-
-function! lsc#cursor#insertEnter() abort
-  call lsc#cursor#clean()
 endfunction
 
 function! lsc#cursor#showDiagnostic() abort
