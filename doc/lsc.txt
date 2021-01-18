@@ -231,6 +231,13 @@ file types with |g:lsc_auto_map|. With manual completion the editor may
 "hang" for up to 5 seconds while it waits for completion results to become
 available.
 
+When enabled, autocomplete may make requests after typing any character
+configured by the language server as a "trigger" character, as well as after
+typing 3 consecutive word characters. Change the number of word characters
+before triggering a completion with |g:lsc_autocomplete_length|, or disable word
+character completion entirely and use autocomplete only on trigger characters by
+setting to `0`.
+
 Note: By default |completeopt| includes "preview" which will open the preview
 window to show more details for selected completion items. Close the window
 after completion with CTRL_W-z or disable with "set completeopt-=preview". To
