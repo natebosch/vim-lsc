@@ -3,6 +3,6 @@ let g:lsc_registered_commands = 1
 
 if !exists('g:lsc_server_commands') | finish | endif
 
-for [l:filetype, l:config] in items(g:lsc_server_commands)
-  call RegisterLanguageServer(l:filetype, l:config)
+for [s:filetype, s:config] in items(g:lsc_server_commands)
+  call RegisterLanguageServer(s:filetype, s:config)
 endfor
