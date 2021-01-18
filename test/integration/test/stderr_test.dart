@@ -45,7 +45,7 @@ void main() {
     }
     final messages = await vim.messages(2);
     expect(messages, [
-      matches('"foo.txt" .* --No lines in buffer--'),
+      matches('"foo.txt" .*--No lines in buffer--'),
       '[lsc:Error] Failed to initialize server "some server". '
           'Failing command is: [\'sh\', \'-c\', \'echo messagestderr >&2\']'
     ]);

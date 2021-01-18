@@ -2,54 +2,32 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:_test/stub_lsp.dart';
-import 'package:_test/vim_remote.dart';
+import 'package:_test/test_bed.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
-import 'package:lsp/lsp.dart' show lspChannel;
 import 'package:test/test.dart';
 
 void main() {
-  Stream<Peer> clients;
-  ServerSocket serverSocket;
-  Vim vim;
+  TestBed testBed;
   Peer client;
 
   setUpAll(() async {
-    serverSocket = await ServerSocket.bind('localhost', 0);
-
-    clients = serverSocket.map((socket) {
-      return Peer(lspChannel(socket, socket), onUnhandledError: (error, stack) {
-        fail('Unhandled server error: $error');
-      });
-    }).asBroadcastStream();
-    vim = await Vim.start();
-    await vim.expr('RegisterLanguageServer("text", {'
-        '"command":"localhost:${serverSocket.port}",'
-        '"enabled":v:false,'
-        '})');
+    testBed = await TestBed.setup();
   });
 
   setUp(() async {
-    final nextClient = clients.first;
-    await vim.edit('foo.txt');
-    await vim.sendKeys(':LSClientEnable<cr>');
+    final nextClient = testBed.clients.first;
+    await testBed.vim.edit('foo.txt');
+    await testBed.vim.sendKeys(':LSClientEnable<cr>');
     client = await nextClient;
   });
 
   tearDown(() async {
-    await vim.sendKeys(':LSClientDisable<cr>');
-    await vim.sendKeys(':%bwipeout!<cr>');
+    await testBed.vim.sendKeys(':LSClientDisable<cr>');
+    await testBed.vim.sendKeys(':%bwipeout!<cr>');
     final file = File('foo.txt');
     if (await file.exists()) await file.delete();
     await client.done;
     client = null;
-  });
-
-  tearDownAll(() async {
-    await vim.quit();
-    final log = File(vim.name);
-    print(await log.readAsString());
-    await log.delete();
-    await serverSocket.close();
   });
 
   Future<void> testNoDidSave(Map<String, dynamic> capabilities) async {
@@ -62,9 +40,9 @@ void main() {
 
     await server.didOpen.first;
 
-    await vim.sendKeys(':w<cr>');
+    await testBed.vim.sendKeys(':w<cr>');
 
-    await vim.sendKeys('iHello<esc>');
+    await testBed.vim.sendKeys('iHello<esc>');
     await await server.didChange.first;
   }
 
@@ -87,7 +65,7 @@ void main() {
 
     await server.didOpen.first;
 
-    await vim.sendKeys(':w<cr>');
+    await testBed.vim.sendKeys(':w<cr>');
 
     await server.didSave.first;
   });
