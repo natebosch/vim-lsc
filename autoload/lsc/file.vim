@@ -123,8 +123,13 @@ function! lsc#file#onChange(...) abort
   if has_key(s:flush_timers, l:file_path)
     call timer_stop(s:flush_timers[l:file_path])
   endif
+  if exists('g:lsc_change_flush_debounce')
+    let l:flush_timeout = g:lsc_change_flush_debounce
+  else
+    let l:flush_timeout = 500
+  endif
   let s:flush_timers[l:file_path] =
-      \ timer_start(500,
+      \ timer_start(l:flush_timeout,
       \   {_->s:FlushIfChanged(file_path, filetype)},
       \   {'repeat': 1})
 endfunction
