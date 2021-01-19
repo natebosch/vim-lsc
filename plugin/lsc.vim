@@ -62,15 +62,29 @@ endfunction
 " subsequent appearances of this file type. If the server exits it will be
 " restarted the next time a window or tab is entered with this file type.
 function! RegisterLanguageServer(filetype, config) abort
-  call lsc#server#register(a:filetype, a:config)
+  let l:server = lsc#server#register(a:filetype, a:config)
+  if !get(l:server.config, 'enabled', v:true) | return | endif
+  let l:buffers = s:BuffersOfType(a:filetype)
+  if empty(l:buffers) | return | endif
+  if l:server.status ==# 'running'
+    for l:buffer in l:buffers
+      call lsc#file#track(l:server, l:buffer, a:filetype)
+    endfor
+  else
+    call lsc#server#start(l:server)
+  endif
+endfunction
+
+function! s:BuffersOfType(filetype) abort
+  let l:buffers = []
   for l:buffer in getbufinfo({'bufloaded': v:true})
     if getbufvar(l:buffer.bufnr, '&filetype') == a:filetype &&
         \ getbufvar(l:buffer.bufnr, '&modifiable') &&
         \ l:buffer.name !~# '\v^fugitive:///'
-      call lsc#server#start(a:filetype)
-      return
+      call add(l:buffers, l:buffer)
     endif
   endfor
+  return l:buffers
 endfunction
 
 augroup LSC

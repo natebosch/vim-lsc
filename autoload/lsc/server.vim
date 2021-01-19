@@ -22,11 +22,8 @@ if !exists('s:initialized')
   let s:initialized = v:true
 endif
 
-function! lsc#server#start(filetype) abort
-  " Expect filetype is registered
-  let l:server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
-  if !get(l:server.config, 'enabled', v:true) | return | endif
-  call s:Start(l:server)
+function! lsc#server#start(server) abort
+  call s:Start(a:server)
 endfunction
 
 function! lsc#server#status(filetype) abort
@@ -143,9 +140,7 @@ function! s:Start(server) abort
           \ 'settings': a:server.config.workspace_config
           \})
     endif
-    for l:filetype in a:server.filetypes
-      call lsc#file#trackAll(l:filetype)
-    endfor
+    call lsc#file#trackAll(a:server)
   endfunction
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
@@ -246,9 +241,10 @@ function! lsc#server#register(filetype, config) abort
   endif
   let g:lsc_servers_by_filetype[a:filetype] = l:config.name
   if has_key(s:servers, l:config.name)
-    call add(s:servers[l:config.name].filetypes, a:filetype)
-    let s:servers[l:config.name].languageId[a:filetype] = l:languageId
-    return
+    let l:server = s:servers[l:config.name]
+    call add(l:server.filetypes, a:filetype)
+    let l:server.languageId[a:filetype] = l:languageId
+    return l:server
   endif
   let l:initial_status = 'not started'
   if !get(l:config, 'enabled', v:true)
@@ -331,6 +327,7 @@ function! lsc#server#register(filetype, config) abort
     return l:config
   endfunction
   let s:servers[l:config.name] = l:server
+  return l:server
 endfunction
 
 function! s:Dispatch(server, method, params, id) abort
