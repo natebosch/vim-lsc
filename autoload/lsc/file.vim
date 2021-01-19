@@ -37,7 +37,7 @@ function! lsc#file#onOpen() abort
     let l:bufnr = bufnr()
     for l:server in lsc#server#forFileType(&filetype)
       if !get(l:server.config, 'enabled', v:true) | continue | endif
-      if l:server.status == 'running'
+      if l:server.status ==# 'running'
         call s:DidOpen(l:server, l:bufnr, l:file_path, &filetype)
       else
         call lsc#server#start(l:server)
@@ -148,7 +148,7 @@ function! s:FlushIfChanged(file_path, filetype) abort
       \ }
   let l:current_content = getbufline(lsc#file#bufnr(a:file_path), 1, '$')
   for l:server in lsc#server#forFileType(a:filetype)
-    if l:server.status != 'running' | continue | endif
+    if l:server.status !=# 'running' | continue | endif
     if l:server.capabilities.textDocumentSync.incremental
       if !exists('l:incremental_params')
         let l:old_content = s:file_content[a:file_path]

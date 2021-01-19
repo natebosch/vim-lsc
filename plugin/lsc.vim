@@ -66,7 +66,7 @@ function! RegisterLanguageServer(filetype, config) abort
   if !get(l:server.config, 'enabled', v:true) | return | endif
   let l:buffers = s:BuffersOfType(a:filetype)
   if empty(l:buffers) | return | endif
-  if l:server.status == 'running'
+  if l:server.status ==# 'running'
     for l:buffer in l:buffers
       call lsc#file#track(l:server, l:buffer, a:filetype)
     endfor
