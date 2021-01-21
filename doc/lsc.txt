@@ -215,6 +215,13 @@ an empty string. The possible statuses are:
 
 CONFIGURATION                                   *lsc-configure*
 
+                                                *g:lsc_change_debounce_time*
+Set the time in milliseconds to wait for subsequent changes before flushing
+buffer content to the server as a `document/didChange` notification. Some
+features, such as autocomplete, may cause changes to be flushed before the
+debounce period has settled. Defaults to `500` milliseconds.
+
+
                                                 *lsc-configure-trace*
                                                 *g:lsc_trace_level*
 Set the "trace" field sent to the server during initialization using the
