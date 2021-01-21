@@ -71,7 +71,7 @@ function! RegisterLanguageServer(filetype, config) abort
       call lsc#file#track(l:server, l:buffer, a:filetype)
     endfor
   else
-    call lsc#server#start(l:server)
+    call lsc#server#start(l:server, lsc#file#normalize(l:buffers[0].name))
   endif
 endfunction
 

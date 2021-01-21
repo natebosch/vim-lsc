@@ -40,7 +40,7 @@ function! lsc#file#onOpen() abort
       if l:server.status ==# 'running'
         call s:DidOpen(l:server, l:bufnr, l:file_path, &filetype)
       else
-        call lsc#server#start(l:server)
+        call lsc#server#start(l:server, l:file_path)
       endif
     endfor
   endif
@@ -90,6 +90,24 @@ function! s:DidOpen(server, bufnr, file_path, filetype) abort
       \   }
       \ }
   if a:server.notify('textDocument/didOpen', l:params)
+    " TODO: Check capabilities
+    if has_key(a:server.config, 'WorkspaceRoot')
+      let l:root = a:server.config.WorkspaceRoot(a:file_path)
+      if index(a:server.roots, l:root) < 0
+        call add(a:server.roots, l:root)
+        " TODO: Add a name
+        let l:workspace_folders = {'event':
+            \   {'added': [{
+            \     'uri': lsc#uri#documentUri(l:root),
+            \     'name': l:root,
+            \     }],
+            \    'removed': [],
+            \   },
+            \ }
+        call a:server.notify('workspace/didChangeWorkspaceFolders',
+            \ l:workspace_folders)
+      endif
+    endif
     let s:file_versions[a:file_path] = l:version
     if get(g:, 'lsc_enable_incremental_sync', v:true)
         \ && a:server.capabilities.textDocumentSync.incremental
