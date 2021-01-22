@@ -1,10 +1,22 @@
 " Refresh highlight matches on all visible windows.
-function! lsc#highlights#updateDisplayed() abort
-  if s:DeferForMode() | return | endif
+function! lsc#highlights#updateDisplayed(bufnr) abort
+  " If vim is in select or visual mode return true and attempt to schedule an
+  " update to highlights for after returning to normal mode. If vim enters
+  " insert mode the text will be changed and highlights will update anyway.
+  let l:mode = mode()
+  if l:mode ==# 's' || l:mode ==# 'S' || l:mode ==# "\<c-s>" ||
+      \ l:mode ==# 'v' || l:mode ==# 'V' || l:mode ==# "\<c-v>"
+    call lsc#util#once('CursorHold,CursorMoved',
+        \ function('lsc#highlights#updateDisplayed', [a:bufnr]))
+    return
+  endif
+  let s:bufnr = a:bufnr
   call lsc#util#winDo('call lsc#highlights#updateIfActive()')
+  unlet s:bufnr
 endfunction
 
 function! lsc#highlights#updateIfActive() abort
+  if s:bufnr != bufnr() | return | endif
   if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
   call lsc#highlights#update()
 endfunction
@@ -46,19 +58,6 @@ function! lsc#highlights#clear() abort
   endif
 endfunction
 
-" If vim is in select or visual mode return true and attempt to schedule an
-" update to highlights for after returning to normal mode. If vim enters insert
-" mode the text will be changed and highlights will update anyway.
-function! s:DeferForMode() abort
-  let l:mode = mode()
-  if l:mode ==# 's' || l:mode ==# 'S' || l:mode ==# "\<c-s>" ||
-      \ l:mode ==# 'v' || l:mode ==# 'V' || l:mode ==# "\<c-v>"
-    call lsc#util#once('CursorHold,CursorMoved',
-        \ function('lsc#highlights#updateDisplayed'))
-    return v:true
-  endif
-  return v:false
-endfunction
 
 " Whether the diagnostic highlights for the current window are up to date.
 function! s:CurrentWindowIsFresh() abort
