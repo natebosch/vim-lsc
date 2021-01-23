@@ -27,7 +27,12 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
   endfunction
   function! l:c._recieve(message) abort
     let l:self._buffer .= a:message
-    while s:Consume(l:self) | endwhile
+    if has_key(l:self, '_consume') | return | endif
+    if s:Consume(l:self)
+      let l:self._consume = timer_start(0,
+          \ function('<SID>HandleTimer', [l:self]),
+          \ {'repeat': 1})
+    endif
   endfunction
   let l:channel = lsc#channel#open(a:command, l:c._recieve, a:on_err, a:on_exit)
   if type(l:channel) == type(v:null)
@@ -35,6 +40,16 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
   endif
   let l:c._channel = l:channel
   return l:c
+endfunction
+
+function! s:HandleTimer(server, ...) abort
+  if s:Consume(a:server)
+    let a:server._consume = timer_start(0,
+        \ function('<SID>HandleTimer', [a:server]),
+        \ {'repeat': 1})
+  else
+    unlet a:server._consume
+  endif
 endfunction
 
 function! s:Format(method, params, id) abort

@@ -51,6 +51,8 @@
 - Use full words for completion item kinds instead of single letters.
 - Avoid overwriting location list if it is in use for something other than LSC
   diagnostics.
+- Asynchronously loop over server messages to avoid long synchronous pauses
+  between handling user input.
 
 # 0.3.2
 
