@@ -158,11 +158,11 @@ function! s:Start(server, file_path) abort
   let a:server.roots = [l:root]
   let l:params = {'processId': getpid(),
       \ 'clientInfo': {'name': 'vim-lsc'},
-      \ 'rootUri': lsc#uri#documentUri(l:root),
+      \ 'rootUri': lsc#uri#documentUri(l:root).'/',
       \ 'capabilities': s:ClientCapabilities(),
       \ 'trace': l:trace_level,
       \ 'workspaceFolders': [{
-      \   'uri': lsc#uri#documentUri(l:root),
+      \   'uri': lsc#uri#documentUri(l:root).'/',
       \   'name': l:root,
       \ }],
       \}

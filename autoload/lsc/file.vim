@@ -98,7 +98,7 @@ function! s:DidOpen(server, bufnr, file_path, filetype) abort
         " TODO: Add a name
         let l:workspace_folders = {'event':
             \   {'added': [{
-            \     'uri': lsc#uri#documentUri(l:root),
+            \     'uri': lsc#uri#documentUri(l:root).'/',
             \     'name': l:root,
             \     }],
             \    'removed': [],

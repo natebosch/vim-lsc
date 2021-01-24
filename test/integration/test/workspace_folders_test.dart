@@ -51,7 +51,7 @@ void main() {
       expect(initialization['capabilities']['workspace']['workspaceFolders'],
           true);
       expect(initialization['workspaceFolders'], [
-        {'uri': 'some uri', 'name': anything}
+        {'uri': d.dir('workspaces/lib').io.uri.toString(), 'name': anything}
       ]);
     });
 
