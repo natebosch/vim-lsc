@@ -161,16 +161,19 @@ function! s:Start(server, file_path) abort
     unlet a:server.config.WorkspaceRoot
   endtry
   let a:server.roots = [l:root]
+  let l:capabilities = s:ClientCapabilities(a:server.config)
   let l:params = {'processId': getpid(),
       \ 'clientInfo': {'name': 'vim-lsc'},
       \ 'rootUri': lsc#uri#documentUri(l:root).'/',
-      \ 'capabilities': s:ClientCapabilities(a:server.config),
+      \ 'capabilities': l:capabilities,
       \ 'trace': l:trace_level,
-      \ 'workspaceFolders': [{
+      \}
+  if l:capabilities.workspace.workspaceFolders
+    let l:params.workspaceFolders = [{
       \   'uri': lsc#uri#documentUri(l:root).'/',
       \   'name': l:root,
-      \ }],
-      \}
+      \ }]
+  endif
   call a:server._initialize(l:params, funcref('OnInitialize'))
 endfunction
 
