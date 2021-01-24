@@ -95,11 +95,10 @@ function! s:DidOpen(server, bufnr, file_path, filetype) abort
         let l:root = a:server.config.WorkspaceRoot(a:file_path)
         if index(a:server.roots, l:root) < 0
           call add(a:server.roots, l:root)
-          " TODO: Add a name
           let l:workspace_folders = {'event':
               \   {'added': [{
               \     'uri': lsc#uri#documentUri(l:root).'/',
-              \     'name': l:root,
+              \     'name': fnamemodify(l:root, ':.'),
               \     }],
               \    'removed': [],
               \   },

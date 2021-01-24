@@ -51,7 +51,10 @@ void main() {
       expect(initialization['capabilities']['workspace']['workspaceFolders'],
           true);
       expect(initialization['workspaceFolders'], [
-        {'uri': d.dir('workspaces/foo').io.uri.toString(), 'name': anything}
+        {
+          'uri': d.dir('workspaces/foo').io.uri.toString(),
+          'name': 'workspaces/foo'
+        }
       ]);
     });
 
@@ -99,7 +102,10 @@ void main() {
       final change = await changeEvents.next;
       expect(change['removed'], isEmpty);
       expect(change['added'], [
-        {'uri': d.dir('workspaces/bar').io.uri.toString(), 'name': anything}
+        {
+          'uri': d.dir('workspaces/bar').io.uri.toString(),
+          'name': 'workspaces/bar'
+        }
       ]);
     });
 

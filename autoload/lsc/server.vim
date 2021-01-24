@@ -171,7 +171,7 @@ function! s:Start(server, file_path) abort
   if l:capabilities.workspace.workspaceFolders
     let l:params.workspaceFolders = [{
       \   'uri': lsc#uri#documentUri(l:root).'/',
-      \   'name': l:root,
+      \   'name': fnamemodify(l:root, ':.')
       \ }]
   endif
   call a:server._initialize(l:params, funcref('OnInitialize'))
