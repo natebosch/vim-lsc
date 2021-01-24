@@ -46,6 +46,11 @@ class Vim {
     final result = await Process.run(
         'vim', [..._serverNameArg, '--remote-expr', expression]);
     final stdout = result.stdout as String;
+    final stderr = result.stderr as String;
+    if (stderr.isNotEmpty) {
+      throw Exception(
+          'Failed to evaluate vim expression [$expression]:\n$stderr');
+    }
     return stdout.endsWith('\n')
         ? stdout.substring(0, stdout.length - 1)
         : stdout;

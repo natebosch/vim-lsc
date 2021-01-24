@@ -142,8 +142,9 @@ void main() {
             await vim.sendKeys(':function! ThrowingRoot(path) abort<cr>');
             await vim.sendKeys('throw "sad"<cr>');
             await vim.sendKeys('endfunction<cr>');
+            await vim.sendKeys('<cr>');
           },
-          config: '"WorkspaceRoot": function("ThrowingRoot")),');
+          config: '"WorkspaceRoot":function("ThrowingRoot"),');
       await d.dir('workspaces', [
         d.dir('foo', [
           d.file('makefile'),
