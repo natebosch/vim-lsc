@@ -1,16 +1,12 @@
-function! lsc#workspace#byMarker() abort
-  " TODO
-  return function('<SID>Cheat')
+function! lsc#workspace#byMarker(markers) abort
+  return function('<SID>FindByMarkers', [a:markers])
 endfunction
 
-function! s:Cheat(file_path) abort
-  return fnamemodify(a:file_path, ':h:h')
-endfunction
-
-function! lsc#workspace#findMarker(file_path, markers) abort
+function! s:FindByMarkers(markers, file_path) abort
   for l:path in s:ParentDirectories(a:file_path)
     if s:ContainsAny(l:path, a:markers) | return l:path | endif
   endfor
+  return fnamemodify(a:file_path, ':h')
 endfunction
 
 " Whether `path` contains any children from `markers`.

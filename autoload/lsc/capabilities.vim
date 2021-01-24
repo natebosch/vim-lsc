@@ -46,7 +46,6 @@ function! lsc#capabilities#normalize(capabilities) abort
       endif
     endif
   endif
-  echom 'Capabilities: '.string(l:normalized.workspace.didChangeWorkspaceFolders)
   return l:normalized
 endfunction
 

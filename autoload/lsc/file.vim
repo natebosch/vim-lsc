@@ -107,9 +107,6 @@ function! s:DidOpen(server, bufnr, file_path, filetype) abort
           call a:server.notify('workspace/didChangeWorkspaceFolders',
               \ l:workspace_folders)
         endif
-      else
-        " TODO
-        echom '!!!!! Not bothering to send'
       endif
     endif
     let s:file_versions[a:file_path] = l:version

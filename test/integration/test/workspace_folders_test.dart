@@ -25,7 +25,7 @@ void main() {
         ])
       ]).create();
       testBed = await TestBed.setup(
-        config: '"WorkspaceRoot": lsc#workspace#byMarker(),',
+        config: '"WorkspaceRoot": lsc#workspace#byMarker(["lib/"]),',
       );
     });
 
@@ -43,7 +43,7 @@ void main() {
       client = null;
     });
 
-    test('configuration honored in initialization', () async {
+    test('uses root for initialization', () async {
       final server = StubServer(client);
 
       await server.initialized;
@@ -76,17 +76,32 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 10));
     });
 
-    test('Deregister test', () async {
-      // TODO, no support for this at all today
-      // final server = StubServer(client, capabilities: {
-      //   'workspace': {
-      //     'workspacefolders': {
-      //       'supported': true,
-      //       'changenotifications': 'something?',
-      //     }
-      //   }
-      // });
-    }, skip: 'Not implemented');
+    test('treats a string value as enabling', () async {
+      final server = StubServer(client, capabilities: {
+        'workspace': {
+          'workspaceFolders': {
+            'supported': true,
+            'changeNotifications': 'something',
+          }
+        }
+      });
+      final changeController = StreamController<Map<String, dynamic>>();
+      final changeEvents = StreamQueue(changeController.stream);
+      server.peer.registerMethod('workspace/didChangeWorkspaceFolders',
+          (Parameters p) {
+        changeController.add(p['event'].asMap.cast<String, dynamic>());
+      });
+
+      await server.initialized;
+
+      await testBed.vim.edit('workspaces/bar/lib/bar.txt');
+
+      final change = await changeEvents.next;
+      expect(change['removed'], isEmpty);
+      expect(change['added'], [
+        {'uri': d.dir('workspaces/bar').io.uri.toString(), 'name': anything}
+      ]);
+    });
 
     test('sends notifications with capability', () async {
       final server = StubServer(client, capabilities: {
