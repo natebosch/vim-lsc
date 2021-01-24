@@ -159,7 +159,7 @@ function! s:Start(server, file_path) abort
   let l:params = {'processId': getpid(),
       \ 'clientInfo': {'name': 'vim-lsc'},
       \ 'rootUri': lsc#uri#documentUri(l:root).'/',
-      \ 'capabilities': s:ClientCapabilities(),
+      \ 'capabilities': s:ClientCapabilities(a:server.config),
       \ 'trace': l:trace_level,
       \ 'workspaceFolders': [{
       \   'uri': lsc#uri#documentUri(l:root).'/',
@@ -170,7 +170,7 @@ function! s:Start(server, file_path) abort
 endfunction
 
 " Missing value means no support
-function! s:ClientCapabilities() abort
+function! s:ClientCapabilities(config) abort
   let l:applyEdit = v:false
   if !exists('g:lsc_enable_apply_edit') || g:lsc_enable_apply_edit
     let l:applyEdit = v:true
@@ -179,7 +179,8 @@ function! s:ClientCapabilities() abort
     \ 'workspace': {
     \   'applyEdit': l:applyEdit,
     \   'configuration': v:true,
-    \   'workspaceFolders': v:true,
+    \   'workspaceFolders':
+    \      has_key(a:config, 'WorkspaceRoot') ? v:true : v:false,
     \ },
     \ 'textDocument': {
     \   'synchronization': {

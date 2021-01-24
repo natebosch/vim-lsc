@@ -90,22 +90,26 @@ function! s:DidOpen(server, bufnr, file_path, filetype) abort
       \   }
       \ }
   if a:server.notify('textDocument/didOpen', l:params)
-    " TODO: Check capabilities
     if has_key(a:server.config, 'WorkspaceRoot')
-      let l:root = a:server.config.WorkspaceRoot(a:file_path)
-      if index(a:server.roots, l:root) < 0
-        call add(a:server.roots, l:root)
-        " TODO: Add a name
-        let l:workspace_folders = {'event':
-            \   {'added': [{
-            \     'uri': lsc#uri#documentUri(l:root).'/',
-            \     'name': l:root,
-            \     }],
-            \    'removed': [],
-            \   },
-            \ }
-        call a:server.notify('workspace/didChangeWorkspaceFolders',
-            \ l:workspace_folders)
+      if a:server.capabilities.workspace.didChangeWorkspaceFolders
+        let l:root = a:server.config.WorkspaceRoot(a:file_path)
+        if index(a:server.roots, l:root) < 0
+          call add(a:server.roots, l:root)
+          " TODO: Add a name
+          let l:workspace_folders = {'event':
+              \   {'added': [{
+              \     'uri': lsc#uri#documentUri(l:root).'/',
+              \     'name': l:root,
+              \     }],
+              \    'removed': [],
+              \   },
+              \ }
+          call a:server.notify('workspace/didChangeWorkspaceFolders',
+              \ l:workspace_folders)
+        endif
+      else
+        " TODO
+        echom '!!!!! Not bothering to send'
       endif
     endif
     let s:file_versions[a:file_path] = l:version

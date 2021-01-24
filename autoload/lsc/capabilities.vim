@@ -31,6 +31,22 @@ function! lsc#capabilities#normalize(capabilities) abort
     let l:normalized.referenceHighlights =
         \ a:capabilities.documentHighlightProvider
   endif
+  if has_key(a:capabilities, 'workspace')
+    let l:workspace = a:capabilities.workspace
+    if has_key(l:workspace, 'workspaceFolders')
+      let l:workspace_folders = l:workspace.workspaceFolders
+      if has_key(l:workspace_folders, 'changeNotifications')
+        if type(l:workspace_folders.changeNotifications) == type(v:true)
+          let l:normalized.workspace.didChangeWorkspaceFolders =
+              \ l:workspace_folders.changeNotifications
+        else
+          " Does not handle deregistration
+          let l:normalized.workspace.didChangeWorkspaceFolders = v:true
+        endif
+      endif
+    endif
+  endif
+  echom 'Capabilities: '.string(l:normalized.workspace.didChangeWorkspaceFolders)
   return l:normalized
 endfunction
 
@@ -42,5 +58,8 @@ function! lsc#capabilities#defaults() abort
       \   'sendDidSave': v:false,
       \ },
       \ 'referenceHighlights': v:false,
+      \ 'workspace': {
+      \   'didChangeWorkspaceFolders': v:false,
+      \ },
       \}
 endfunction

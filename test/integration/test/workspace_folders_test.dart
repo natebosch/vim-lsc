@@ -69,7 +69,11 @@ void main() {
           (Parameters p) {
         fail('Unexpected call to didChangeWorkspaceFolders');
       });
-      // TODO
+      await server.initialized;
+
+      await testBed.vim.edit('workspaces/bar/lib/bar.txt');
+
+      await Future.delayed(const Duration(milliseconds: 10));
     });
 
     test('Deregister test', () async {
@@ -82,7 +86,7 @@ void main() {
       //     }
       //   }
       // });
-    });
+    }, skip: 'Not implemented');
 
     test('sends notifications with capability', () async {
       final server = StubServer(client, capabilities: {
@@ -110,8 +114,6 @@ void main() {
       expect(change['added'], [
         {'uri': d.dir('workspaces/bar').io.uri.toString(), 'name': anything}
       ]);
-
-      // TODO
     });
   });
 
