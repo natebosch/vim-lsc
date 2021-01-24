@@ -26,7 +26,6 @@ void main() {
       ]).create();
       testBed = await TestBed.setup(
         config: '"WorkspaceRoot": lsc#workspace#byMarker(),',
-        workingDirectory: d.sandbox,
       );
     });
 

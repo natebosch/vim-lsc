@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:_test/stub_lsp.dart';
 import 'package:_test/test_bed.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
@@ -19,8 +17,6 @@ void main() {
     tearDown(() async {
       await testBed.vim.sendKeys(':LSClientDisable<cr>');
       await testBed.vim.sendKeys(':%bwipeout!<cr>');
-      final file = File('foo.txt');
-      if (await file.exists()) await file.delete();
       await client?.done;
     });
 
