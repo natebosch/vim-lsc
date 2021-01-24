@@ -76,7 +76,7 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 10));
     });
 
-    test('treats a string value as enabling', () async {
+    test('sends notifications with string capability', () async {
       final server = StubServer(client, capabilities: {
         'workspace': {
           'workspaceFolders': {
@@ -103,7 +103,7 @@ void main() {
       ]);
     });
 
-    test('sends notifications with capability', () async {
+    test('sends notifications with bool capability', () async {
       final server = StubServer(client, capabilities: {
         'workspace': {
           'workspaceFolders': {
@@ -178,15 +178,6 @@ void main() {
       final server = StubServer(client);
 
       print('Waiting for initialization');
-      await server.initialized;
-      final initialization = await server.initialization;
-      expect(initialization['capabilities']['workspace']['workspaceFolders'],
-          false);
-    });
-
-    test('does not advertise capability', () async {
-      final server = StubServer(client);
-
       await server.initialized;
       final initialization = await server.initialization;
       expect(initialization['capabilities']['workspace']['workspaceFolders'],
