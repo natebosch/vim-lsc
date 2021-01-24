@@ -152,9 +152,14 @@ function! s:Start(server, file_path) abort
   else
     let l:trace_level = 'off'
   endif
-  let l:root = has_key(a:server.config, 'WorkspaceRoot')
-      \ ? a:server.config.WorkspaceRoot(a:file_path)
-      \ : lsc#file#cwd()
+  try
+    let l:root = has_key(a:server.config, 'WorkspaceRoot')
+        \ ? a:server.config.WorkspaceRoot(a:file_path)
+        \ : lsc#file#cwd()
+  catch
+    let l:root = lsc#file#cwd()
+    unlet a:server.config.WorkspaceRoot
+  endtry
   let a:server.roots = [l:root]
   let l:params = {'processId': getpid(),
       \ 'clientInfo': {'name': 'vim-lsc'},

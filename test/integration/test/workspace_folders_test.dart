@@ -133,10 +133,63 @@ void main() {
   });
 
   group('WorkspaceRoot throws', () {
-    // TODO
+    TestBed testBed;
+    Peer client;
 
-    test('can handle a WorkspaceRoot that throws', () async {
-      // TODO
+    setUpAll(() async {
+      testBed = await TestBed.setup(
+          beforeRegister: (vim) async {
+            await vim.sendKeys(':function! ThrowingRoot(path) abort<cr>');
+            await vim.sendKeys('throw "sad"<cr>');
+            await vim.sendKeys('endfunction<cr>');
+          },
+          config: '"WorkspaceRoot": function("ThrowingRoot")),');
+      await d.dir('workspaces', [
+        d.dir('foo', [
+          d.file('makefile'),
+          d.dir('lib', [d.file('foo.txt')])
+        ]),
+        d.dir('bar', [
+          d.file('makefile'),
+          d.dir('lib', [d.file('bar.txt')])
+        ])
+      ]).create();
+    });
+
+    setUp(() async {
+      final nextClient = testBed.clients.first;
+      await testBed.vim.edit('foo.txt');
+      await testBed.vim.sendKeys(':LSClientEnable<cr>');
+      print('Waiting for client');
+      client = await nextClient;
+    });
+
+    tearDown(() async {
+      await testBed.vim.sendKeys(':LSClientDisable<cr>');
+      await testBed.vim.sendKeys(':%bwipeout!<cr>');
+      final file = File('foo.txt');
+      if (await file.exists()) await file.delete();
+      await client.done;
+      client = null;
+    });
+
+    test('does not advertise capability', () async {
+      final server = StubServer(client);
+
+      print('Waiting for initialization');
+      await server.initialized;
+      final initialization = await server.initialization;
+      expect(initialization['capabilities']['workspace']['workspaceFolders'],
+          false);
+    });
+
+    test('does not advertise capability', () async {
+      final server = StubServer(client);
+
+      await server.initialized;
+      final initialization = await server.initialization;
+      expect(initialization['capabilities']['workspace']['workspaceFolders'],
+          false);
     });
   });
 
