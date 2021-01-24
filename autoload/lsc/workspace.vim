@@ -4,7 +4,7 @@ function! lsc#workspace#byMarker() abort
 endfunction
 
 function! s:Cheat(file_path) abort
-  return fnamemodify(a:file_path, ':h')
+  return fnamemodify(a:file_path, ':h:h')
 endfunction
 
 function! lsc#workspace#findMarker(file_path, markers) abort

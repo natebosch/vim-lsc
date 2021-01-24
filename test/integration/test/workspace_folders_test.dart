@@ -31,7 +31,7 @@ void main() {
 
     setUp(() async {
       final nextClient = testBed.clients.first;
-      await testBed.vim.edit('workspaces/lib/foo.txt');
+      await testBed.vim.edit('workspaces/foo/lib/foo.txt');
       await testBed.vim.sendKeys(':LSClientEnable<cr>');
       client = await nextClient;
     });
@@ -51,7 +51,7 @@ void main() {
       expect(initialization['capabilities']['workspace']['workspaceFolders'],
           true);
       expect(initialization['workspaceFolders'], [
-        {'uri': d.dir('workspaces/lib').io.uri.toString(), 'name': anything}
+        {'uri': d.dir('workspaces/foo').io.uri.toString(), 'name': anything}
       ]);
     });
 
@@ -103,12 +103,12 @@ void main() {
 
       await server.initialized;
 
-      await testBed.vim.edit('workspaces/bar/bar.txt');
+      await testBed.vim.edit('workspaces/bar/lib/bar.txt');
 
       final change = await changeEvents.next;
       expect(change['removed'], isEmpty);
       expect(change['added'], [
-        {'uri': 'some uri', 'name': anything}
+        {'uri': d.dir('workspaces/bar').io.uri.toString(), 'name': anything}
       ]);
 
       // TODO
