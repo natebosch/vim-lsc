@@ -13,7 +13,9 @@ class TestBed {
   TestBed._(this.vim, this.clients);
 
   static Future<TestBed> setup(
-      {Future<void> Function(Vim) beforeRegister, String config = ''}) async {
+      {Future<void> Function(Vim) beforeRegister,
+      String config = '',
+      String workingDirectory}) async {
     final serverSocket = await ServerSocket.bind('localhost', 0);
 
     final clients = serverSocket
@@ -21,7 +23,7 @@ class TestBed {
             onUnhandledError: (error, stack) =>
                 fail('Unhandled server error: $error')))
         .asBroadcastStream();
-    final vim = await Vim.start();
+    final vim = await Vim.start(workingDirectory: workingDirectory);
     await beforeRegister?.call(vim);
     await vim.expr('RegisterLanguageServer("text", {'
         '"command":"localhost:${serverSocket.port}",'

@@ -1,3 +1,12 @@
+function! lsc#workspace#byMarker() abort
+  " TODO
+  return function('<SID>Cheat')
+endfunction
+
+function! s:Cheat(file_path) abort
+  return fnamemodify(a:file_path, ':h')
+endfunction
+
 function! lsc#workspace#findMarker(file_path, markers) abort
   for l:path in s:ParentDirectories(a:file_path)
     if s:ContainsAny(l:path, a:markers) | return l:path | endif
