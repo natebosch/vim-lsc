@@ -10,8 +10,12 @@ on:
 
 jobs:
   dart-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
     name: Run integration tests
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     steps:
     - uses: dart-lang/setup-dart@v0.3
