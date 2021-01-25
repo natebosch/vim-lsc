@@ -90,24 +90,7 @@ function! s:DidOpen(server, bufnr, file_path, filetype) abort
       \   }
       \ }
   if a:server.notify('textDocument/didOpen', l:params)
-    if has_key(a:server.config, 'WorkspaceRoot')
-      if a:server.capabilities.workspace.didChangeWorkspaceFolders
-        let l:root = a:server.config.WorkspaceRoot(a:file_path)
-        if index(a:server.roots, l:root) < 0
-          call add(a:server.roots, l:root)
-          let l:workspace_folders = {'event':
-              \   {'added': [{
-              \     'uri': lsc#uri#documentUri(l:root).'/',
-              \     'name': fnamemodify(l:root, ':.'),
-              \     }],
-              \    'removed': [],
-              \   },
-              \ }
-          call a:server.notify('workspace/didChangeWorkspaceFolders',
-              \ l:workspace_folders)
-        endif
-      endif
-    endif
+    call s:UpdateRoots(a:server, a:file_path)
     let s:file_versions[a:file_path] = l:version
     if get(g:, 'lsc_enable_incremental_sync', v:true)
         \ && a:server.capabilities.textDocumentSync.incremental
@@ -115,6 +98,28 @@ function! s:DidOpen(server, bufnr, file_path, filetype) abort
     endif
     doautocmd <nomodeline> User LSCOnChangesFlushed
   endif
+endfunction
+
+function! s:UpdateRoots(server, file_path) abort
+  if !has_key(a:server.config, 'WorkspaceRoot') | return | endif
+  if !a:server.capabilities.workspace.didChangeWorkspaceFolders | return | endif
+  try
+    let l:root = a:server.config.WorkspaceRoot(a:file_path)
+  catch
+    return
+  endtry
+  if index(a:server.roots, l:root) >= 0 | return | endif
+  call add(a:server.roots, l:root)
+  let l:workspace_folders = {'event':
+      \   {'added': [{
+      \     'uri': lsc#uri#documentUri(l:root).'/',
+      \     'name': fnamemodify(l:root, ':.'),
+      \     }],
+      \    'removed': [],
+      \   },
+      \ }
+  call a:server.notify('workspace/didChangeWorkspaceFolders',
+      \ l:workspace_folders)
 endfunction
 
 " Mark all files of type `filetype` as untracked.
