@@ -16,7 +16,7 @@ class TestBed {
   static Future<TestBed> setup(
       {Future<void> Function(Vim) beforeRegister, String config = ''}) async {
     final serverSocket = await ServerSocket.bind('localhost', 0);
-    print('Lisenting on localhost:${serverSocket.port}');
+    print('Listening on localhost:${serverSocket.port}');
 
     final clients = serverSocket
         .map((socket) => Peer(lspChannel(socket, socket),

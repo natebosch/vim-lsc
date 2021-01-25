@@ -5,7 +5,9 @@ function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
       echom '!!!! Connecting to: '.a:command
       let l:channel_options = {'mode': 'raw',
           \ 'callback': {_, message -> a:Callback(message)},
-          \ 'close_cb': {_ -> a:OnExit()}}
+          \ 'close_cb': {_ -> a:OnExit()},
+          \ 'waittime': 500,
+          \}
       call s:WrapVim(ch_open(a:command, l:channel_options), l:c)
       if ch_status(l:c._channel) !=# 'open'
         throw 'Failed to open channel '.a:command
