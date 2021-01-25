@@ -21,4 +21,10 @@ jobs:
     - name: checkout
       uses: actions/checkout@v2
     - name: check vim
-      run: vim --version; vim --version | grep +clientserver
+      run: vim --version; vim --version | grep +notarealfeature
+    - name: pub upgrade
+      working-directory: test/integration
+      run: pub upgrade
+    - name: run tests
+      working-directory: test/integration
+      run: pub run test test/vim_test.dart
