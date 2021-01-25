@@ -69,7 +69,12 @@ endfunction
 function! s:WrapVim(vim_channel, c) abort
   let a:c._channel = a:vim_channel
   function! a:c._send(data) abort
-    call ch_sendraw(l:self._channel, a:data)
+    try
+      call ch_sendraw(l:self._channel, a:data)
+    catch
+      echoer '!!!!! Failed to send to channel: '.string(a:data)
+      throw v:exception
+    endtry
   endfunction
 endfunction
 
