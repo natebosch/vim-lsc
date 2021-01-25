@@ -282,7 +282,8 @@ function! lsc#server#register(filetype, config) abort
     try
       call l:self._channel.request('initialize', l:params, a:callback)
     catch
-      echoer '!!!!! Failed to snend the initialize: '.l:self.config.name
+      echoerr '!!!!! Failed to send the initialize: '.l:self.config.name
+      echoerr v:exception
     endtry
   endfunction
   function! l:server.on_err(message) abort
@@ -290,7 +291,7 @@ function! lsc#server#register(filetype, config) abort
     call lsc#message#error('StdErr from '.l:self.config.name.': '.a:message)
   endfunction
   function! l:server.on_exit() abort
-    echom '!!!!! On Exit for '.l:self.name
+    echom '!!!!! On Exit for '.l:self.config.name
     unlet l:self._channel
     let l:old_status = l:self.status
     if l:old_status ==# 'starting'
