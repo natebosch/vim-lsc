@@ -10,8 +10,9 @@ import 'vim_remote.dart';
 class TestBed {
   final Vim vim;
   final Stream<Peer> clients;
+  final int port;
 
-  TestBed._(this.vim, this.clients);
+  TestBed._(this.vim, this.clients, this.port);
 
   static Future<TestBed> setup(
       {Future<void> Function(Vim) beforeRegister, String config = ''}) async {
@@ -37,6 +38,6 @@ class TestBed {
       print(await d.file(vim.name).io.readAsString());
       await serverSocket.close();
     });
-    return TestBed._(vim, clients);
+    return TestBed._(vim, clients, serverSocket.port);
   }
 }
