@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:_test/stub_lsp.dart';
+import 'package:_test/test_bed.dart';
 import 'package:_test/vim_remote.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -60,4 +62,20 @@ void main() {
       });
     });
   });
+
+  group('localhost', () {
+    TestBed testBed;
+    setUpAll(() async {
+      testBed = await TestBed.setup();
+    });
+
+    test('can connect', () async {
+      final nextClient = testBed.clients.first;
+      await testBed.vim.edit('foo.txt');
+      await testBed.vim.sendKeys(':LSClientEnable<cr>');
+      final client = await nextClient;
+      final server = StubServer(client);
+      await server.initialized;
+    });
+  }, solo: true);
 }

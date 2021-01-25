@@ -7,6 +7,9 @@ function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
           \ 'callback': {_, message -> a:Callback(message)},
           \ 'close_cb': {_ -> a:OnExit()}}
       call s:WrapVim(ch_open(a:command, l:channel_options), l:c)
+      if ch_status(l:c._channel) !=# 'open'
+        throw 'Failed to open channel '.a:command
+      endif
       echom '!!! Now have channel: '.ch_status(l:c._channel)
       return l:c
     elseif exists('*sockconnect')
@@ -74,7 +77,7 @@ function! s:WrapVim(vim_channel, c) abort
     try
       call ch_sendraw(l:self._channel, a:data)
     catch
-      echoer '!!!!! Failed to send to channel: '.string(a:data)
+      echom '!!!!! Failed to send to channel: '.string(a:data)
       throw v:exception
     endtry
   endfunction
