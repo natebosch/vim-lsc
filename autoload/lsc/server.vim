@@ -196,7 +196,7 @@ function! s:ClientCapabilities() abort
 endfunction
 
 function! lsc#server#filetypeActive(filetype) abort
-  let l:server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
+  let server = s:servers[g:lsc_servers_by_filetype[a:filetype]]
   return get(l:server.config, 'enabled', v:true)
 endfunction
 
