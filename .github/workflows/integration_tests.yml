@@ -17,6 +17,7 @@ jobs:
     - uses: dart-lang/setup-dart@v0.3
       with:
         sdk: stable
+    - uses: rhysd/action-setup-vim@v1
     - name: checkout
       uses: actions/checkout@v2
     - name: pub upgrade
