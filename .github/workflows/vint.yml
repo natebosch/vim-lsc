@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+    - name: Checkout
+      uses: actions/checkout@v2
 
-      - name: Run vint
-        uses: ludvighz/vint-action@v1
-        with:
-          path: .
+    - name: Run vint
+      uses: ludvighz/vint-action@v1
+      with:
+        path: .
