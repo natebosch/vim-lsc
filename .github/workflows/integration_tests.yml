@@ -1,0 +1,27 @@
+name: integration tests
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  dart-tests:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: dart-lang/setup-dart@v0.3
+      with:
+        sdk: stable
+    - name: checkout
+      uses: actions/checkout@v2
+    - name: pub upgrade
+      working-directory: test/integration
+      run: pub upgrade
+    - name: run tests
+      working-directory: test/integration
+      run: pub run test
