@@ -71,8 +71,11 @@ void main() {
 
     test('can connect', () async {
       final nextClient = testBed.clients.first;
-      Socket.connect('localhost', testBed.port);
-      await nextClient;
+      await testBed.vim.edit('foo.txt');
+      await testBed.vim.sendKeys(':LSClientEnable<cr>');
+      final client = await nextClient;
+      final server = StubServer(client);
+      await server.initialized;
     });
   }, solo: true);
 }

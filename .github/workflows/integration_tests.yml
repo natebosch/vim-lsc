@@ -18,6 +18,8 @@ jobs:
       with:
         sdk: stable
     - uses: rhysd/action-setup-vim@v1
+      with:
+        version: nightly
     - name: checkout
       uses: actions/checkout@v2
     - name: check vim
