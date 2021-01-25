@@ -20,9 +20,5 @@ jobs:
     - uses: rhysd/action-setup-vim@v1
     - name: checkout
       uses: actions/checkout@v2
-    - name: pub upgrade
-      working-directory: test/integration
-      run: pub upgrade
-    - name: run tests
-      working-directory: test/integration
-      run: pub run test
+    - name: check vim
+      run: vim --version; vim --version | grep +clientserver
