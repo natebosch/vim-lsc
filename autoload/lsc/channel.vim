@@ -2,10 +2,12 @@ function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
   let l:c = s:Channel()
   if type(a:command) == type('') && a:command =~# '[^:]\+:\d\+'
     if exists('*ch_open')
+      echom '!!!! Connecting to: '.a:command
       let l:channel_options = {'mode': 'raw',
           \ 'callback': {_, message -> a:Callback(message)},
           \ 'close_cb': {_ -> a:OnExit()}}
       call s:WrapVim(ch_open(a:command, l:channel_options), l:c)
+      echom '!!! Now have channel: '.ch_status(l:c._channel)
       return l:c
     elseif exists('*sockconnect')
       let l:channel_options = {
