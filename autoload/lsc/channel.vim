@@ -78,7 +78,8 @@ function! s:WrapVim(vim_channel, c) abort
       call ch_sendraw(l:self._channel, a:data)
     catch
       echom '!!!!! Failed to send to channel: '.string(a:data)
-      throw v:exception
+      echom v:exception
+      throw 'Channel send failed'
     endtry
   endfunction
 endfunction
