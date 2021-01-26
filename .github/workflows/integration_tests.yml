@@ -12,7 +12,7 @@ jobs:
   dart-tests:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-20.04]
 
     name: Run integration tests
     runs-on: ${{ matrix.os }}
@@ -22,8 +22,6 @@ jobs:
       with:
         sdk: stable
     - uses: rhysd/action-setup-vim@v1
-      with:
-        version: nightly
     - name: checkout
       uses: actions/checkout@v2
     - name: check vim
