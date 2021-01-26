@@ -21,13 +21,12 @@ jobs:
     - uses: dart-lang/setup-dart@v0.3
       with:
         sdk: stable
-    - uses: rhysd/action-setup-vim@v1
-      with:
-        version: v8.1.2269
-    - name: checkout
-      uses: actions/checkout@v2
+    - name: install vim
+      run: sudo apt install vim-gtk3
     - name: check vim
       run: vim --version; vim --version | grep +clientserver
+    - name: checkout
+      uses: actions/checkout@v2
     - name: pub upgrade
       working-directory: test/integration
       run: pub upgrade
