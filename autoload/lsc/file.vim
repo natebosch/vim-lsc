@@ -34,7 +34,7 @@ function! lsc#file#onOpen() abort
   if has_key(s:file_versions, l:file_path)
     call lsc#file#flushChanges()
   else
-    let l:bufnr = bufnr()
+    let l:bufnr = bufnr('%')
     for l:server in lsc#server#forFileType(&filetype)
       if !get(l:server.config, 'enabled', v:true) | continue | endif
       if l:server.status ==# 'running'
