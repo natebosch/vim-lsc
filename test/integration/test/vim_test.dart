@@ -1,7 +1,5 @@
 import 'dart:io';
 
-import 'package:_test/stub_lsp.dart';
-import 'package:_test/test_bed.dart';
 import 'package:_test/vim_remote.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';

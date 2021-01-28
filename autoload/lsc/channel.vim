@@ -2,17 +2,10 @@ function! lsc#channel#open(command, Callback, ErrCallback, OnExit) abort
   let l:c = s:Channel()
   if type(a:command) == type('') && a:command =~# '[^:]\+:\d\+'
     if exists('*ch_open')
-      echom '!!!! Connecting to: '.a:command
       let l:channel_options = {'mode': 'raw',
           \ 'callback': {_, message -> a:Callback(message)},
-          \ 'close_cb': {_ -> a:OnExit()},
-          \ 'waittime': 500,
-          \}
+          \ 'close_cb': {_ -> a:OnExit()}}
       call s:WrapVim(ch_open(a:command, l:channel_options), l:c)
-      if ch_status(l:c._channel) !=# 'open'
-        throw 'Failed to open channel '.a:command
-      endif
-      echom '!!! Now have channel: '.ch_status(l:c._channel)
       return l:c
     elseif exists('*sockconnect')
       let l:channel_options = {
@@ -76,13 +69,7 @@ endfunction
 function! s:WrapVim(vim_channel, c) abort
   let a:c._channel = a:vim_channel
   function! a:c._send(data) abort
-    try
-      call ch_sendraw(l:self._channel, a:data)
-    catch
-      echom '!!!!! Failed to send to channel: '.string(a:data)
-      echom v:exception
-      throw 'Channel send failed'
-    endtry
+    call ch_sendraw(l:self._channel, a:data)
   endfunction
 endfunction
 
