@@ -63,7 +63,7 @@ function! s:ActionMenu(actions, OnSelected) abort
     return
   endif
   let l:choices = ['Choose an action:']
-  for l:index in range(a:actions)
+  for l:index in range(len(a:actions))
     call add(l:choices, string(l:index + 1).' - '.a:actions[l:index]['title'])
   endfor
   let l:choice = inputlist(l:choices)

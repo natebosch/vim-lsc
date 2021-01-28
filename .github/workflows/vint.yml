@@ -1,0 +1,23 @@
+name: vint
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  vim-vint:
+    name: Lint the viml with vint
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Run vint
+      uses: ludvighz/vint-action@v1
+      with:
+        path: .
