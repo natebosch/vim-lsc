@@ -21,8 +21,7 @@ jobs:
     - uses: dart-lang/setup-dart@v0.3
       with:
         sdk: stable
-    - name: install vim
-      run: sudo apt install vim-gtk3
+    - uses: rhysd/action-setup-vim@v1
       with:
         version: nightly
     - name: check vim
