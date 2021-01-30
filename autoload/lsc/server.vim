@@ -157,6 +157,8 @@ function! s:Start(server, file_path) abort
         \ ? a:server.config.WorkspaceRoot(a:file_path)
         \ : lsc#file#cwd()
   catch
+    call lsc#message#error(
+        \ 'Disabling workspace roots due to error: '.string(v:exception))
     let l:root = lsc#file#cwd()
     unlet a:server.config.WorkspaceRoot
   endtry

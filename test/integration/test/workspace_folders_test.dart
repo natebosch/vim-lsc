@@ -167,7 +167,6 @@ void main() {
       final nextClient = testBed.clients.first;
       await testBed.vim.edit('foo.txt');
       await testBed.vim.sendKeys(':LSClientEnable<cr>');
-      print('Waiting for client');
       client = await nextClient;
     });
 
@@ -183,11 +182,14 @@ void main() {
     test('does not advertise capability', () async {
       final server = StubServer(client);
 
-      print('Waiting for initialization');
       await server.initialized;
       final initialization = await server.initialization;
       expect(initialization['capabilities']['workspace']['workspaceFolders'],
           false);
+      final messages = await testBed.vim.messages(1);
+      expect(messages, [
+        '[lsc:Error] Disabling workspace roots due to error: \'sad\'',
+      ]);
     });
   });
 
