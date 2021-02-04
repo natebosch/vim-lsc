@@ -41,6 +41,10 @@ class Vim {
     await Future.delayed(const Duration(milliseconds: 10));
   }
 
+  Future<void> stdinWriteln(String keys) async {
+    _process.stdin.writeln(keys);
+  }
+
   /// Evaluate [expression] as a vim expression.
   Future<String> expr(String expression) async {
     final result = await Process.run(
