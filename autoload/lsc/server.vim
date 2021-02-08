@@ -166,13 +166,13 @@ function! s:Start(server, file_path) abort
   let l:capabilities = s:ClientCapabilities(a:server.config)
   let l:params = {'processId': getpid(),
       \ 'clientInfo': {'name': 'vim-lsc'},
-      \ 'rootUri': lsc#uri#documentUri(l:root).'/',
+      \ 'rootUri': lsc#uri#documentUri(l:root),
       \ 'capabilities': l:capabilities,
       \ 'trace': l:trace_level,
       \}
   if l:capabilities.workspace.workspaceFolders
     let l:params.workspaceFolders = [{
-      \   'uri': lsc#uri#documentUri(l:root).'/',
+      \   'uri': lsc#uri#documentUri(l:root),
       \   'name': fnamemodify(l:root, ':.')
       \ }]
   endif
