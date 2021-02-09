@@ -233,7 +233,7 @@ function! s:CompletionItemWord(lsp_item) abort
           \ 'snippet': l:item.word,
           \ 'snippet_trigger': l:item.word
           \ })
-    let l:item.word = a:lsp_item.label
+    let l:item.word = substitute(a:lsp_item.label, '^\s*\|\s*$', '', 'g')
   endif
   return l:item
 endfunction
