@@ -343,7 +343,7 @@ function! s:Diagnostics(file_path, lsp_diagnostics) abort
       let l:self._list_items = []
       let l:bufnr = lsc#file#bufnr(l:self.file_path)
       if l:bufnr == -1
-        let l:file_ref = {'filename': fnamemodify(l:self.file_path, ':.')}
+        let l:file_ref = {'filename': fnamemodify(l:self.file_path, ':~:.')}
       else
         let l:file_ref = {'bufnr': l:bufnr}
       endif
