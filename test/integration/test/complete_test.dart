@@ -44,7 +44,7 @@ void main() {
     await server.initialized;
     await testBed.vim.sendKeys('ifoo.');
     await testBed.vim.waitForPopUpMenu();
-    await testBed.vim.sendKeys('a<c-n><esc><esc>');
+    await testBed.vim.sendKeys('a<cr><esc>');
     expect(await testBed.vim.expr('getline(1)'), 'foo.abcd');
   });
 
@@ -61,7 +61,7 @@ void main() {
     await server.initialized;
     await testBed.vim.sendKeys('ifoo');
     await testBed.vim.waitForPopUpMenu();
-    await testBed.vim.sendKeys('b<c-n><esc><esc>');
+    await testBed.vim.sendKeys('b<cr><esc>');
     expect(await testBed.vim.expr('getline(1)'), 'foobar');
   });
 
@@ -78,7 +78,7 @@ void main() {
     await server.initialized;
     await testBed.vim.sendKeys('if<c-x><c-u>');
     await testBed.vim.waitForPopUpMenu();
-    await testBed.vim.sendKeys('<c-n><esc><esc>');
+    await testBed.vim.sendKeys('<cr><esc>');
     expect(await testBed.vim.expr('getline(1)'), 'foobar');
   });
 }

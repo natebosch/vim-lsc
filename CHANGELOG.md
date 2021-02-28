@@ -1,3 +1,10 @@
+# 0.5.0
+
+**Minor breaking changes**
+- Remove `noselect` from the default `completeopts` used during autocompletion.
+  Re-enable this with `set completeopts+=noselect`. This changes the initial
+  behavior of some keys when autocomplete starts.
+
 # 0.4.0
 
 **Bug fixes**
@@ -21,8 +28,6 @@
   reported.
 
 **Enhancements**
-- Remove `noselect` from the default `completeopts` used during autocompletion.
-  Re-enable this with `set completeopts+=noselect`.
 - More tolerant towards buggy language servers that omit the `result` field on
   response message.
 - Add `g:lsc_autocomplete_length` to configure how many word characters to wait
