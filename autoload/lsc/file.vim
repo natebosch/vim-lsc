@@ -112,7 +112,7 @@ function! s:UpdateRoots(server, file_path) abort
   call add(a:server.roots, l:root)
   let l:workspace_folders = {'event':
       \   {'added': [{
-      \     'uri': lsc#uri#documentUri(l:root).'/',
+      \     'uri': lsc#uri#documentUri(l:root),
       \     'name': fnamemodify(l:root, ':.'),
       \     }],
       \    'removed': [],
