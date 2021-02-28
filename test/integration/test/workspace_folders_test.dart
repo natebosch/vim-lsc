@@ -53,7 +53,7 @@ void main() {
       expect(initialization['workspaceFolders'], [
         {
           'uri': d.dir('workspaces/foo').io.uri.toString(),
-          'name': 'workspaces/foo'
+          'name': 'workspaces/foo/'
         }
       ]);
     });
@@ -104,7 +104,7 @@ void main() {
       expect(change['added'], [
         {
           'uri': d.dir('workspaces/bar').io.uri.toString(),
-          'name': 'workspaces/bar'
+          'name': 'workspaces/bar/'
         }
       ]);
     });
