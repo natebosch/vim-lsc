@@ -129,7 +129,7 @@ function! s:SetCompleteOpt() abort
     " Set the options that impact behavior for autocomplete use cases without
     " touching other like `preview`
     setl completeopt-=longest
-    setl completeopt+=menu,menuone,noinsert,noselect
+    setl completeopt+=menu,menuone,noinsert
   endif
 endfunction
 

@@ -1,3 +1,10 @@
+# 0.5.0
+
+**Minor breaking changes**
+- Remove `noselect` from the default `completeopts` used during autocompletion.
+  Re-enable this with `set completeopts+=noselect`. This changes the initial
+  behavior of some keys when autocomplete starts.
+
 # 0.4.0
 
 **Bug fixes**
