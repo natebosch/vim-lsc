@@ -1,5 +1,9 @@
 # 0.5.0
 
+**Bug fixes**
+- Fix occasional errors stemming from interleaving the handling of multiple
+  messages from the server.
+
 **Minor breaking changes**
 - Remove `noselect` from the default `completeopts` used during autocompletion.
   Re-enable this with `set completeopts+=noselect`. This changes the initial
