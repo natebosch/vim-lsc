@@ -3,6 +3,8 @@
 **Bug fixes**
 - Fix occasional errors stemming from interleaving the handling of multiple
   messages from the server.
+- Support the `DocumentHighlightOptions` format for
+  `documentHighlightsProvider`.
 
 **Minor breaking changes**
 - Remove `noselect` from the default `completeopts` used during autocompletion.
