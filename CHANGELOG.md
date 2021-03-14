@@ -1,3 +1,18 @@
+# 0.5.0
+
+**Bug fixes**
+- Fix occasional errors stemming from interleaving the handling of multiple
+  messages from the server.
+- Support the `DocumentHighlightOptions` format for
+  `documentHighlightsProvider`.
+- Avoid a state where no document highlights reference calls are made following
+  a server restart.
+
+**Minor breaking changes**
+- Remove `noselect` from the default `completeopts` used during autocompletion.
+  Re-enable this with `set completeopts+=noselect`. This changes the initial
+  behavior of some keys when autocomplete starts.
+
 # 0.4.0
 
 **Bug fixes**
@@ -51,6 +66,8 @@
 - Use full words for completion item kinds instead of single letters.
 - Avoid overwriting location list if it is in use for something other than LSC
   diagnostics.
+- Asynchronously loop over server messages to avoid long synchronous pauses
+  between handling user input.
 
 # 0.3.2
 

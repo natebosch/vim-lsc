@@ -4,7 +4,7 @@ endfunction
 
 function! lsc#message#showRequest(message, actions) abort
   let l:options = [a:message]
-  for l:index in range(a:actions)
+  for l:index in range(len(a:actions))
     let l:title = get(a:actions, l:index)['title']
     call add(l:options, (l:index + 1) . ' - ' . l:title)
   endfor

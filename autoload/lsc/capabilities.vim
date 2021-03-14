@@ -27,9 +27,12 @@ function! lsc#capabilities#normalize(capabilities) abort
     endif
     let l:normalized.textDocumentSync.incremental = l:incremental
   endif
-  if has_key(a:capabilities, 'documentHighlightProvider')
-    let l:normalized.referenceHighlights =
-        \ a:capabilities.documentHighlightProvider
+  let l:document_highlight_provider =
+      \ get(a:capabilities, 'documentHighlightProvider', v:false)
+  if type(l:document_highlight_provider) == type({})
+    let l:normalized.referenceHighlights = v:true
+  else
+    let l:normalized.referenceHighlights = l:document_highlight_provider
   endif
   return l:normalized
 endfunction

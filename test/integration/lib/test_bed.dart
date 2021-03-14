@@ -1,8 +1,9 @@
 import 'dart:io';
 
-import 'package:test/test.dart';
 import 'package:json_rpc_2/json_rpc_2.dart';
 import 'package:lsp/lsp.dart' show lspChannel;
+import 'package:test/test.dart';
+import 'package:test_descriptor/test_descriptor.dart' as d;
 
 import 'vim_remote.dart';
 
@@ -21,7 +22,7 @@ class TestBed {
             onUnhandledError: (error, stack) =>
                 fail('Unhandled server error: $error')))
         .asBroadcastStream();
-    final vim = await Vim.start();
+    final vim = await Vim.start(workingDirectory: d.sandbox);
     await beforeRegister?.call(vim);
     await vim.expr('RegisterLanguageServer("text", {'
         '"command":"localhost:${serverSocket.port}",'
@@ -32,9 +33,7 @@ class TestBed {
 
     addTearDown(() async {
       await vim.quit();
-      final log = File(vim.name);
-      print(await log.readAsString());
-      await log.delete();
+      print(await d.file(vim.name).io.readAsString());
       await serverSocket.close();
     });
     return TestBed._(vim, clients);

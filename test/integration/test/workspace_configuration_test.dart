@@ -25,8 +25,6 @@ void main() {
   tearDown(() async {
     await testBed.vim.sendKeys(':LSClientDisable<cr>');
     await testBed.vim.sendKeys(':%bwipeout!<cr>');
-    final file = File('foo.txt');
-    if (await file.exists()) await file.delete();
     await client.done;
     client = null;
   });

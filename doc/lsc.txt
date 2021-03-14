@@ -215,6 +215,13 @@ an empty string. The possible statuses are:
 
 CONFIGURATION                                   *lsc-configure*
 
+                                                *g:lsc_change_debounce_time*
+Set the time in milliseconds to wait for subsequent changes before flushing
+buffer content to the server as a `document/didChange` notification. Some
+features, such as autocomplete, may cause changes to be flushed before the
+debounce period has settled. Defaults to `500` milliseconds.
+
+
                                                 *lsc-configure-trace*
                                                 *g:lsc_trace_level*
 Set the "trace" field sent to the server during initialization using the
@@ -253,7 +260,10 @@ When using autocomplete this plugin will modify the buffer local setting
 recommended for a typical autocomplete experience and help to avoid the plugin
 from making changes without a specific user action. Leave
 `g:lsc_auto_completeopt` set to `v:true` (the default) for the recommended
-values.
+values. Some options are left as is, configure `preview`, `popup`,
+`popuphidden`, and `noselect` as preferred in the normal way. See |completeopt|.
+When using this option to override the defaults, be sure to avoid `longest`, and
+include `noinsert`.
 
 It is recommended to avoid other plugins which are attempting to perform
 autocomplete in the same buffer as `vim-lsc`, but if they are used there may
