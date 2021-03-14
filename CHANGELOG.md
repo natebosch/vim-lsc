@@ -13,6 +13,10 @@
   Re-enable this with `set completeopts+=noselect`. This changes the initial
   behavior of some keys when autocomplete starts.
 
+**Enhancements**
+- Improve performance when the language server sends diagnostics for huge
+  numbers of files.
+
 # 0.4.0
 
 **Bug fixes**
