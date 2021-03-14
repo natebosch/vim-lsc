@@ -17,7 +17,6 @@ endfunction
 
 function! lsc#highlights#updateIfActive() abort
   if s:bufnr != bufnr() | return | endif
-  if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
   call lsc#highlights#update()
 endfunction
 
