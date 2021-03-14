@@ -10,13 +10,11 @@ function! lsc#highlights#updateDisplayed(bufnr) abort
         \ function('lsc#highlights#updateDisplayed', [a:bufnr]))
     return
   endif
-  let s:bufnr = a:bufnr
-  call lsc#util#winDo('call lsc#highlights#updateIfActive()')
-  unlet s:bufnr
+  call lsc#util#winDo('call lsc#highlights#updateIfActive('.string(a:bufnr).')')
 endfunction
 
-function! lsc#highlights#updateIfActive() abort
-  if s:bufnr != bufnr() | return | endif
+function! lsc#highlights#updateIfActive(bufnr) abort
+  if a:bufnr != bufnr() | return | endif
   call lsc#highlights#update()
 endfunction
 
