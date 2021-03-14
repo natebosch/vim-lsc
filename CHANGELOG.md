@@ -3,6 +3,10 @@
 **Bug fixes**
 - Fix occasional errors stemming from interleaving the handling of multiple
   messages from the server.
+- Support the `DocumentHighlightOptions` format for
+  `documentHighlightsProvider`.
+- Avoid a state where no document highlights reference calls are made following
+  a server restart.
 
 **Minor breaking changes**
 - Remove `noselect` from the default `completeopts` used during autocompletion.
