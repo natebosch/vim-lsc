@@ -1,12 +1,8 @@
-" Refresh highlight matches on all visible windows.
-function! lsc#highlights#updateDisplayed() abort
-  if s:DeferForMode() | return | endif
-  call lsc#util#winDo('call lsc#highlights#updateIfActive()')
-endfunction
-
-function! lsc#highlights#updateIfActive() abort
-  if !has_key(g:lsc_servers_by_filetype, &filetype) | return | endif
-  call lsc#highlights#update()
+" Refresh highlight matches on windows open for [bufnr].
+function! lsc#highlights#updateDisplayed(bufnr) abort
+  for l:window_id in win_findbuf(a:bufnr)
+    call win_execute(l:window_id, 'call lsc#highlights#update()')
+  endfor
 endfunction
 
 " Refresh highlight matches in the current window.
@@ -44,20 +40,6 @@ function! lsc#highlights#clear() abort
   if exists('w:lsc_highlights_source')
     unlet w:lsc_highlights_source
   endif
-endfunction
-
-" If vim is in select or visual mode return true and attempt to schedule an
-" update to highlights for after returning to normal mode. If vim enters insert
-" mode the text will be changed and highlights will update anyway.
-function! s:DeferForMode() abort
-  let l:mode = mode()
-  if l:mode ==# 's' || l:mode ==# 'S' || l:mode ==# "\<c-s>" ||
-      \ l:mode ==# 'v' || l:mode ==# 'V' || l:mode ==# "\<c-v>"
-    call lsc#util#once('CursorHold,CursorMoved',
-        \ function('lsc#highlights#updateDisplayed'))
-    return v:true
-  endif
-  return v:false
 endfunction
 
 " Whether the diagnostic highlights for the current window are up to date.
