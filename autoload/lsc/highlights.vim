@@ -1,21 +1,8 @@
 " Refresh highlight matches on all visible windows.
 function! lsc#highlights#updateDisplayed(bufnr) abort
-  " If vim is in select or visual mode return true and attempt to schedule an
-  " update to highlights for after returning to normal mode. If vim enters
-  " insert mode the text will be changed and highlights will update anyway.
-  let l:mode = mode()
-  if l:mode ==# 's' || l:mode ==# 'S' || l:mode ==# "\<c-s>" ||
-      \ l:mode ==# 'v' || l:mode ==# 'V' || l:mode ==# "\<c-v>"
-    call lsc#util#once('CursorHold,CursorMoved',
-        \ function('lsc#highlights#updateDisplayed', [a:bufnr]))
-    return
-  endif
-  call lsc#util#winDo('call lsc#highlights#updateIfActive('.string(a:bufnr).')')
-endfunction
-
-function! lsc#highlights#updateIfActive(bufnr) abort
-  if a:bufnr != bufnr() | return | endif
-  call lsc#highlights#update()
+  for l:window in win_findbuf(a:bufnr)
+    call win_execute(l:window, 'call lsc#highlights#update()')
+  endfor
 endfunction
 
 " Refresh highlight matches in the current window.
