@@ -58,14 +58,13 @@ function! s:HighlightReferences(force_in_highlight) abort
   if has_key(s:pending, &filetype) && s:pending[&filetype]
     return
   endif
-  let s:pending[&filetype] = v:true
   let s:highlights_request += 1
   let l:params = lsc#params#documentPosition()
   " TODO handle multiple servers
   let l:server = lsc#server#forFileType(&filetype)[0]
-  call l:server.request('textDocument/documentHighlight', l:params,
-      \ funcref('<SID>HandleHighlights',
-      \ [s:highlights_request, getcurpos(), bufnr('%'), &filetype]))
+  let s:pending[&filetype] = l:server.request('textDocument/documentHighlight',
+      \ l:params, funcref('<SID>HandleHighlights',
+      \   [s:highlights_request, getcurpos(), bufnr('%'), &filetype]))
 endfunction
 
 function! s:CanHighlightReferences() abort

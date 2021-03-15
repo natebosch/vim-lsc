@@ -78,8 +78,11 @@ function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
   else
     unlet s:file_diagnostics[a:file_path]
   endif
-  call s:UpdateWindowStates(a:file_path)
-  call lsc#highlights#updateDisplayed()
+  let l:bufnr = lsc#file#bufnr(a:file_path)
+  if l:bufnr != -1
+    call s:UpdateWindowStates(a:file_path)
+    call lsc#highlights#updateDisplayed(l:bufnr)
+  endif
   call s:UpdateQuickFix()
   if exists('#User#LSCDiagnosticsChange')
     doautocmd <nomodeline> User LSCDiagnosticsChange
@@ -95,7 +98,6 @@ endfunction
 " the list is left as is. If there is no location list or the list is LSC owned
 " diagnostics, check if it is stale and update it to the new diagnostics.
 function! s:UpdateWindowStates(file_path) abort
-  if lsc#file#bufnr(a:file_path) == -1 | return | endif
   let l:diagnostics = lsc#diagnostics#forFile(a:file_path)
   for l:window_id in win_findbuf(lsc#file#bufnr(a:file_path))
     call s:UpdateWindowState(l:window_id, l:diagnostics)

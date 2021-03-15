@@ -1,9 +1,20 @@
 # 0.5.0
 
+**Bug fixes**
+- Fix occasional errors stemming from interleaving the handling of multiple
+  messages from the server.
+- Support the `DocumentHighlightOptions` format for
+  `documentHighlightsProvider`.
+- Avoid a state where no document highlights reference calls are made following
+  a server restart.
+
 **Minor breaking changes**
 - Remove `noselect` from the default `completeopts` used during autocompletion.
   Re-enable this with `set completeopts+=noselect`. This changes the initial
   behavior of some keys when autocomplete starts.
+
+**Enhancements**
+- Improve performance when the language server sends many diagnostics updates.
 
 # 0.4.0
 

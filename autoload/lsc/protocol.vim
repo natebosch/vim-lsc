@@ -30,8 +30,7 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
     if has_key(l:self, '_consume') | return | endif
     if s:Consume(l:self)
       let l:self._consume = timer_start(0,
-          \ function('<SID>HandleTimer', [l:self]),
-          \ {'repeat': 1})
+          \ function('<SID>HandleTimer', [l:self]))
     endif
   endfunction
   let l:channel = lsc#channel#open(a:command, l:c._recieve, a:on_err, a:on_exit)
@@ -45,8 +44,7 @@ endfunction
 function! s:HandleTimer(server, ...) abort
   if s:Consume(a:server)
     let a:server._consume = timer_start(0,
-        \ function('<SID>HandleTimer', [a:server]),
-        \ {'repeat': 1})
+        \ function('<SID>HandleTimer', [a:server]))
   else
     unlet a:server._consume
   endif
@@ -99,14 +97,8 @@ function! s:Consume(server) abort
   endtry
   if exists('l:content')
     call lsc#util#shift(a:server._out, 10, l:content)
-    try
-      call s:Dispatch(l:content, a:server._on_message, a:server._callbacks)
-    catch
-      call lsc#message#error('Error dispatching message: '.string(v:exception))
-      let g:lsc_last_error = v:exception
-      let g:lsc_last_throwpoint = v:throwpoint
-      let g:lsc_last_error_message = l:content
-    endtry
+    call timer_start(0, function('<SID>Dispatch',
+        \ [l:content, a:server._on_message, a:server._callbacks]))
   endif
   return l:remaining_message !=# ''
 endfunction
@@ -124,31 +116,33 @@ function! s:ContentLength(headers) abort
   return -1
 endfunction
 
-function! s:Dispatch(message, OnMessage, callbacks) abort
-  if has_key(a:message, 'method')
-    let l:method = a:message.method
-    let l:params = has_key(a:message, 'params') ? a:message.params : v:null
-    let l:id = has_key(a:message, 'id') ? a:message.id : v:null
-    call a:OnMessage(l:method, l:params, l:id)
-  elseif has_key(a:message, 'error')
-    let l:error = a:message.error
-    let l:message = has_key(l:error, 'message') ?
-        \ l:error.message :
-        \ string(l:error)
-    call lsc#message#error(l:message)
-  elseif has_key(a:message, 'result')
-    let l:call_id = a:message['id']
-    if has_key(a:callbacks, l:call_id)
-      let l:Callback = a:callbacks[l:call_id][0]
-      unlet a:callbacks[l:call_id]
-      call l:Callback(a:message['result'])
+function! s:Dispatch(message, OnMessage, callbacks, ...) abort
+  try
+    if has_key(a:message, 'method')
+      let l:method = a:message.method
+      let l:params = has_key(a:message, 'params') ? a:message.params : v:null
+      let l:id = has_key(a:message, 'id') ? a:message.id : v:null
+      call a:OnMessage(l:method, l:params, l:id)
+    elseif has_key(a:message, 'error')
+      let l:error = a:message.error
+      let l:message = has_key(l:error, 'message') ?
+          \ l:error.message :
+          \ string(l:error)
+      call lsc#message#error(l:message)
+    elseif has_key(a:message, 'id')
+      let l:call_id = a:message['id']
+      if has_key(a:callbacks, l:call_id)
+        let l:Callback = a:callbacks[l:call_id][0]
+        unlet a:callbacks[l:call_id]
+        call l:Callback(get(a:message, 'result', v:null))
+      endif
+    else
+      call lsc#message#error('Unknown message type: '.string(a:message))
     endif
-  elseif has_key(a:message, 'id') && has_key(a:callbacks, a:message.id)
-    let l:call_id = a:message['id']
-    let l:Callback = a:callbacks[l:call_id][0]
-    unlet a:callbacks[l:call_id]
-    call l:Callback(v:null)
-  else
-    call lsc#message#error('Unknown message type: '.string(a:message))
-  endif
+  catch
+    call lsc#message#error('Error dispatching message: '.string(v:exception))
+    let g:lsc_last_error = v:exception
+    let g:lsc_last_throwpoint = v:throwpoint
+    let g:lsc_last_error_message = a:message
+  endtry
 endfunction
