@@ -234,7 +234,7 @@ endfunction
 
 function! s:AllDiagnostics() abort
   let l:all_diagnostics = []
-  let l:files = keys(s:file_diagnostics)
+  let l:files = sort(keys(s:file_diagnostics), function('lsc#file#compare'))
   for l:file_path in l:files
     let l:diagnostics = s:file_diagnostics[l:file_path]
     call extend(l:all_diagnostics, l:diagnostics.ListItems())

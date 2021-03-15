@@ -14,8 +14,7 @@
   behavior of some keys when autocomplete starts.
 
 **Enhancements**
-- Improve performance when the language server sends diagnostics for huge
-  numbers of files.
+- Improve performance when the language server sends many diagnostics updates.
 
 # 0.4.0
 
