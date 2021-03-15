@@ -1,4 +1,4 @@
-" Refresh highlight matches on all visible windows.
+" Refresh highlight matches on windows open for [bufnr].
 function! lsc#highlights#updateDisplayed(bufnr) abort
   for l:window_id in win_findbuf(a:bufnr)
     call win_execute(l:window_id, 'call lsc#highlights#update()')
