@@ -42,7 +42,6 @@ function! lsc#highlights#clear() abort
   endif
 endfunction
 
-
 " Whether the diagnostic highlights for the current window are up to date.
 function! s:CurrentWindowIsFresh() abort
   if !exists('w:lsc_diagnostics') | return v:true | endif
