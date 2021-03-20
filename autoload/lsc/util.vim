@@ -151,3 +151,23 @@ endfunction
 
 function! lsc#util#noop() abort
 endfunction
+
+function! lsc#util#async(Callback) abort
+  return funcref('<Sid>Async', [a:Callback])
+endfunction
+
+function! s:Async(Callback, ...) abort
+  call timer_start(0, funcref('<SID>IgnoreArgs', [a:Callback, a:000]))
+endfunction
+
+function! s:IgnoreArgs(Callback, args, ...) abort
+  try
+    call call(a:Callback, a:args)
+  catch
+    call lsc#message#error('Error with callback: '.string(a:Callback)."\n"
+        \ .string(v:exception))
+    let g:lsc_last_error = v:exception
+    let g:lsc_last_throwpoint = v:throwpoint
+    let g:lsc_last_error_callback = [a:Callback, a:args]
+  endtry
+endfunction
