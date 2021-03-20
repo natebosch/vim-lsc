@@ -280,7 +280,7 @@ function! lsc#server#register(filetype, config) abort
   endfunction
   function! l:server._initialize(params, callback) abort
     let l:params = lsc#config#messageHook(l:self, 'initialize', a:params)
-    call l:self._channel.request('initialize', l:params, a:callback)
+    call l:self._channel.request('initialize', l:params, a:callback, {})
   endfunction
   function! l:server.on_err(message) abort
     if get(l:self.config, 'suppress_stderr', v:false) | return | endif
