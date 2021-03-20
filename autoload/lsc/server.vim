@@ -86,7 +86,7 @@ function! s:Kill(server, status, OnExit) abort
     endif
     if a:OnExit != v:null | call a:OnExit() | endif
   endfunction
-  return a:server.request('shutdown', v:null, funcref('Exit'))
+  return a:server.request('shutdown', v:null, funcref('Exit'), {'sync': v:true})
 endfunction
 
 function! lsc#server#restart() abort
@@ -259,12 +259,13 @@ function! lsc#server#register(filetype, config) abort
       \ 'capabilities': lsc#capabilities#defaults()
       \}
   let l:server.languageId[a:filetype] = l:languageId
-  function! l:server.request(method, params, callback) abort
+  function! l:server.request(method, params, callback, ...) abort
     if l:self.status !=# 'running' | return v:false | endif
     let l:params = lsc#config#messageHook(l:self, a:method, a:params)
     if l:params is lsc#config#skip() | return v:false | endif
     let l:Callback = lsc#config#responseHook(l:self, a:method, a:callback)
-    call l:self._channel.request(a:method, l:params, l:Callback)
+    let l:options = a:0 > 0 ? a:1 : {}
+    call l:self._channel.request(a:method, l:params, l:Callback, l:options)
     return v:true
   endfunction
   function! l:server.notify(method, params) abort
