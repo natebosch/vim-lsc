@@ -7,6 +7,7 @@
   `documentHighlightsProvider`.
 - Avoid a state where no document highlights reference calls are made following
   a server restart.
+- Avoid creating public functions for callbacks which should be temporary.
 
 **Minor breaking changes**
 - Remove `noselect` from the default `completeopts` used during autocompletion.
