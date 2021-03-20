@@ -56,11 +56,9 @@ endfunction
 function! lsc#server#exit() abort
   let l:exit_start = reltime()
   let l:pending = []
-  function! OnExit(server_name) closure abort
-    call remove(l:pending, index(l:pending, a:server_name))
-  endfunction
   for l:server in values(s:servers)
-    if s:Kill(l:server, 'exiting', funcref('OnExit', [ l:server.config.name ]))
+    if s:Kill(l:server, 'exiting',
+        \ funcref('<SID>OnExit', [l:server.config.name, l:pending]))
       call add(l:pending, l:server.config.name)
     endif
   endfor
@@ -75,21 +73,28 @@ function! lsc#server#exit() abort
   return len(l:pending) == 0
 endfunction
 
+function! s:OnExit(server_name, pending) abort
+  call remove(a:pending, index(a:pending, a:server_name))
+endfunction
+
 " Request a 'shutdown' then 'exit'.
 "
 " Calls `OnExit` after the exit is requested. Returns `v:false` if no request
 " was made because the server is not currently running.
 function! s:Kill(server, status, OnExit) abort
-  function! Exit(result) closure abort
-    let a:server.status = a:status
-    if has_key(a:server, '_channel')
-      " An early exit still could have remove the channel.
-      " The status has been updated so `a:server.notify` would bail
-      call a:server._channel.notify('exit', v:null)
-    endif
-    if a:OnExit != v:null | call a:OnExit() | endif
-  endfunction
-  return a:server.request('shutdown', v:null, funcref('Exit'))
+  return a:server.request('shutdown', v:null,
+      \ funcref('<SID>HandleShutdownResponse', [a:server, a:status, a:OnExit]),
+      \ {'sync': v:true})
+endfunction
+
+function! s:HandleShutdownResponse(server, status, OnExit, result) abort
+  let a:server.status = a:status
+  if has_key(a:server, '_channel')
+    " An early exit still could have remove the channel.
+    " The status has been updated so `a:server.notify` would bail
+    call a:server._channel.notify('exit', v:null)
+  endif
+  if a:OnExit != v:null | call a:OnExit() | endif
 endfunction
 
 function! lsc#server#restart() abort
@@ -132,20 +137,6 @@ function! s:Start(server, file_path) abort
     let a:server.status = 'failed'
     return
   endif
-  function! OnInitialize(init_result) closure abort
-    let a:server.status = 'running'
-    call a:server.notify('initialized', {})
-    if type(a:init_result) == type({}) && has_key(a:init_result, 'capabilities')
-      let a:server.capabilities =
-          \ lsc#capabilities#normalize(a:init_result.capabilities)
-    endif
-    if has_key(a:server.config, 'workspace_config')
-      call a:server.notify('workspace/didChangeConfiguration', {
-          \ 'settings': a:server.config.workspace_config
-          \})
-    endif
-    call lsc#file#trackAll(a:server)
-  endfunction
   if exists('g:lsc_trace_level') &&
       \ index(['off', 'messages', 'verbose'], g:lsc_trace_level) >= 0
     let l:trace_level = g:lsc_trace_level
@@ -176,7 +167,22 @@ function! s:Start(server, file_path) abort
       \   'name': fnamemodify(l:root, ':.')
       \ }]
   endif
-  call a:server._initialize(l:params, funcref('OnInitialize'))
+  call a:server._initialize(l:params, funcref('<SID>OnInitialize', [a:server]))
+endfunction
+
+function! s:OnInitialize(server, init_result) abort
+  let a:server.status = 'running'
+  call a:server.notify('initialized', {})
+  if type(a:init_result) == type({}) && has_key(a:init_result, 'capabilities')
+    let a:server.capabilities =
+        \ lsc#capabilities#normalize(a:init_result.capabilities)
+  endif
+  if has_key(a:server.config, 'workspace_config')
+    call a:server.notify('workspace/didChangeConfiguration', {
+        \ 'settings': a:server.config.workspace_config
+        \})
+  endif
+  call lsc#file#trackAll(a:server)
 endfunction
 
 " Missing value means no support
@@ -283,12 +289,13 @@ function! lsc#server#register(filetype, config) abort
       \ 'capabilities': lsc#capabilities#defaults()
       \}
   let l:server.languageId[a:filetype] = l:languageId
-  function! l:server.request(method, params, callback) abort
+  function! l:server.request(method, params, callback, ...) abort
     if l:self.status !=# 'running' | return v:false | endif
     let l:params = lsc#config#messageHook(l:self, a:method, a:params)
     if l:params is lsc#config#skip() | return v:false | endif
     let l:Callback = lsc#config#responseHook(l:self, a:method, a:callback)
-    call l:self._channel.request(a:method, l:params, l:Callback)
+    let l:options = a:0 > 0 ? a:1 : {}
+    call l:self._channel.request(a:method, l:params, l:Callback, l:options)
     return v:true
   endfunction
   function! l:server.notify(method, params) abort
@@ -303,7 +310,7 @@ function! lsc#server#register(filetype, config) abort
   endfunction
   function! l:server._initialize(params, callback) abort
     let l:params = lsc#config#messageHook(l:self, 'initialize', a:params)
-    call l:self._channel.request('initialize', l:params, a:callback)
+    call l:self._channel.request('initialize', l:params, a:callback, {})
   endfunction
   function! l:server.on_err(message) abort
     if get(l:self.config, 'suppress_stderr', v:false) | return | endif
