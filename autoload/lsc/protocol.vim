@@ -85,11 +85,11 @@ function! s:Consume(server) abort
     return s:Incomplete(l:buffer)
   endif
   if len(l:message) == l:message_end
-    let l:payload = l:message[l:message_start:]
+    let l:payload = l:message[l:message_start :]
     call remove(l:buffer, 0)
   else
-    let l:payload = l:message[l:message_start:l:message_end-1]
-    let l:buffer[0] = l:message[l:message_end:]
+    let l:payload = l:message[l:message_start : l:message_end-1]
+    let l:buffer[0] = l:message[l:message_end :]
   endif
   try
     if len(l:payload) > 0
