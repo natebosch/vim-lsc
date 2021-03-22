@@ -399,85 +399,82 @@ function! lsc#diagnostics#echoForLine() abort
 endfunction
 
 function! s:Diagnostics(file_path, lsp_diagnostics) abort
-  let l:diagnostics = {
-      \ 'file_path': a:file_path,
+  return {
       \ 'lsp_diagnostics': a:lsp_diagnostics,
+      \ 'Highlights': funcref('<SID>DiagnosticsHighlights'),
+      \ 'ListItems': funcref('<SID>DiagnosticsListItems', [a:file_path]),
+      \ 'ByLine': funcref('<SID>DiagnosticsByLine'),
       \}
-  function! l:diagnostics.Highlights() abort
-    if !has_key(l:self, '_highlights')
-      let l:self._highlights = []
-      for l:diagnostic in l:self.lsp_diagnostics
-        call add(l:self._highlights, {
-            \ 'group': s:SeverityGroup(l:diagnostic.severity),
-            \ 'severity': l:diagnostic.severity,
-            \ 'ranges': lsc#convert#rangeToHighlights(l:diagnostic.range),
-            \})
-      endfor
+endfunction
+function! s:DiagnosticsHighlights() abort dict
+  if !has_key(l:self, '_highlights')
+    let l:self._highlights = []
+    for l:diagnostic in l:self.lsp_diagnostics
+      call add(l:self._highlights, {
+          \ 'group': s:SeverityGroup(l:diagnostic.severity),
+          \ 'severity': l:diagnostic.severity,
+          \ 'ranges': lsc#convert#rangeToHighlights(l:diagnostic.range),
+          \})
+    endfor
+  endif
+  return l:self._highlights
+endfunction
+function! s:DiagnosticsListItems(file_path) abort dict
+  if !has_key(l:self, '_list_items')
+    let l:self._list_items = []
+    let l:bufnr = lsc#file#bufnr(a:file_path)
+    if l:bufnr == -1
+      let l:file_ref = {'filename': fnamemodify(a:file_path, ':.')}
+    else
+      let l:file_ref = {'bufnr': l:bufnr}
     endif
-    return l:self._highlights
-  endfunction
-  function! l:diagnostics.ListItems() abort
-    if !has_key(l:self, '_list_items')
-      let l:self._list_items = []
-      let l:bufnr = lsc#file#bufnr(l:self.file_path)
-      if l:bufnr == -1
-        let l:file_ref = {'filename': fnamemodify(l:self.file_path, ':.')}
+    for l:diagnostic in l:self.lsp_diagnostics
+      let l:item = {
+          \ 'lnum': l:diagnostic.range.start.line + 1,
+          \ 'col': l:diagnostic.range.start.character + 1,
+          \ 'text': s:DiagnosticMessage(l:diagnostic),
+          \ 'type': s:SeverityType(l:diagnostic.severity)
+          \}
+      call extend(l:item, l:file_ref)
+      call add(l:self._list_items, l:item)
+    endfor
+    call sort(l:self._list_items, 'lsc#util#compareQuickFixItems')
+  endif
+  return l:self._list_items
+endfunction
+function! s:DiagnosticsByLine() abort dict
+  if !has_key(l:self, '_by_line')
+    let l:self._by_line = {}
+    for l:diagnostic in l:self.lsp_diagnostics
+      let l:start_line = string(l:diagnostic.range.start.line + 1)
+      if !has_key(l:self._by_line, l:start_line)
+        let l:line = []
+        let l:self._by_line[l:start_line] = l:line
       else
-        let l:file_ref = {'bufnr': l:bufnr}
+        let l:line = l:self._by_line[l:start_line]
       endif
-      for l:diagnostic in l:self.lsp_diagnostics
-        let l:item = {
-            \ 'lnum': l:diagnostic.range.start.line + 1,
-            \ 'col': l:diagnostic.range.start.character + 1,
-            \ 'text': s:DiagnosticMessage(l:diagnostic),
-            \ 'type': s:SeverityType(l:diagnostic.severity)
-            \}
-        call extend(l:item, l:file_ref)
-        call add(l:self._list_items, l:item)
-      endfor
-      call sort(l:self._list_items, 'lsc#util#compareQuickFixItems')
-    endif
-    return l:self._list_items
-  endfunction
-  function! l:diagnostics.ByLine() abort
-    if !has_key(l:self, '_by_line')
-      let l:self._by_line = {}
-      for l:diagnostic in l:self.lsp_diagnostics
-        let l:start_line = string(l:diagnostic.range.start.line + 1)
-        if !has_key(l:self._by_line, l:start_line)
-          let l:line = []
-          let l:self._by_line[l:start_line] = l:line
-        else
-          let l:line = l:self._by_line[l:start_line]
-        endif
-        let l:simple = {
-            \ 'message': s:DiagnosticMessage(l:diagnostic),
-            \ 'range': l:diagnostic.range,
-            \ 'severity': s:SeverityLabel(l:diagnostic.severity),
-            \}
-        call add(l:line, l:simple)
-      endfor
-      for l:line in values(l:self._by_line)
-        call sort(l:line, function('<SID>CompareRanges'))
-      endfor
-    endif
-    return l:self._by_line
-  endfunction
-  return l:diagnostics
+      let l:simple = {
+          \ 'message': s:DiagnosticMessage(l:diagnostic),
+          \ 'range': l:diagnostic.range,
+          \ 'severity': s:SeverityLabel(l:diagnostic.severity),
+          \}
+      call add(l:line, l:simple)
+    endfor
+    for l:line in values(l:self._by_line)
+      call sort(l:line, function('<SID>CompareRanges'))
+    endfor
+  endif
+  return l:self._by_line
 endfunction
 
 function! s:EmptyDiagnostics() abort
   if !exists('s:empty_diagnostics')
-    let s:empty_diagnostics = {'lsp_diagnostics': []}
-    function! s:empty_diagnostics.Highlights() abort
-      return []
-    endfunction
-    function! s:empty_diagnostics.ListItems() abort
-      return []
-    endfunction
-    function! s:empty_diagnostics.ByLine() abort
-      return {}
-    endfunction
+    let s:empty_diagnostics = {
+        \ 'lsp_diagnostics': [],
+        \ 'Highlights': {->[]},
+        \ 'ListItems': {->[]},
+        \ 'ByLine': {->{}},
+        \}
   endif
   return s:empty_diagnostics
 endfunction
