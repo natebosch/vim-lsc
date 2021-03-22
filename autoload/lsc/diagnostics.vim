@@ -281,10 +281,26 @@ function! s:IsUsed(highest_used, idx, to_check) abort
   return lsc#file#compare(a:highest_used, a:to_check) >= 0
 endfunction
 function! s:First500(file_list) abort
+  if !exists('*<SID>Rand')
+    if exists('*rand')
+      function! s:Rand(max) abort
+        return rand() % a:max
+      endfunction
+    elseif has('nvim-0.4.0')
+      function! s:Rand(max) abort
+        return luaeval('math.random(0,'.string(a:max).')')
+      endfunction
+    else
+      lsc#message#error('Missing support for rand().'
+          \.' :LSClientAllDiagnostics may be inconsistent when there'
+          \.' are more than 500 files with diagnostics.')
+      return a:file_list[:500]
+    endif
+  endif
   let l:result = []
   let l:search_in = a:file_list
   while len(l:result) != 500
-    let l:pivot = l:search_in[rand() % len(l:search_in)]
+    let l:pivot = l:search_in[s:Rand(len(l:search_in))]
     let l:accept = []
     let l:reject = []
     for l:file in l:search_in
