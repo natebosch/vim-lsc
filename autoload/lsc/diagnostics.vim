@@ -62,28 +62,53 @@ function! lsc#diagnostics#forFile(file_path) abort
 endfunction
 
 function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
-  if exists('g:lsc_enable_diagnostics') && !g:lsc_enable_diagnostics
+  if (exists('g:lsc_enable_diagnostics') && !g:lsc_enable_diagnosticsa)
+      \ || (empty(a:diagnostics) && !has_key(s:file_diagnostics, a:file_path))
     return
   endif
-  if empty(a:diagnostics) && !has_key(s:file_diagnostics, a:file_path)
-    return
-  endif
+  let l:visible_change = v:true
   if !empty(a:diagnostics)
     if has_key(s:file_diagnostics, a:file_path) &&
         \ s:file_diagnostics[a:file_path].lsp_diagnostics == a:diagnostics
       return
     endif
+    if exists('s:highest_used_diagnostic')
+      if lsc#file#compare(s:highest_used_diagnostic, a:file_path) >= 0
+        if len(
+            \ get(
+            \   get(s:file_diagnostics, a:file_path, {}),
+            \   'lsp_diagnostics', []
+            \ )
+            \) > len(a:diagnostics)
+          unlet s:highest_used_diagnostic
+        endif
+      else
+        let l:visible_change = v:false
+      endif
+    endif
     let s:file_diagnostics[a:file_path] =
         \ s:Diagnostics(a:file_path, a:diagnostics)
   else
     unlet s:file_diagnostics[a:file_path]
+    if exists('s:highest_used_diagnostic')
+       if lsc#file#compare(s:highest_used_diagnostic, a:file_path) >= 0
+         unlet s:highest_used_diagnostic
+       else
+         let l:visible_change = v:false
+       endif
+    endif
   endif
   let l:bufnr = lsc#file#bufnr(a:file_path)
   if l:bufnr != -1
     call s:UpdateWindowStates(a:file_path)
     call lsc#highlights#updateDisplayed(l:bufnr)
   endif
-  call s:UpdateQuickFix()
+  if l:visible_change
+    if exists('s:quickfix_debounce')
+      call timer_stop(s:quickfix_debounce)
+    endif
+    let s:quickfix_debounce = timer_start(100, funcref('<SID>UpdateQuickFix'))
+  endif
   if exists('#User#LSCDiagnosticsChange')
     doautocmd <nomodeline> User LSCDiagnosticsChange
   endif
@@ -203,7 +228,8 @@ function! lsc#diagnostics#showInQuickFix() abort
   copen
 endfunction
 
-function! s:UpdateQuickFix() abort
+function! s:UpdateQuickFix(...) abort
+  unlet s:quickfix_debounce
   let l:current = getqflist({'context': 1, 'idx': 1, 'items': 1})
   let l:context = get(l:current, 'context', 0)
   if type(l:context) != type({}) ||
@@ -234,15 +260,49 @@ endfunction
 
 function! s:AllDiagnostics() abort
   let l:all_diagnostics = []
-  let l:files = sort(keys(s:file_diagnostics), function('lsc#file#compare'))
+  let l:files = keys(s:file_diagnostics)
+  if exists('s:highest_used_diagnostic')
+    call filter(l:files, funcref('<SID>IsUsed', [s:highest_used_diagnostic]))
+  elseif len(l:files) > 500
+    let l:files = s:First500(l:files)
+  endif
+  call sort(l:files, funcref('lsc#file#compare'))
   for l:file_path in l:files
     let l:diagnostics = s:file_diagnostics[l:file_path]
     call extend(l:all_diagnostics, l:diagnostics.ListItems())
     if len(l:all_diagnostics) >= 500
+      let s:highest_used_diagnostic = l:file_path
       break
     endif
   endfor
   return l:all_diagnostics
+endfunction
+function! s:IsUsed(highest_used, idx, to_check) abort
+  return lsc#file#compare(a:highest_used, a:to_check) >= 0
+endfunction
+function! s:First500(file_list) abort
+  let l:result = []
+  let l:search_in = a:file_list
+  while len(l:result) != 500
+    let l:pivot = l:search_in[rand() % len(l:search_in)]
+    let l:accept = []
+    let l:reject = []
+    for l:file in l:search_in
+      if lsc#file#compare(l:pivot, l:file) < 0
+        call add(l:reject, l:file)
+      else
+        call add(l:accept, l:file)
+      endif
+    endfor
+    let l:need = 500 - len(l:result)
+    if len(l:accept) > l:need
+      let l:search_in = l:accept
+    else
+      call extend(l:result, l:accept)
+      let l:search_in = l:reject
+    endif
+  endwhile
+  return l:result
 endfunction
 
 " Clear the LSC controlled location list for the current window.
