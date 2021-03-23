@@ -4,7 +4,7 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
       \ '_in': [],
       \ '_out': [],
       \ '_buffer': [],
-      \ '_on_message': lsc#util#async(a:on_message),
+      \ '_on_message': lsc#util#async('message handler', a:on_message),
       \ '_callbacks': {},
       \}
   function! l:c.request(method, params, callback, options) abort
@@ -12,7 +12,7 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
     let l:message = s:Format(a:method, a:params, l:self._call_id)
     let l:self._callbacks[l:self._call_id] = get(a:options, 'sync', v:false)
         \ ? [a:callback]
-        \ : [lsc#util#async(a:callback)]
+        \ : [lsc#util#async('request callback for '.a:method, a:callback)]
     call l:self._send(l:message)
   endfunction
   function! l:c.notify(method, params) abort
