@@ -62,28 +62,53 @@ function! lsc#diagnostics#forFile(file_path) abort
 endfunction
 
 function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
-  if exists('g:lsc_enable_diagnostics') && !g:lsc_enable_diagnostics
+  if (exists('g:lsc_enable_diagnostics') && !g:lsc_enable_diagnosticsa)
+      \ || (empty(a:diagnostics) && !has_key(s:file_diagnostics, a:file_path))
     return
   endif
-  if empty(a:diagnostics) && !has_key(s:file_diagnostics, a:file_path)
-    return
-  endif
+  let l:visible_change = v:true
   if !empty(a:diagnostics)
     if has_key(s:file_diagnostics, a:file_path) &&
         \ s:file_diagnostics[a:file_path].lsp_diagnostics == a:diagnostics
       return
     endif
+    if exists('s:highest_used_diagnostic')
+      if lsc#file#compare(s:highest_used_diagnostic, a:file_path) >= 0
+        if len(
+            \ get(
+            \   get(s:file_diagnostics, a:file_path, {}),
+            \   'lsp_diagnostics', []
+            \ )
+            \) > len(a:diagnostics)
+          unlet s:highest_used_diagnostic
+        endif
+      else
+        let l:visible_change = v:false
+      endif
+    endif
     let s:file_diagnostics[a:file_path] =
         \ s:Diagnostics(a:file_path, a:diagnostics)
   else
     unlet s:file_diagnostics[a:file_path]
+    if exists('s:highest_used_diagnostic')
+       if lsc#file#compare(s:highest_used_diagnostic, a:file_path) >= 0
+         unlet s:highest_used_diagnostic
+       else
+         let l:visible_change = v:false
+       endif
+    endif
   endif
   let l:bufnr = lsc#file#bufnr(a:file_path)
   if l:bufnr != -1
     call s:UpdateWindowStates(a:file_path)
     call lsc#highlights#updateDisplayed(l:bufnr)
   endif
-  call s:UpdateQuickFix()
+  if l:visible_change
+    if exists('s:quickfix_debounce')
+      call timer_stop(s:quickfix_debounce)
+    endif
+    let s:quickfix_debounce = timer_start(100, funcref('<SID>UpdateQuickFix'))
+  endif
   if exists('#User#LSCDiagnosticsChange')
     doautocmd <nomodeline> User LSCDiagnosticsChange
   endif
@@ -203,7 +228,8 @@ function! lsc#diagnostics#showInQuickFix() abort
   copen
 endfunction
 
-function! s:UpdateQuickFix() abort
+function! s:UpdateQuickFix(...) abort
+  unlet s:quickfix_debounce
   let l:current = getqflist({'context': 1, 'idx': 1, 'items': 1})
   let l:context = get(l:current, 'context', 0)
   if type(l:context) != type({}) ||
@@ -234,15 +260,65 @@ endfunction
 
 function! s:AllDiagnostics() abort
   let l:all_diagnostics = []
-  let l:files = sort(keys(s:file_diagnostics), function('lsc#file#compare'))
+  let l:files = keys(s:file_diagnostics)
+  if exists('s:highest_used_diagnostic')
+    call filter(l:files, funcref('<SID>IsUsed', [s:highest_used_diagnostic]))
+  elseif len(l:files) > 500
+    let l:files = s:First500(l:files)
+  endif
+  call sort(l:files, funcref('lsc#file#compare'))
   for l:file_path in l:files
     let l:diagnostics = s:file_diagnostics[l:file_path]
     call extend(l:all_diagnostics, l:diagnostics.ListItems())
     if len(l:all_diagnostics) >= 500
+      let s:highest_used_diagnostic = l:file_path
       break
     endif
   endfor
   return l:all_diagnostics
+endfunction
+function! s:IsUsed(highest_used, idx, to_check) abort
+  return lsc#file#compare(a:highest_used, a:to_check) >= 0
+endfunction
+function! s:First500(file_list) abort
+  if !exists('*<SID>Rand')
+    if exists('*rand')
+      function! s:Rand(max) abort
+        return rand() % a:max
+      endfunction
+    elseif has('nvim-0.4.0')
+      function! s:Rand(max) abort
+        return luaeval('math.random(0,'.string(a:max - 1).')')
+      endfunction
+    else
+      call lsc#message#error('Missing support for rand().'
+          \.' :LSClientAllDiagnostics may be inconsistent when there'
+          \.' are more than 500 files with diagnostics.')
+      return a:file_list[:500]
+    endif
+  endif
+  let l:result = []
+  let l:search_in = a:file_list
+  while len(l:result) != 500
+    let l:pivot = l:search_in[s:Rand(len(l:search_in))]
+    let l:accept = []
+    let l:reject = []
+    for l:file in l:search_in
+      if lsc#file#compare(l:pivot, l:file) < 0
+        call add(l:reject, l:file)
+      else
+        call add(l:accept, l:file)
+      endif
+    endfor
+    let l:need = 500 - len(l:result)
+    if len(l:accept) > l:need
+      let l:search_in = l:accept
+    else
+      call extend(l:result, l:accept)
+      let l:search_in = l:reject
+    endif
+  endwhile
+  return l:result
 endfunction
 
 " Clear the LSC controlled location list for the current window.
@@ -323,85 +399,82 @@ function! lsc#diagnostics#echoForLine() abort
 endfunction
 
 function! s:Diagnostics(file_path, lsp_diagnostics) abort
-  let l:diagnostics = {
-      \ 'file_path': a:file_path,
+  return {
       \ 'lsp_diagnostics': a:lsp_diagnostics,
+      \ 'Highlights': funcref('<SID>DiagnosticsHighlights'),
+      \ 'ListItems': funcref('<SID>DiagnosticsListItems', [a:file_path]),
+      \ 'ByLine': funcref('<SID>DiagnosticsByLine'),
       \}
-  function! l:diagnostics.Highlights() abort
-    if !has_key(l:self, '_highlights')
-      let l:self._highlights = []
-      for l:diagnostic in l:self.lsp_diagnostics
-        call add(l:self._highlights, {
-            \ 'group': s:SeverityGroup(l:diagnostic.severity),
-            \ 'severity': l:diagnostic.severity,
-            \ 'ranges': lsc#convert#rangeToHighlights(l:diagnostic.range),
-            \})
-      endfor
+endfunction
+function! s:DiagnosticsHighlights() abort dict
+  if !has_key(l:self, '_highlights')
+    let l:self._highlights = []
+    for l:diagnostic in l:self.lsp_diagnostics
+      call add(l:self._highlights, {
+          \ 'group': s:SeverityGroup(l:diagnostic.severity),
+          \ 'severity': l:diagnostic.severity,
+          \ 'ranges': lsc#convert#rangeToHighlights(l:diagnostic.range),
+          \})
+    endfor
+  endif
+  return l:self._highlights
+endfunction
+function! s:DiagnosticsListItems(file_path) abort dict
+  if !has_key(l:self, '_list_items')
+    let l:self._list_items = []
+    let l:bufnr = lsc#file#bufnr(a:file_path)
+    if l:bufnr == -1
+      let l:file_ref = {'filename': fnamemodify(a:file_path, ':.')}
+    else
+      let l:file_ref = {'bufnr': l:bufnr}
     endif
-    return l:self._highlights
-  endfunction
-  function! l:diagnostics.ListItems() abort
-    if !has_key(l:self, '_list_items')
-      let l:self._list_items = []
-      let l:bufnr = lsc#file#bufnr(l:self.file_path)
-      if l:bufnr == -1
-        let l:file_ref = {'filename': fnamemodify(l:self.file_path, ':.')}
+    for l:diagnostic in l:self.lsp_diagnostics
+      let l:item = {
+          \ 'lnum': l:diagnostic.range.start.line + 1,
+          \ 'col': l:diagnostic.range.start.character + 1,
+          \ 'text': s:DiagnosticMessage(l:diagnostic),
+          \ 'type': s:SeverityType(l:diagnostic.severity)
+          \}
+      call extend(l:item, l:file_ref)
+      call add(l:self._list_items, l:item)
+    endfor
+    call sort(l:self._list_items, 'lsc#util#compareQuickFixItems')
+  endif
+  return l:self._list_items
+endfunction
+function! s:DiagnosticsByLine() abort dict
+  if !has_key(l:self, '_by_line')
+    let l:self._by_line = {}
+    for l:diagnostic in l:self.lsp_diagnostics
+      let l:start_line = string(l:diagnostic.range.start.line + 1)
+      if !has_key(l:self._by_line, l:start_line)
+        let l:line = []
+        let l:self._by_line[l:start_line] = l:line
       else
-        let l:file_ref = {'bufnr': l:bufnr}
+        let l:line = l:self._by_line[l:start_line]
       endif
-      for l:diagnostic in l:self.lsp_diagnostics
-        let l:item = {
-            \ 'lnum': l:diagnostic.range.start.line + 1,
-            \ 'col': l:diagnostic.range.start.character + 1,
-            \ 'text': s:DiagnosticMessage(l:diagnostic),
-            \ 'type': s:SeverityType(l:diagnostic.severity)
-            \}
-        call extend(l:item, l:file_ref)
-        call add(l:self._list_items, l:item)
-      endfor
-      call sort(l:self._list_items, 'lsc#util#compareQuickFixItems')
-    endif
-    return l:self._list_items
-  endfunction
-  function! l:diagnostics.ByLine() abort
-    if !has_key(l:self, '_by_line')
-      let l:self._by_line = {}
-      for l:diagnostic in l:self.lsp_diagnostics
-        let l:start_line = string(l:diagnostic.range.start.line + 1)
-        if !has_key(l:self._by_line, l:start_line)
-          let l:line = []
-          let l:self._by_line[l:start_line] = l:line
-        else
-          let l:line = l:self._by_line[l:start_line]
-        endif
-        let l:simple = {
-            \ 'message': s:DiagnosticMessage(l:diagnostic),
-            \ 'range': l:diagnostic.range,
-            \ 'severity': s:SeverityLabel(l:diagnostic.severity),
-            \}
-        call add(l:line, l:simple)
-      endfor
-      for l:line in values(l:self._by_line)
-        call sort(l:line, function('<SID>CompareRanges'))
-      endfor
-    endif
-    return l:self._by_line
-  endfunction
-  return l:diagnostics
+      let l:simple = {
+          \ 'message': s:DiagnosticMessage(l:diagnostic),
+          \ 'range': l:diagnostic.range,
+          \ 'severity': s:SeverityLabel(l:diagnostic.severity),
+          \}
+      call add(l:line, l:simple)
+    endfor
+    for l:line in values(l:self._by_line)
+      call sort(l:line, function('<SID>CompareRanges'))
+    endfor
+  endif
+  return l:self._by_line
 endfunction
 
 function! s:EmptyDiagnostics() abort
   if !exists('s:empty_diagnostics')
-    let s:empty_diagnostics = {'lsp_diagnostics': []}
-    function! s:empty_diagnostics.Highlights() abort
-      return []
-    endfunction
-    function! s:empty_diagnostics.ListItems() abort
-      return []
-    endfunction
-    function! s:empty_diagnostics.ByLine() abort
-      return {}
-    endfunction
+    let s:empty_diagnostics = {
+        \ 'lsp_diagnostics': [],
+        \ 'Highlights': {->[]},
+        \ 'ListItems': {->[]},
+        \ 'ByLine': {->{}},
+        \}
   endif
   return s:empty_diagnostics
 endfunction

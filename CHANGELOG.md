@@ -16,6 +16,7 @@
 
 **Enhancements**
 - Improve performance when the language server sends many diagnostics updates.
+- Improve performance for periods of high message throughput.
 
 # 0.4.0
 

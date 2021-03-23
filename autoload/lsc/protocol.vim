@@ -3,8 +3,8 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
       \ '_call_id': 0,
       \ '_in': [],
       \ '_out': [],
-      \ '_buffer': '',
-      \ '_on_message': lsc#util#async(a:on_message),
+      \ '_buffer': [],
+      \ '_on_message': lsc#util#async('message handler', a:on_message),
       \ '_callbacks': {},
       \}
   function! l:c.request(method, params, callback, options) abort
@@ -12,7 +12,7 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
     let l:message = s:Format(a:method, a:params, l:self._call_id)
     let l:self._callbacks[l:self._call_id] = get(a:options, 'sync', v:false)
         \ ? [a:callback]
-        \ : [lsc#util#async(a:callback)]
+        \ : [lsc#util#async('request callback for '.a:method, a:callback)]
     call l:self._send(l:message)
   endfunction
   function! l:c.notify(method, params) abort
@@ -28,7 +28,7 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
     call l:self._channel.send(s:Encode(a:message))
   endfunction
   function! l:c._recieve(message) abort
-    let l:self._buffer .= a:message
+    call add(l:self._buffer, a:message)
     if has_key(l:self, '_consume') | return | endif
     if s:Consume(l:self)
       let l:self._consume = timer_start(0,
@@ -67,25 +67,30 @@ function! s:Encode(message) abort
   return 'Content-Length: '.l:length."\r\n\r\n".l:encoded
 endfunction
 
-" Reads from the buffer for server_name and processes the message. Continues to
-" process messages until the buffer is empty. Does nothing if a complete message
-" is not available.
+" Reads from the buffer for [server] and processes a message, if one is
+" available.
+"
+" Returns true if there are more messages to consume in the buffer.
 function! s:Consume(server) abort
-  let l:message = a:server._buffer
+  let l:buffer = a:server._buffer
+  let l:message = l:buffer[0]
   let l:end_of_header = stridx(l:message, "\r\n\r\n")
   if l:end_of_header < 0
-    return v:false
+    return s:Incomplete(l:buffer)
   endif
   let l:headers = split(l:message[:l:end_of_header - 1], "\r\n")
   let l:message_start = l:end_of_header + len("\r\n\r\n")
   let l:message_end = l:message_start + s:ContentLength(l:headers)
   if len(l:message) < l:message_end
-    " Wait for the rest of the message to get buffered
-    return v:false
+    return s:Incomplete(l:buffer)
   endif
-  let l:payload = l:message[l:message_start : l:message_end-1]
-  let l:remaining_message = l:message[l:message_end : ]
-  let a:server._buffer = l:remaining_message
+  if len(l:message) == l:message_end
+    let l:payload = l:message[l:message_start :]
+    call remove(l:buffer, 0)
+  else
+    let l:payload = l:message[l:message_start : l:message_end-1]
+    let l:buffer[0] = l:message[l:message_end :]
+  endif
   try
     if len(l:payload) > 0
       let l:content = json_decode(l:payload)
@@ -101,7 +106,16 @@ function! s:Consume(server) abort
     call lsc#util#shift(a:server._out, 10, l:content)
     call s:Dispatch(l:content, a:server._on_message, a:server._callbacks)
   endif
-  return l:remaining_message !=# ''
+  return !empty(l:buffer)
+endfunction
+
+function! s:Incomplete(buffer) abort
+  if len(a:buffer) == 1 | return v:false | endif
+  " Merge 2 messages
+  let l:first = remove(a:buffer, 0)
+  let l:second = remove(a:buffer, 0)
+  call insert(a:buffer, l:first.l:second)
+  return v:true
 endfunction
 
 " Finds the header with 'Content-Length' and returns the integer value
