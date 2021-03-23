@@ -291,7 +291,7 @@ function! s:First500(file_list) abort
         return luaeval('math.random(0,'.string(a:max).')')
       endfunction
     else
-      lsc#message#error('Missing support for rand().'
+      call lsc#message#error('Missing support for rand().'
           \.' :LSClientAllDiagnostics may be inconsistent when there'
           \.' are more than 500 files with diagnostics.')
       return a:file_list[:500]
