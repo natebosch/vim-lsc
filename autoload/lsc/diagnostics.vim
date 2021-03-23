@@ -288,7 +288,7 @@ function! s:First500(file_list) abort
       endfunction
     elseif has('nvim-0.4.0')
       function! s:Rand(max) abort
-        return luaeval('math.random(0,'.string(a:max).')')
+        return luaeval('math.random(0,'.string(a:max - 1).')')
       endfunction
     else
       call lsc#message#error('Missing support for rand().'
