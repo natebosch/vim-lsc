@@ -62,7 +62,7 @@ function! lsc#diagnostics#forFile(file_path) abort
 endfunction
 
 function! lsc#diagnostics#setForFile(file_path, diagnostics) abort
-  if (exists('g:lsc_enable_diagnostics') && !g:lsc_enable_diagnosticsa)
+  if (exists('g:lsc_enable_diagnostics') && !g:lsc_enable_diagnostics)
       \ || (empty(a:diagnostics) && !has_key(s:file_diagnostics, a:file_path))
     return
   endif
