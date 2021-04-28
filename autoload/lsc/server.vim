@@ -11,6 +11,7 @@ if !exists('s:initialized')
   " - capabilities. Configuration for client/server interaction.
   " - filetypes. List of filetypes handled by this server.
   " - logs. The last 100 logs from `window/logMessage`.
+  " - roots. All workspace folders seen by this server.
   " - config. Config dict. Contains:
   "   - name: Same as the key into `s:servers`
   "   - command: Executable
@@ -18,12 +19,14 @@ if !exists('s:initialized')
   "   - message_hooks: (optional) Functions call to override params
   "   - workspace_config: (optional) Arbitrary data to send as
   "     `workspace/didChangeConfiguration` settings on startup.
+  "   - WorkspaceRoot: (optional) Callback to discover the root of the project
+  "     containing a given file path.
   let s:servers = {}
   let s:initialized = v:true
 endif
 
-function! lsc#server#start(server) abort
-  call s:Start(a:server)
+function! lsc#server#start(server, file_path) abort
+  call s:Start(a:server, a:file_path)
 endfunction
 
 function! lsc#server#status(filetype) abort
@@ -99,9 +102,10 @@ function! lsc#server#restart() abort
   let l:server = s:servers[l:server_name]
   let l:old_status = l:server.status
   if l:old_status ==# 'starting' || l:old_status ==# 'running'
+    let l:server.started_from = lsc#file#fullPath()
     call s:Kill(l:server, 'restarting', v:null)
   else
-    call s:Start(l:server)
+    call s:Start(l:server, lsc#file#fullPath())
   endif
 endfunction
 
@@ -119,7 +123,7 @@ function! lsc#server#userCall(method, params, callback) abort
 endfunction
 
 " Start `server` if it isn't already running.
-function! s:Start(server) abort
+function! s:Start(server, file_path) abort
   if has_key(a:server, '_channel')
     " Server is already running
     return
@@ -139,12 +143,30 @@ function! s:Start(server) abort
   else
     let l:trace_level = 'off'
   endif
+  try
+    let l:root = has_key(a:server.config, 'WorkspaceRoot')
+        \ ? a:server.config.WorkspaceRoot(a:file_path)
+        \ : lsc#file#cwd()
+  catch
+    call lsc#message#error(
+        \ 'Disabling workspace roots due to error: '.string(v:exception))
+    let l:root = lsc#file#cwd()
+    unlet a:server.config.WorkspaceRoot
+  endtry
+  let a:server.roots = [l:root]
+  let l:capabilities = s:ClientCapabilities(a:server.config)
   let l:params = {'processId': getpid(),
       \ 'clientInfo': {'name': 'vim-lsc'},
-      \ 'rootUri': lsc#uri#documentUri(lsc#file#cwd()),
-      \ 'capabilities': s:ClientCapabilities(),
-      \ 'trace': l:trace_level
+      \ 'rootUri': lsc#uri#documentUri(l:root),
+      \ 'capabilities': l:capabilities,
+      \ 'trace': l:trace_level,
       \}
+  if l:capabilities.workspace.workspaceFolders
+    let l:params.workspaceFolders = [{
+      \   'uri': lsc#uri#documentUri(l:root),
+      \   'name': fnamemodify(l:root, ':.')
+      \ }]
+  endif
   call a:server._initialize(l:params, funcref('<SID>OnInitialize', [a:server]))
 endfunction
 
@@ -164,7 +186,7 @@ function! s:OnInitialize(server, init_result) abort
 endfunction
 
 " Missing value means no support
-function! s:ClientCapabilities() abort
+function! s:ClientCapabilities(config) abort
   let l:applyEdit = v:false
   if !exists('g:lsc_enable_apply_edit') || g:lsc_enable_apply_edit
     let l:applyEdit = v:true
@@ -173,6 +195,8 @@ function! s:ClientCapabilities() abort
     \ 'workspace': {
     \   'applyEdit': l:applyEdit,
     \   'configuration': v:true,
+    \   'workspaceFolders':
+    \      has_key(a:config, 'WorkspaceRoot') ? v:true : v:false,
     \ },
     \ 'textDocument': {
     \   'synchronization': {
@@ -221,7 +245,7 @@ function! lsc#server#enable() abort
   endif
   let l:server = s:servers[g:lsc_servers_by_filetype[&filetype]]
   let l:server.config.enabled = v:true
-  call s:Start(l:server)
+  call s:Start(l:server, lsc#file#fullPath())
 endfunction
 
 function! lsc#server#register(filetype, config) abort
@@ -294,6 +318,7 @@ function! lsc#server#register(filetype, config) abort
   endfunction
   function! l:server.on_exit() abort
     unlet l:self._channel
+    unlet l:self.roots
     let l:old_status = l:self.status
     if l:old_status ==# 'starting'
       let l:self.status= 'failed'
@@ -315,7 +340,9 @@ function! lsc#server#register(filetype, config) abort
       call lsc#cursor#clean()
     endfor
     if l:old_status ==# 'restarting'
-      call s:Start(l:self)
+      let l:started_from = l:self.started_from
+      unlet l:self.started_from
+      call s:Start(l:self, l:started_from)
     endif
   endfunction
   function! l:server.find_config(item) abort

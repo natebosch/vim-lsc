@@ -4,10 +4,13 @@ import 'package:json_rpc_2/json_rpc_2.dart';
 
 class StubServer {
   final Peer peer;
+  Future<Map<String, dynamic>> get initialization => _initialization.future;
+  final _initialization = Completer<Map<String, dynamic>>();
 
   StubServer(this.peer, {Map<String, dynamic> capabilities = const {}}) {
     peer
-      ..registerMethod('initialize', (_) {
+      ..registerMethod('initialize', (Parameters p) {
+        _initialization.complete(p.asMap.cast<String, dynamic>());
         return {'capabilities': capabilities};
       })
       ..registerMethod('initialized', (_) {
