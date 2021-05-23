@@ -20,6 +20,9 @@ endif
 if !exists('g:lsc_enable_popup_syntax')
   let g:lsc_enable_popup_syntax = v:true
 endif
+if !exists('g:lsc_close_on_select')
+  let g:lsc_close_on_select = v:false
+endif
 
 command! LSClientGoToDefinitionSplit
     \ call lsc#reference#goToDefinition(<q-mods>, 1)
@@ -159,6 +162,9 @@ function! LSCEnsureCurrentWindowState() abort
   call lsc#diagnostics#updateCurrentWindow()
   call lsc#highlights#update()
   call lsc#cursor#onWinEnter()
+  if g:lsc_close_on_select
+    cclose
+  endif
 endfunction
 
 " Run `function` if LSC is enabled for the current filetype.
