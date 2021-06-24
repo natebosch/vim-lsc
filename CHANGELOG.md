@@ -8,6 +8,9 @@
 - Avoid a state where no document highlights reference calls are made following
   a server restart.
 - Avoid creating public functions for callbacks which should be temporary.
+- Fix character positions when the cursor is on a line following multibyte
+  characters for recent versions of vim. Older versions and neovim continue to
+  have incorrect positions.
 
 **Minor breaking changes**
 - Remove `noselect` from the default `completeopts` used during autocompletion.
