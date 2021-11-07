@@ -159,6 +159,24 @@ function! s:OnInitialize(server, init_result) abort
     call a:server.notify('workspace/didChangeConfiguration', {
         \ 'settings': a:server.config.workspace_config
         \})
+  elseif has_key(a:server.config, 'settings_json_path')
+    let l:json_path = a:server.config.settings_json_path
+    if has_key(a:server.config, 'workspace_root_file')
+        let l:root_file = a:server.config.workspace_root_file
+        let l:file_path = findfile(l:root_file, ';')
+        let l:parent_dir = fnamemodify(l:file_path, ':p:h')
+    elseif has_key(a:server.config, 'workspace_root_dir')
+        let l:root_dir = a:server.config.workspace_root_dir
+        let l:file_path = finddir(l:root_dir, ';')
+        let l:parent_dir = fnamemodify(l:file_path, ':h')
+    else
+        let l:parent_dir = "."
+    endif
+    let l:json_real_path = l:parent_dir . "/" . l:json_path
+    let l:settings_dict = json_decode(join(readfile(l:json_real_path), ''))
+    call a:server.notify('workspace/didChangeConfiguration', {
+        \ 'settings': settings_dict
+        \})
   endif
   call lsc#file#trackAll(a:server)
 endfunction
