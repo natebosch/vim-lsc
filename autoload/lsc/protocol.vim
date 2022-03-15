@@ -27,7 +27,7 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
     call lsc#util#shift(l:self._in, 10, a:message)
     call l:self._channel.send(s:Encode(a:message))
   endfunction
-  function! l:c._recieve(message) abort
+  function! l:c._receive(message) abort
     call add(l:self._buffer, a:message)
     if has_key(l:self, '_consume') | return | endif
     if s:Consume(l:self)
@@ -35,7 +35,7 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
           \ function('<SID>HandleTimer', [l:self]))
     endif
   endfunction
-  let l:channel = lsc#channel#open(a:command, l:c._recieve, a:on_err, a:on_exit)
+  let l:channel = lsc#channel#open(a:command, l:c._receive, a:on_err, a:on_exit)
   if type(l:channel) == type(v:null)
     return v:null
   endif
