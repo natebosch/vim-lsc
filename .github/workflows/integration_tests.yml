@@ -26,10 +26,10 @@ jobs:
     - name: dart pub upgrade
       working-directory: test/integration
       run: dart pub upgrade
-    - uses: cachix/install-nix-action@v10
+    - uses: cachix/install-nix-action@v17
       with:
         nix_path: nixpkgs=channel:nixos-unstable
-    - uses: workflow/nix-shell-action@v1
+    - uses: workflow/nix-shell-action@v3.0.2
       with:
         packages: xvfb-run,vim
         script: cd test/integration/; xvfb-run dart test
