@@ -46,6 +46,10 @@ class Vim {
     final result = await Process.run(
         'vim', [..._serverNameArg, '--remote-expr', expression]);
     final stdout = result.stdout as String;
+    final stderr = result.stderr as String;
+    if (stderr.isNotEmpty) {
+      throw StateError('Stderr: $stderr');
+    }
     return stdout.endsWith('\n')
         ? stdout.substring(0, stdout.length - 1)
         : stdout;
@@ -57,9 +61,15 @@ class Vim {
         workingDirectory: _workingDirectory);
     final exitCode = await result.exitCode;
     assert(exitCode == 0);
-    final openFile = await expr('expand(\'%\')');
-    assert(openFile == fileName,
-        '$openFile should be $fileName, ${result.stdout} ${result.stderr}');
+    final stderr = result.stderr as String;
+    if (stderr.isNotEmpty) {
+      throw StateError('Stderr: $stderr');
+    }
+    for (var i = 0; i < 3; i++) {
+      final openFile = await expr('expand(\'%\')');
+      if (openFile == fileName) return;
+    }
+    throw StateError('Failed to open file $fileName');
   }
 
   /// Returns the last [count] messages from `:messages`.
