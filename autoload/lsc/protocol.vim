@@ -107,7 +107,7 @@ function! s:Consume(server) abort
     call lsc#message#error('Could not decode message: ['.l:payload.']')
   endtry
   if exists('l:content')
-    call lsc#util#shift(a:server._out, s:log_size, l:content)
+    call lsc#util#shift(a:server._out, s:log_size, deepcopy(l:content))
     call s:Dispatch(l:content, a:server._on_message, a:server._callbacks)
   endif
   return !empty(l:buffer)
