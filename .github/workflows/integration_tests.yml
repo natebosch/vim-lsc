@@ -18,21 +18,18 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: dart-lang/setup-dart@v0.3
+    - uses: dart-lang/setup-dart@v1.3
       with:
         sdk: stable
-    - uses: rhysd/action-setup-vim@v1
-      with:
-        version: nightly
-    - name: check vim
-      run: vim --version; vim --version | grep +clientserver
     - name: checkout
       uses: actions/checkout@v2
-    - name: pub upgrade
+    - name: dart pub upgrade
       working-directory: test/integration
-      run: pub upgrade
-    - name: run integration tests
-      uses: GabrielBB/xvfb-action@v1
+      run: dart pub upgrade
+    - uses: cachix/install-nix-action@v17
       with:
-        working-directory: test/integration
-        run: pub run test
+        nix_path: nixpkgs=channel:nixos-unstable
+    - uses: workflow/nix-shell-action@v3.0.2
+      with:
+        packages: xvfb-run,vim_configurable
+        script: cd test/integration/; xvfb-run dart test

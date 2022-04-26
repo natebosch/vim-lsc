@@ -1,3 +1,8 @@
+if !exists('s:initialized')
+  let s:log_size = 10
+  let s:initialized = v:true
+endif
+
 function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
   let l:c = {
       \ '_call_id': 0,
@@ -17,14 +22,13 @@ function! lsc#protocol#open(command, on_message, on_err, on_exit) abort
   endfunction
   function! l:c.notify(method, params) abort
     let l:message = s:Format(a:method, a:params, v:null)
-    cal lsc#util#shift(l:self._in, 10, l:message)
     call l:self._send(l:message)
   endfunction
   function! l:c.respond(id, result) abort
     call l:self._send({'id': a:id, 'result': a:result})
   endfunction
   function! l:c._send(message) abort
-    call lsc#util#shift(l:self._in, 10, a:message)
+    call lsc#util#shift(l:self._in, s:log_size, a:message)
     call l:self._channel.send(s:Encode(a:message))
   endfunction
   function! l:c._recieve(message) abort
@@ -103,7 +107,7 @@ function! s:Consume(server) abort
     call lsc#message#error('Could not decode message: ['.l:payload.']')
   endtry
   if exists('l:content')
-    call lsc#util#shift(a:server._out, 10, l:content)
+    call lsc#util#shift(a:server._out, s:log_size, deepcopy(l:content))
     call s:Dispatch(l:content, a:server._on_message, a:server._callbacks)
   endif
   return !empty(l:buffer)
