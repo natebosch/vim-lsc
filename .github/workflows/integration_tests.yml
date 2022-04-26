@@ -31,5 +31,5 @@ jobs:
         nix_path: nixpkgs=channel:nixos-unstable
     - uses: workflow/nix-shell-action@v3.0.2
       with:
-        packages: xvfb-run,vim
+        packages: xvfb-run,vim_configurable
         script: cd test/integration/; xvfb-run dart test
