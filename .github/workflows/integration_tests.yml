@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: dart-lang/setup-dart@v0.3
+    - uses: dart-lang/setup-dart@v1.3
       with:
         sdk: stable
     - uses: rhysd/action-setup-vim@v1
@@ -35,4 +35,4 @@ jobs:
       uses: GabrielBB/xvfb-action@v1
       with:
         working-directory: test/integration
-        run: pub run test
+        run: dart test
