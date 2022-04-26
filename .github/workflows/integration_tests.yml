@@ -21,18 +21,16 @@ jobs:
     - uses: dart-lang/setup-dart@v1.3
       with:
         sdk: stable
-    - uses: rhysd/action-setup-vim@v1.2.11
-      with:
-        version: stable
-    - name: check vim
-      run: vim --version; vim --version | grep +clientserver
     - name: checkout
       uses: actions/checkout@v2
-    - name: pub upgrade
+    - name: dart pub upgrade
       working-directory: test/integration
-      run: pub upgrade
-    - name: run integration tests
-      uses: GabrielBB/xvfb-action@v1
+      run: dart pub upgrade
+    - uses: cachix/install-nix-action@v10
       with:
-        working-directory: test/integration
-        run: dart test
+        nix_path: nixpkgs=channel:nixos-unstable
+    - uses: workflow/nix-shell-action@v1
+      working-directory: test/integration
+      with:
+        packages: xvfb-run,vim
+        script: xvfb-run dart test
