@@ -8,6 +8,8 @@
 - Avoid a state where no document highlights reference calls are made following
   a server restart.
 - Avoid creating public functions for callbacks which should be temporary.
+- Fix file edits in buffers that aren't current when the current buffer is
+  shorter than the buffer being edited.
 
 **Minor breaking changes**
 - Remove `noselect` from the default `completeopts` used during autocompletion.
