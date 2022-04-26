@@ -58,7 +58,8 @@ class Vim {
     final exitCode = await result.exitCode;
     assert(exitCode == 0);
     final openFile = await expr('expand(\'%\')');
-    assert(openFile == fileName);
+    assert(openFile == fileName,
+        '$openFile should be $fileName, ${result.stdout} ${result.stderr}');
   }
 
   /// Returns the last [count] messages from `:messages`.
