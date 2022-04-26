@@ -21,9 +21,9 @@ jobs:
     - uses: dart-lang/setup-dart@v1.3
       with:
         sdk: stable
-    - uses: rhysd/action-setup-vim@v1
+    - uses: rhysd/action-setup-vim@v1.2.11
       with:
-        version: nightly
+        version: stable
     - name: check vim
       run: vim --version; vim --version | grep +clientserver
     - name: checkout
