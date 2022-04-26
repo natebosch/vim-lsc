@@ -119,7 +119,7 @@ function! lsc#edit#apply(workspace_edit) abort
   endif
 
   try
-    call s:ApplyAll(l:changes)
+    keepjumps keepalt call s:ApplyAll(l:changes)
   finally
     if len(l:alternate) > 0 | let @#=l:alternate | endif
     if l:old_buffer != bufnr('%') | execute 'buffer' l:old_buffer | endif
@@ -135,19 +135,16 @@ function! s:ApplyAll(changes) abort
   for [l:uri, l:edits] in items(a:changes)
     let l:file_path = lsc#uri#documentPath(l:uri)
     let l:bufnr = lsc#file#bufnr(l:file_path)
-    let l:cmd = 'keepjumps keepalt'
-    if l:bufnr !=# -1
-      let l:cmd .= ' b '.l:bufnr
+    if l:bufnr == -1
+      execute 'edit '.l:file_path
     else
-      let l:cmd .= ' edit '.l:file_path
-    endif
-    let l:foldenable = &foldenable
-    if l:foldenable
-      let l:cmd .= ' | set nofoldenable'
+      execute 'b '.string(l:bufnr)
     endif
     call sort(l:edits, '<SID>CompareEdits')
+    let l:foldenable = &foldenable
+    let l:cmd = 'set nofoldenable'
     for l:idx in range(0, len(l:edits) - 1)
-      let l:cmd .= ' | silent execute "keepjumps normal! '
+      let l:cmd .= ' | silent execute "normal! '
       let l:cmd .= s:Apply(l:edits[l:idx])
       let l:cmd .= '\<C-r>=l:edits['.string(l:idx).'].newText\<cr>"'
     endfor
