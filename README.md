@@ -97,13 +97,15 @@ killed manually instead.
 
 ### Diagnostics
 
-Errors, warnings, and hints reported by the server are highlighted in the buffer.
-When the cursor is on a line with a diagnostic the message will be displayed. If
-there are multiple diagnostics on a line the one closest to the cursor will be
-displayed.
+Errors, warnings, and hints reported by the server are highlighted in the
+buffer. When the cursor is on a line with a diagnostic the message will be
+displayed. If there are multiple diagnostics on a line the one closest to the
+cursor will be displayed.
 
 Diagnostics are also reported in the location list for each window which has the
-buffer open.
+buffer open. **Tip:** Use `:lbefore` or `:lafter` to jump to the next diagnostic
+before or after the cursor position. If the location list was overwritten it can
+be restored with `:LSCLientWindowDiagnostics`.
 
 Run `:LSClientAllDiagnostics` to populate, and maintain, a list of all
 diagnostics across the project in the quickfix list.

@@ -315,6 +315,9 @@ If the location list is in use by a list other than the LSC diagnostics you
 won't see updates as diagnostics change. Call |:LSClientWindowDiagnostics| to
 restore the LSC diagnostics list.
 
+While vim-lsc is maintaining the location list |:lbefore| and |:lafter| will
+jump to the previous or next diagnostic around the cursor.
+
                                                 *lsc-configure-hover*
                                                 *g:lsc_preview_split_direction*
 By default the `:LSClientShowHover` command splits the window following
