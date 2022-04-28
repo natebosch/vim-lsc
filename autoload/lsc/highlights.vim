@@ -7,6 +7,7 @@ endfunction
 
 " Refresh highlight matches in the current window.
 function! lsc#highlights#update() abort
+  if !get(g:, 'lsc_diagnostic_highlights', v:true) | return | endif
   if s:CurrentWindowIsFresh() | return | endif
   call lsc#highlights#clear()
   if &diff | return | endif
