@@ -42,6 +42,8 @@ command! LSClientSignatureHelp call lsc#signaturehelp#getSignatureHelp()
 command! LSClientRestartServer call <SID>IfEnabled('lsc#server#restart')
 command! LSClientDisable call lsc#server#disable()
 command! LSClientEnable call lsc#server#enable()
+command! LSClientDisableDiagnosticHighlights call <SID>DisableHighlights()
+command! LSClientEnableDiagnosticHighlights call <SID>EnableHighlights()
 
 if !exists('g:lsc_enable_apply_edit') || g:lsc_enable_apply_edit
   command! -nargs=? LSClientRename call lsc#edit#rename(<args>)
@@ -85,6 +87,16 @@ function! s:BuffersOfType(filetype) abort
     endif
   endfor
   return l:buffers
+endfunction
+
+function! s:DisableHighlights() abort
+  let g:lsc_enable_highlights = v:false
+  call lsc#util#winDo('call lsc#highlights#clear()')
+endfunction
+
+function! s:EnableHighlights() abort
+  let g:lsc_enable_highlights = v:true
+  call lsc#util#winDo('call lsc#highlights#update()')
 endfunction
 
 augroup LSC
