@@ -19,6 +19,8 @@
 **Enhancements**
 - Improve performance when the language server sends many diagnostics updates.
 - Improve performance for periods of high message throughput.
+- Add `g:lsc_diagnostic_highlights` config, and commands to enable and disable
+  diagnostic highlights.
 
 # 0.4.0
 
