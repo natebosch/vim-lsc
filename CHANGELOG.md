@@ -21,6 +21,8 @@
 - Improve performance for periods of high message throughput.
 - Add `g:lsc_diagnostic_highlights` config, and commands to enable and disable
   diagnostic highlights.
+- Add `g:lsc_block_complete_triggers` to override server config and disable
+  autocomplete after specific characters.
 
 # 0.4.0
 

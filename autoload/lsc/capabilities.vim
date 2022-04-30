@@ -11,6 +11,11 @@ function! lsc#capabilities#normalize(capabilities) abort
     if has_key(l:completion_provider, 'triggerCharacters')
       let l:normalized.completion.triggerCharacters =
           \ l:completion_provider['triggerCharacters']
+      let l:blocked = get(g:, 'lsc_block_complete_triggers', [])
+      if !empty(l:blocked)
+        call filter(l:normalized.completion.triggerCharacters,
+            \ 'index(l:blocked, v:val) < 0')
+      endif
     endif
   endif
   if has_key(a:capabilities, 'textDocumentSync')
