@@ -23,6 +23,7 @@ void main() {
   });
 
   tearDown(() async {
+    await testBed.vim.sendKeys('<C-\\><C-N>');
     await testBed.vim.sendKeys(':LSClientDisable<cr>');
     await testBed.vim.sendKeys(':%bwipeout!<cr>');
     await client.done;
@@ -46,6 +47,25 @@ void main() {
     await testBed.vim.waitForPopUpMenu();
     await testBed.vim.sendKeys('a<cr><esc>');
     expect(await testBed.vim.expr('getline(1)'), 'foo.abcd');
+  });
+
+  test('filter out trigger characters', () async {
+    await testBed.vim
+        .sendKeys(':let g:lsc_block_complete_triggers = ["{"]<cr>');
+    final server = StubServer(client, capabilities: {
+      'completionProvider': {
+        'triggerCharacters': ['.', '{']
+      },
+    });
+    var completeWasCalled = false;
+    server.peer.registerMethod('textDocument/completion', (Parameters _) {
+      // Thrown exception would be caught by JSON RPC.
+      completeWasCalled = true;
+    });
+    await server.initialized;
+    await testBed.vim.sendKeys('i{');
+    await Future.delayed(const Duration(seconds: 1));
+    expect(completeWasCalled, false);
   });
 
   test('autocomplete on 3 word characters', () async {

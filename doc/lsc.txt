@@ -267,6 +267,16 @@ automatically close the preview window after completion use the following:
  autocmd CompleteDone * silent! pclose
 <
 
+                                                *g:lsc_block_complete_triggers*
+Language Servers configure the characters that trigger autocomplete. In some
+cases a server may enable autocomplete for characters which are commonly
+followed by a newline, but the `<enter>` key gets captured by the popupmenu.
+Disable autocomplete for selected characters, overriding server configuration,
+with:
+>
+ let g:lsc_block_complete_triggers = ['{']
+<
+
                                                 *lsc-configure-completeopt*
                                                 *g:lsc_auto_completeopt*
 When using autocomplete this plugin will modify the buffer local setting
