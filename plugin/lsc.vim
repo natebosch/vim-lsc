@@ -25,6 +25,10 @@ command! LSClientGoToDefinitionSplit
     \ call lsc#reference#goToDefinition(<q-mods>, 1)
 command! LSClientGoToDefinition
     \ call lsc#reference#goToDefinition(<q-mods>, 0)
+command! LSClientGoToDeclarationSplit
+    \ call lsc#reference#goToDeclaration(<q-mods>, 1)
+command! LSClientGoToDeclaration
+    \ call lsc#reference#goToDeclaration(<q-mods>, 0)
 command! LSClientFindReferences call lsc#reference#findReferences()
 command! LSClientNextReference call lsc#reference#findNext(1)
 command! LSClientPreviousReference call lsc#reference#findNext(-1)

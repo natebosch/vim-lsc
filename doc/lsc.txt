@@ -76,6 +76,14 @@ will default to opening a vertical split, while >
 <
 will prefer a new tab.
 
+                                                *:LSClientGoToDeclaration*
+Similiar to |LSClientGoToDefinition| but expects only a single result.
+This is not compliant to the current protocol since it accepts multiple
+declaration results as well.
+
+                                                *:LSClientGoToDeclarationSplit*
+In accordance to |LSClientGoToDeclaration| and |LSClientGoToDefinitionSplit|.
+
                                                 *:LSClientFindReferences*
 Populate the |quickfix| with a list of location which reference the element
 under the cursor, including it's definition. Sends a "textDocument/references"

@@ -3,6 +3,8 @@ if !exists('s:initialized')
   let s:default_maps = {
       \ 'GoToDefinition': '<C-]>',
       \ 'GoToDefinitionSplit': ['<C-W>]', '<C-W><C-]>'],
+      \ 'GoToDeclaration': 'gd',
+      \ 'GoToDeclarationSplit': ['<C-W>]', '<C-W>gd'],
       \ 'FindReferences': 'gr',
       \ 'NextReference': '<C-n>',
       \ 'PreviousReference': '<C-p>',
@@ -54,6 +56,8 @@ function! lsc#config#mapKeys() abort
   for l:command in [
       \ 'GoToDefinition',
       \ 'GoToDefinitionSplit',
+      \ 'GoToDeclaration',
+      \ 'GoToDeclarationSplit',
       \ 'FindReferences',
       \ 'NextReference',
       \ 'PreviousReference',

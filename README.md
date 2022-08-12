@@ -148,6 +148,12 @@ using the default mappings) to jump to the location of the definition. When
 multiple definitions are available, the quickfix list will be opened.
 If the cursor moves before the server responds the response will be ignored.
 
+### Jump to declaration
+
+While the cursor is on any identifier call `LSClientGoToDeclaration` (`gd` if
+using the default mappings) to jump to the location of the declaration.
+If the cursor moves before the server responds the response will be ignored.
+
 ### Find references
 
 While the cursor is on any identifier call `LSClientFindReferences` (`gr` if

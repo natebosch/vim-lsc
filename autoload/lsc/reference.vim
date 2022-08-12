@@ -1,20 +1,28 @@
 let s:popup_id = 0
 
+function! lsc#reference#goToDeclaration(mods, issplit) abort
+  call lsc#file#flushChanges()
+  call lsc#server#userCall('textDocument/declaration',
+      \ lsc#params#documentPosition(),
+      \ lsc#util#gateResult('GoTo',
+      \   function('<SID>GoTo', ['declaration', a:mods, a:issplit])))
+endfunction
+
 function! lsc#reference#goToDefinition(mods, issplit) abort
   call lsc#file#flushChanges()
   call lsc#server#userCall('textDocument/definition',
       \ lsc#params#documentPosition(),
-      \ lsc#util#gateResult('GoToDefinition',
-      \   function('<SID>GoToDefinition', [a:mods, a:issplit])))
+      \ lsc#util#gateResult('GoTo',
+      \   function('<SID>GoTo', ['definition', a:mods, a:issplit])))
 endfunction
 
-function! s:GoToDefinition(mods, issplit, result) abort
+function! s:GoTo(label, mods, issplit, result) abort
   if type(a:result) == type(v:null) ||
       \ (type(a:result) == type([]) && len(a:result) == 0)
-    call lsc#message#error('No definition found')
+    call lsc#message#error('No'. a:label .'found')
     return
   endif
-  if type(a:result) == type([]) && len(a:result) == 1
+  if type(a:result) == type([]) && (a:label ==# 'declaration' || len(a:result) == 1)
     let l:location = a:result[0]
   elseif type(a:result) == type([]) && len(a:result) > 2
     call s:setQuickFixLocations('Definitions', a:result)
