@@ -50,9 +50,10 @@ COMMANDS                                        *lsc-commands*
                                                 *:LSClientGoToDefinition*
 Jump to the location defining the element under the cursor. Sends a
 "textDocument/definition" request with the location set to the cursor's
-position. If the cursor is not in the same position when the server responds
-the jump will be canceled. With |lsc-default-map| this command is bound to
-`<c-]>`.
+position. When multiple definitions are returned, the quickfix list will
+be opened to prompt the user for choice.  If the cursor is not in the same
+position when the server responds the jump will be canceled.
+With |lsc-default-map| this command is bound to `<c-]>`.
 
 If this version of vim supports |settagstack| the tag stack will also be
 updated to include this jump. Jump back with `<c-t>` or |:pop|, it is not

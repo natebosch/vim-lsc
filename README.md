@@ -144,8 +144,9 @@ other reference to the currently highlighted element.
 ### Jump to definition
 
 While the cursor is on any identifier call `LSClientGoToDefinition` (`<C-]>` if
-using the default mappings) to jump to the location of the definition. If the
-cursor moves before the server responds the response will be ignored.
+using the default mappings) to jump to the location of the definition. When
+multiple definitions are available, the quickfix list will be opened.
+If the cursor moves before the server responds the response will be ignored.
 
 ### Find references
 
