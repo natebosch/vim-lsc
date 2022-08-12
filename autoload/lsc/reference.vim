@@ -14,32 +14,37 @@ function! s:GoToDefinition(mods, issplit, result) abort
     call lsc#message#error('No definition found')
     return
   endif
-  if type(a:result) == type([])
+  if type(a:result) == type([]) && len(a:result) == 1
     let l:location = a:result[0]
+  elseif type(a:result) == type([]) && len(a:result) > 2
+    call s:setQuickFixLocations('Definitions', a:result)
+    execute copen
   else
     let l:location = a:result
   endif
-  let l:file = lsc#uri#documentPath(l:location.uri)
-  let l:line = l:location.range.start.line + 1
-  let l:character = l:location.range.start.character + 1
-  let l:dotag = &tagstack && exists('*gettagstack') && exists('*settagstack')
-  if l:dotag
-    let l:from = [bufnr('%'), line('.'), col('.'), 0]
-    let l:tagname = expand('<cword>')
-    let l:stack = gettagstack()
-    if l:stack.curidx > 1
-      let l:stack.items = l:stack.items[0:l:stack.curidx-2]
-    else
-      let l:stack.items = []
+  if exists('l:location')
+    let l:file = lsc#uri#documentPath(l:location.uri)
+    let l:line = l:location.range.start.line + 1
+    let l:character = l:location.range.start.character + 1
+    let l:dotag = &tagstack && exists('*gettagstack') && exists('*settagstack')
+    if l:dotag
+      let l:from = [bufnr('%'), line('.'), col('.'), 0]
+      let l:tagname = expand('<cword>')
+      let l:stack = gettagstack()
+      if l:stack.curidx > 1
+        let l:stack.items = l:stack.items[0:l:stack.curidx-2]
+      else
+        let l:stack.items = []
+      endif
+      let l:stack.items += [{'from': l:from, 'tagname': l:tagname}]
+      let l:stack.curidx = len(l:stack.items)
+      call settagstack(win_getid(), l:stack)
     endif
-    let l:stack.items += [{'from': l:from, 'tagname': l:tagname}]
-    let l:stack.curidx = len(l:stack.items)
-    call settagstack(win_getid(), l:stack)
-  endif
-  call s:goTo(l:file, l:line, l:character, a:mods, a:issplit)
-  if l:dotag
-    let l:curidx = gettagstack().curidx + 1
-    call settagstack(win_getid(), {'curidx': l:curidx})
+    call s:goTo(l:file, l:line, l:character, a:mods, a:issplit)
+    if l:dotag
+      let l:curidx = gettagstack().curidx + 1
+      call settagstack(win_getid(), {'curidx': l:curidx})
+    endif
   endif
 endfunction
 
