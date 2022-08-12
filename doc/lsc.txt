@@ -77,7 +77,8 @@ will default to opening a vertical split, while >
 will prefer a new tab.
 
                                                 *:LSClientGoToDeclaration*
-Similiar to |LSClientGoToDefinition| but expects only a single result.
+Similiar to |LSClientGoToDefinition| but expects only a single result when
+issuing the default binding `gd`.
 This is not compliant to the current protocol since it accepts multiple
 declaration results as well.
 
