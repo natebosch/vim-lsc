@@ -18,7 +18,7 @@ function! s:GoToDefinition(mods, issplit, result) abort
     let l:location = a:result[0]
   elseif type(a:result) == type([]) && len(a:result) > 2
     call s:setQuickFixLocations('Definitions', a:result)
-    execute copen
+    call copen()
   else
     let l:location = a:result
   endif
