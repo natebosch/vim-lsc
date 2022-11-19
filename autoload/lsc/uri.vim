@@ -27,15 +27,8 @@ endfunction
 
 function! s:DecodePath(value) abort
   " shamelessly taken from Mr. T. Pope and adapted:
-  " (https://github.com/tpope/vim-unimpaired/blob/master/plugin/unimpaired.vim#L465-L466)
+  " (https://github.com/tpope/vim-unimpaired/blob/master/plugin/unimpaired.vim#L466)
   " This follows the VIM License over at https://github.com/vim/vim/blob/master/LICENSE
-  let str = substitute(
-        \ substitute(
-        \   substitute(a:value,'%0[Aa]\n$','%0A',''),
-        \   '%0[Aa]',
-        \   '\n',
-        \   'g')
-        \,'+',' ','g')
   return iconv(
         \ substitute(
         \   str,
