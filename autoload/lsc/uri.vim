@@ -31,7 +31,7 @@ function! s:DecodePath(value) abort
   " This follows the VIM License over at https://github.com/vim/vim/blob/master/LICENSE
   return iconv(
         \ substitute(
-        \   str,
+        \   a:value,
         \   '%\(\x\x\)',
         \   '\=nr2char("0x".submatch(1))','g'),
         \ 'utf-8',
