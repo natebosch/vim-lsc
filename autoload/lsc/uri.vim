@@ -16,7 +16,7 @@ function! s:EncodePath(value) abort
   " (https://github.com/tpope/vim-unimpaired/blob/master/plugin/unimpaired.vim#L461)
   " This follows the VIM License over at https://github.com/vim/vim/blob/master/LICENSE
   return substitute(iconv(a:value, "latin-1", 'utf-8'),
-        \ '[^A-Za-z0-9_.~-]',
+        \ '[^a-zA-Z0-9-_.~/]',
         \ '\=s:EncodeChar(submatch(0))', 'g')
 endfunction
 
