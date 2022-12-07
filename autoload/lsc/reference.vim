@@ -24,7 +24,7 @@ function! s:GoTo(label, mods, issplit, result) abort
   endif
   if type(a:result) == type([]) && (a:label ==# 'declaration' || len(a:result) == 1)
     let l:location = a:result[0]
-  elseif type(a:result) == type([]) && len(a:result) > 2
+  elseif type(a:result) == type([]) && len(a:result) > 1
     call s:setQuickFixLocations('Definitions', a:result)
     call copen()
   else
