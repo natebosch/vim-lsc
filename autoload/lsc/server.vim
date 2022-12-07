@@ -197,6 +197,7 @@ function! s:ClientCapabilities() abort
     \   },
     \   'hover': {'contentFormat': ['plaintext', 'markdown']},
     \   'signatureHelp': {'dynamicRegistration': v:false},
+    \   'publishDiagnostics': v:true,
     \ }
     \}
 endfunction
