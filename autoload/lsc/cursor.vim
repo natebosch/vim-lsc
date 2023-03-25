@@ -14,6 +14,7 @@ function! lsc#cursor#onWinEnter() abort
 endfunction
 
 function! lsc#cursor#showDiagnostic() abort
+  if !get(g:, 'lsc_enable_diagnostics', v:true) | return | endif
   if !get(g:, 'lsc_diagnostic_highlights', v:true) | return | endif
   let l:diagnostic = lsc#diagnostics#underCursor()
   if has_key(l:diagnostic, 'message')
