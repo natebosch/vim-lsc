@@ -12,8 +12,12 @@ function! lsc#uri#documentPath(uri) abort
 endfunction
 
 function! s:EncodePath(value) abort
-  return substitute(a:value, '\([^a-zA-Z0-9-_.~/]\)',
-      \ '\=s:EncodeChar(submatch(1))', 'g')
+  " shamelessly taken from Mr. T. Pope and adapted:
+  " (https://github.com/tpope/vim-unimpaired/blob/master/plugin/unimpaired.vim#L461)
+  " This follows the VIM License over at https://github.com/vim/vim/blob/master/LICENSE
+  return substitute(iconv(a:value, "latin-1", 'utf-8'),
+        \ '[^a-zA-Z0-9-_.~/]',
+        \ '\=s:EncodeChar(submatch(0))', 'g')
 endfunction
 
 function! s:EncodeChar(char) abort
@@ -22,13 +26,16 @@ function! s:EncodeChar(char) abort
 endfunction
 
 function! s:DecodePath(value) abort
-  return substitute(a:value, '%\([a-fA-F0-9]\{2}\)',
-      \ '\=s:DecodeChar(submatch(1))', 'g')
-endfunction
-
-function! s:DecodeChar(hexcode) abort
-  let l:charcode = str2nr(a:hexcode, 16)
-  return nr2char(l:charcode)
+  " shamelessly taken from Mr. T. Pope and adapted:
+  " (https://github.com/tpope/vim-unimpaired/blob/master/plugin/unimpaired.vim#L466)
+  " This follows the VIM License over at https://github.com/vim/vim/blob/master/LICENSE
+  return iconv(
+        \ substitute(
+        \   a:value,
+        \   '%\(\x\x\)',
+        \   '\=nr2char("0x".submatch(1))','g'),
+        \ 'utf-8',
+        \ 'latin1')
 endfunction
 
 function! s:filePrefix(...) abort
