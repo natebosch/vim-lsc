@@ -197,7 +197,12 @@ function! s:ClientCapabilities() abort
     \   },
     \   'hover': {'contentFormat': ['plaintext', 'markdown']},
     \   'signatureHelp': {'dynamicRegistration': v:false},
-    \   'publishDiagnostics': v:true,
+    \   'publishDiagnostics': {
+    \     'relatedInformation': v:false,
+    \     'versionSupport': v:false,
+    \     'codeDescriptionSupport': v:false,
+    \     'dataSupport': v:false,
+    \   },
     \ }
     \}
 endfunction
