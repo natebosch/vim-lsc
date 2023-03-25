@@ -160,13 +160,18 @@ updated any time diagnostics change, until the quickfix list is set by some
 other command.
 
                                                 *:LSClientWindowDiagnostics*
-By default vim-lsc will create a location list for every window with an LSC
-tracked buffer open. In the typical case |:lopen| is sufficient to see a
-continuously updated list of diagnostics for the current buffer.
+By default vim-lsc will create and maintain a location list with the diagnostics
+for every window with an LSC tracked buffer open. In the typical case |:lopen|
+is sufficient to see a continuously updated list of diagnostics for the current
+buffer.
 
 If the current location list for a window is in use for another list it will not
 be overwritten. The `:LSClientWindowDiagnostics` command will restore the LSC
 diagnostics to the location list.
+
+Tip: While the diagnostics list is the active location list for the window
+|:lafter| and |:lbefore| will jump to the next and previous diagnostic around
+the cursor.
 
 The LSC diagnostics list is always kept up to day as long as it still exists on
 the location list stack. Use |:lolder|, |:lnewer|, or |:lhistory| to switch
@@ -180,6 +185,15 @@ list.
 Echo the full text of all diagnostics on the current line. Useful when a
 diagnostic has been truncated or there are multiple diagnostics on a line and
 otherwise only the diagnostic closest to the cursor is shown.
+
+                                                *:LSClientDisableDiagnosticHighlights*
+Turn off highglighting of diagnostics, and stop echoing messages form
+diagnostics on the same line as the cursor.
+
+                                                *:LSClientEnableDiagnosticHighlights*
+Turn on highlighting of diagnostics, and start echoing messages from diagnostics
+on the same line as the cursor. Does nothing if |g:lsc_enable_diagnostics| is
+`v:false`.
 
                                                 *:LSClientRestartServer*
 Sends requests to the server for the current filetype to "shutdown" and
@@ -253,6 +267,16 @@ automatically close the preview window after completion use the following:
  autocmd CompleteDone * silent! pclose
 <
 
+                                                *g:lsc_block_complete_triggers*
+Language Servers configure the characters that trigger autocomplete. In some
+cases a server may enable autocomplete for characters which are commonly
+followed by a newline, but the `<enter>` key gets captured by the popupmenu.
+Disable autocomplete for selected characters, overriding server configuration,
+with:
+>
+ let g:lsc_block_complete_triggers = ['{']
+<
+
                                                 *lsc-configure-completeopt*
                                                 *g:lsc_auto_completeopt*
 When using autocomplete this plugin will modify the buffer local setting
@@ -303,17 +327,28 @@ example:
 <
 
                                                 *lsc-configure-diagnostics*
-                                                *g:lsc_enable_diagnostics*
-Diagnostics highlighting and location list updating is enabled by default. To
-disable diagnostic tracking set `g:lsc_enable_diagnostics` to `v:false`. With
-diagnostics disabled |:LSClientAllDiagnostics| will never surface any results.
-The server may communicate diagnostics but they will be ignored. Changing this
-configuration while a server is running may have unexpected results, if it is
-changed use |:LSClientRestartServer|.
+                                                *g:lsc_diagnostic_highlights*
+By default diagnostics are highlighted according to their severity and
+diagnostic messages are echoed when the cursor is on a line with a diagnostic.
+To disable these features, set `g:lsc_diagnostic_highlights` to `v:false`.
+Diagnostics can still be accessed from the location list by default (see
+|:LSClientWindowDiagnostics|) or from the quickfix list after using
+|:LSClientAllDiagnostics|. To disable diagnostics entirely see
+|g:lsc_enable_diagnostics|.
 
-If the location list is in use by a list other than the LSC diagnostics you
-won't see updates as diagnostics change. Call |:LSClientWindowDiagnostics| to
-restore the LSC diagnostics list.
+Diagnostic highlightss can be turned on or off any time with
+|:LSClientEnableDiagnosticHighlights| and |:LSClientDisableDiagnosticHighlights|
+
+                                                *g:lsc_enable_diagnostics*
+Disable diagnostic entirely by setting `g:lsc_enable_diagnostics` to `v:false`.
+When diagnostics are disabled there will not be any highlighting or echoing of
+diagnostics while editing, and |:LSClientWindowDiagnostics| and
+|:LSClientAllDiagnostics| will not work. To disable only the highlights and echo
+of diagnostics, see |g:lsc_diagnostic_highlights| or
+|:LSClientDisableDiagnosticHighlights|.
+
+Changing this configuration while a server is running may have unexpected
+results, if it is changed use |:LSClientRestartServer|.
 
                                                 *lsc-configure-hover*
                                                 *g:lsc_preview_split_direction*

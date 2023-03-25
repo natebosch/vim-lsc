@@ -8,6 +8,8 @@
 - Avoid a state where no document highlights reference calls are made following
   a server restart.
 - Avoid creating public functions for callbacks which should be temporary.
+- Fix file edits in buffers that aren't current when the current buffer is
+  shorter than the buffer being edited.
 - Fix character positions when the cursor is on a line following multibyte
   characters for recent versions of vim. Older versions and neovim continue to
   have incorrect positions.
@@ -20,6 +22,10 @@
 **Enhancements**
 - Improve performance when the language server sends many diagnostics updates.
 - Improve performance for periods of high message throughput.
+- Add `g:lsc_diagnostic_highlights` config, and commands to enable and disable
+  diagnostic highlights.
+- Add `g:lsc_block_complete_triggers` to override server config and disable
+  autocomplete after specific characters.
 
 # 0.4.0
 
