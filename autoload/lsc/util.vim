@@ -170,3 +170,15 @@ function! s:IgnoreArgs(name, Callback, args, ...) abort
     let g:lsc_last_error_callback = [a:Callback, a:args]
   endtry
 endfunction
+
+if exists('*charcol')
+  function! lsc#util#currentChar()
+    return charcol('.')
+  endfunction
+else
+  function! lsc#util#currentChar()
+    " TODO - Can charcol be implemented manually?
+    " For now, vim without charcol does not handle multibyte characters
+    return col('.')
+  endfunction
+endif

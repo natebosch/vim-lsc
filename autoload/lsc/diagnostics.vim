@@ -346,7 +346,7 @@ function! lsc#diagnostics#underCursor() abort
     return {}
   endif
   let l:diagnostics = l:file_diagnostics[l:line]
-  let l:col = col('.')
+  let l:col = lsc#util#currentChar()
   let l:closest_diagnostic = {}
   let l:closest_distance = -1
   let l:closest_is_within = v:false
