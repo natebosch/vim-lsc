@@ -22,15 +22,15 @@ function! s:SelectAction(ActionFilter, result) abort
 endfunction
 
 function! s:ExecuteCommand(choice) abort
-  if has_key(a:choice, 'command')
+  if has_key(a:choice, 'edit') && type(a:choice.edit) == type({})
+    call lsc#edit#apply(a:choice.edit)
+  elseif has_key(a:choice, 'command')
     let l:command = type(a:choice.command) == type('') ?
         \ a:choice : a:choice.command
     call lsc#server#userCall('workspace/executeCommand',
         \ {'command': l:command.command,
         \ 'arguments': l:command.arguments},
         \ {_->0})
-  elseif has_key(a:choice, 'edit') && type(a:choice.edit) == type({})
-    call lsc#edit#apply(a:choice.edit)
   endif
 endfunction
 
