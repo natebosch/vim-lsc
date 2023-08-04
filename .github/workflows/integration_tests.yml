@@ -20,7 +20,7 @@ jobs:
     steps:
     - uses: dart-lang/setup-dart@v1.3
       with:
-        sdk: stable
+        sdk: 2.19.0
     - name: checkout
       uses: actions/checkout@v2
     - name: dart pub upgrade
