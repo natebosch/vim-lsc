@@ -45,9 +45,10 @@ function! s:ShowHelp(signatureHelp) abort
   if !has_key(l:signature, 'label')
     return
   endif
+  let l:lines = split(l:signature.label, "\n")
 
   if !has_key(l:signature, 'parameters')
-    call lsc#util#displayAsPreview([l:signature.label], &filetype,
+    call lsc#util#displayAsPreview(l:lines, &filetype,
         \ function('<SID>HighlightCurrentParameter'))
     return
   endif
@@ -60,7 +61,7 @@ function! s:ShowHelp(signatureHelp) abort
     endif
   endif
 
-  call lsc#util#displayAsPreview([l:signature.label], &filetype,
+  call lsc#util#displayAsPreview(l:lines, &filetype,
       \ function('<SID>HighlightCurrentParameter'))
 
 endfunction
