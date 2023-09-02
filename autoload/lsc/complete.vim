@@ -63,7 +63,7 @@ function! s:isCompletable() abort
     return v:false
   endif
   if s:next_char !~# '\w' | return v:false | endif
-  let l:cur_col = col('.')
+  let l:cur_col = lsc#util#currentChar()
   let l:min_length = exists('g:lsc_autocomplete_length') ?
       \ g:lsc_autocomplete_length : 3
   if l:min_length == v:false | return v:false | endif
@@ -108,8 +108,8 @@ function! s:SuggestCompletions(items) abort
     return
   endif
   let l:start = s:FindStart(a:items)
-  let l:base = l:start != col('.')
-      \ ? getline('.')[l:start - 1:col('.') - 2]
+  let l:base = l:start != lsc#util#currentChar()
+      \ ? getline('.')[l:start - 1:lsc#util#currentChar() - 2]
       \ : ''
   let l:completion_items = s:CompletionItems(l:base, a:items)
   call s:SetCompleteOpt()
@@ -169,7 +169,7 @@ endfunction
 " Finds the 1-based index of the character after the last non word character
 " behind the cursor.
 function! s:GuessCompletionStart() abort
-  let l:search = col('.') - 2
+  let l:search = lsc#util#currentChar() - 2
   let l:line = getline('.')
   while l:search > 0
     let l:char = l:line[l:search]

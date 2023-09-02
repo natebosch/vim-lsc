@@ -10,6 +10,9 @@
 - Avoid creating public functions for callbacks which should be temporary.
 - Fix file edits in buffers that aren't current when the current buffer is
   shorter than the buffer being edited.
+- Fix character positions when the cursor is on a line following multibyte
+  characters for recent versions of vim. Older versions and neovim continue to
+  have incorrect positions.
 
 **Minor breaking changes**
 - Remove `noselect` from the default `completeopts` used during autocompletion.

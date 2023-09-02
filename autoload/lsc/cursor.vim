@@ -120,7 +120,7 @@ endfunction
 " not in any reference.
 function! lsc#cursor#isInReference(references) abort
   let l:line = line('.')
-  let l:col = col('.')
+  let l:col = lsc#util#currentChar()
   let l:idx = 0
   for l:reference in a:references
     for l:range in l:reference.ranges
