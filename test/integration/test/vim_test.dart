@@ -35,6 +35,11 @@ void main() {
       expect(result, '2');
     });
 
+    test('loads plugin', () async {
+      final result = await vim.expr('exists(\':LSClientGoToDeclaration\')');
+      expect(result, '1');
+    });
+
     test('opens files, has filetype detection', () async {
       await vim.edit('foo.txt');
       expect(await vim.expr('&ft'), 'text');
