@@ -169,18 +169,28 @@ function! lsc#config#shouldEcho(server, type) abort
       let l:threshold = a:server.config.log_level
     else
       let l:config = a:server.config.log_level
-      if l:config ==# 'Error'
-        let l:threshold = 1
-      elseif l:config ==# 'Warning'
-        let l:threshold = 2
-      elseif l:config ==# 'Info'
-        let l:threshold = 3
-      elseif l:config ==# 'Log'
-        let l:threshold = 4
-      endif
+      let l:threshold = lsc#config#messageType(l:config)
     endif
   endif
   return a:type <= l:threshold
+endfunction
+
+" Convert message type name to number
+function! lsc#config#messageType(type) abort
+  if a:type ==# 'Error'
+    return 1
+  elseif a:type ==# 'Warning'
+    return 2
+  elseif a:type ==# 'Info'
+    return 3
+  elseif a:type ==# 'Log'
+    return 4
+  else
+    call lsc#message#error('Unkown message type: '.a:type)
+
+    " Default to "Info"
+    return 3
+  endif
 endfunction
 
 " A maker from returns from "message_hook" functions indicating that a call

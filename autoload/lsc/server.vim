@@ -360,13 +360,16 @@ function! s:Dispatch(server, method, params, id) abort
     call lsc#util#shift(a:server.logs, 100,
         \ {'message': a:params.message, 'type': a:params.type})
   elseif a:method ==? 'window/progress'
-    if has_key(a:params, 'message')
-      let l:full = a:params['title'] . a:params['message']
-      call lsc#message#show('Progress ' . l:full)
-    elseif has_key(a:params, 'done')
-      call lsc#message#show('Finished ' . a:params['title'])
-    else
-      call lsc#message#show('Starting ' . a:params['title'])
+    let a:params.type = lsc#config#messageType('Log')
+    if lsc#config#shouldEcho(a:server, a:params.type)
+      if has_key(a:params, 'message')
+        let l:full = a:params['title'] . a:params['message']
+        call lsc#message#show('Progress ' . l:full)
+      elseif has_key(a:params, 'done')
+        call lsc#message#show('Finished ' . a:params['title'])
+      else
+        call lsc#message#show('Starting ' . a:params['title'])
+      endif
     endif
   elseif a:method ==? 'workspace/applyEdit'
     let l:applied = lsc#edit#apply(a:params.edit)
